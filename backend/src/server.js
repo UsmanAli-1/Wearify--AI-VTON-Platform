@@ -9,7 +9,7 @@ const cookieParser = require("cookie-parser");
 
 const app = express();
 
-/* ✅ CORS */
+/*  CORS */
 const corsOptions = {
   origin: [
     "http://localhost:3000",
@@ -20,7 +20,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-/* ✅ EXPRESS 5 SAFE PREFLIGHT HANDLER */
+/* EXPRESS 5 SAFE PREFLIGHT HANDLER */
 app.use((req, res, next) => {
   if (req.method === "OPTIONS") {
     return res.sendStatus(204);

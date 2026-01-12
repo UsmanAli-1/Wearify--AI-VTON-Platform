@@ -54,20 +54,22 @@ router.post("/login", async (req, res) => {
       { expiresIn: "1h" }
     )
 
-    // set cookie
     // res.cookie("token", token, {
     //   httpOnly: true,
-    //   secure: true, // true in production (https)
-    //   sameSite: "none",
-    //   maxAge: 1 * 60 * 60 * 1000,
-    // })
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    //   maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    // });
+
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+      secure: true,
+      sameSite: "none",
+      path: "/",
+      maxAge: 1000 * 60 * 60 * 24 * 7,
     });
+
 
 
     // send user data
@@ -121,7 +123,7 @@ router.post("/generate", auth, upload.single("image"), async (req, res) => {
       imagePath: req.file.filename,
       pointsUsed: COST,
     });
-    
+
     // deduct points
     user.points -= COST;
     await user.save();
@@ -141,12 +143,20 @@ router.post("/generate", auth, upload.single("image"), async (req, res) => {
 
 
 router.post("/logout", (req, res) => {
+  // res.clearCookie("token", {
+  //   httpOnly: true,
+  //   secure: process.env.NODE_ENV === "production",
+  //   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  //   path: "/", // make sure the path matches the cookie set during login
+  // });
+
   res.clearCookie("token", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    path: "/", // make sure the path matches the cookie set during login
+    secure: true,
+    sameSite: "none",
+    path: "/",
   });
+
   res.json({ message: "Logged out successfully" });
 });
 
