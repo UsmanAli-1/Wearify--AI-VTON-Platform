@@ -182,7 +182,7 @@ export default function Header() {
                             {user ? (
                                 <Button
                                     onClick={handleSignOut}
-                                    className="hidden md:block rounded-full bg-gradient-to-r from-[#4F5D3A] to-[#6B7A4C]
+                                    className="hidden md:block rounded-full bg-gradient-to-r from-[#4F5D3A] to-[#E6D5B8]/70
                                 hover:from-[#3E4A2F] hover:to-[#5F6F3E] text-black hover:scale-105 duration-300"
                                 >
                                     Sign Out
@@ -191,7 +191,7 @@ export default function Header() {
 
                                 <Button
                                     variant="secondary"
-                                    className="hidden shadow-md md:block rounded-full bg-gradient-to-r from-[#4F5D3A] to-[#6B7A4C]
+                                    className="hidden shadow-md md:block rounded-full bg-gradient-to-r from-[#4F5D3A] to-[#E6D5B8]/70
                                 hover:from-[#3E4A2F] hover:to-[#5F6F3E] text-black hover:scale-105 duration-300"
                                 >
                                     <a href="/signin">Sign In / Sign Up</a>
@@ -237,12 +237,12 @@ export default function Header() {
                     {user ? (
                         <Button
                             onClick={handleSignOut}
-                            className="rounded-full bg-gradient-to-r from-[#4F5D3A] to-[#6B7A4C] text-black mt-2"
+                            className="rounded-full shadow-lg bg-gradient-to-r from-[#4F5D3A] to-[#E6D5B8]/60 text-black mt-2"
                         >
                             Sign Out
                         </Button>
                     ) : (
-                        <Button className="rounded-full bg-gradient-to-r from-[#4F5D3A] to-[#6B7A4C] text-black mt-2">
+                        <Button className="rounded-full shadow-lg bg-gradient-to-r from-[#4F5D3A] to-[#E6D5B8]/60 text-black mt-2">
                             <a href="/signin">Sign In / Sign Up</a>
                         </Button>
                     )}

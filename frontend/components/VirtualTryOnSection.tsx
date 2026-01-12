@@ -14,9 +14,20 @@ import { popUpslow } from "@/lib/motion";
 import BASE_URL from "@/config/api";
 
 
+type Garment = {
+    _id: string;
+    name: string;
+    imagePath: string;
+};
+
+
+
 export default function UploadTryOnSection() {
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [garments, setGarments] = useState<Garment[]>([]);
+
+
 
     // Check login ONCE
     useEffect(() => {
@@ -27,6 +38,9 @@ export default function UploadTryOnSection() {
             .catch(() => setIsLoggedIn(false));
     }, []);
 
+
+
+
     // Upload handler
     const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files) return;
@@ -34,6 +48,8 @@ export default function UploadTryOnSection() {
         const file = e.target.files[0];
         setUploadedImage(URL.createObjectURL(file));
     };
+
+
 
     // check image upload 
     const handleImageCheck = async () => {
@@ -76,6 +92,19 @@ export default function UploadTryOnSection() {
     };
 
 
+
+
+    useEffect(() => {
+        fetch(`${BASE_URL}/api/garments`)
+            .then(res => res.json())
+            .then(data => {
+                // console.log("GARMENTS DATA:", data);
+                setGarments(data);
+            });
+    }, []);
+
+
+
     return (
         <section className="w-full px-6 md:px-20 py-8 flex flex-col gap-5 bg-gradient-to-r  from-[#4F5D3A] to-[#6B7A4C]">
             <h1 className="m-auto md:text-5xl text-3xl font-bold text-[#1C1C1C]">
@@ -90,35 +119,16 @@ export default function UploadTryOnSection() {
                     <Motion variant={popUpslow}>
                         <Card className="bg-[#1C1C1C]/50 rounded-2xl p-3 max-w-xl hover:scale-105 duration-300 transition shadow-xl">
                             <CardContent className="flex gap-3 overflow-x-scroll no-scrollbar">
-                                {[
-                                    "/images/t1.jpg",
-                                    "/images/t13.jpg",
-                                    "/images/t3.jpg",
-                                    "/images/t4.jpg",
-                                    "/images/t5.jpg",
-                                    "/images/t6.jpg",
-                                    "/images/t7.jpg",
-                                    "/images/t8.jpg",
-                                    "/images/t9.jpg",
-                                    "/images/t10.jpg",
-                                    "/images/t11.jpg",
-                                    "/images/t14.jpg",
-                                    "/images/t15.jpg",
-                                    "/images/t12.jpg",
-                                    "/images/t16.jpg",
-                                ].map(
-                                    (src, i) => (
-                                        <Image
-                                            key={i}
-                                            src={src}
-                                            alt=""
-                                            width={80}
-                                            height={100}
-                                            sizes="75px"
-                                            className="z-10 rounded-xl object-cover hover:scale-110 transition-transform duration-300 cursor-pointer"
-                                        />
-                                    )
-                                )}
+                                {garments.map((g, i) => (
+                                    <img
+                                        key={i}
+                                        src={`${BASE_URL}/uploads/${g.imagePath}`}
+                                        alt={g.name}
+                                        className="w-[80px] h-[110px] rounded-xl object-cover hover:scale-110 duration-300 transition"
+                                    />
+
+                                ))}
+
                             </CardContent>
                         </Card>
                     </Motion>

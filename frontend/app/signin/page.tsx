@@ -138,7 +138,7 @@ export default function SignIn() {
                                     variant="outline"
                                     className="w-full mb-3 flex items-center justify-center gap-3 bg-white"
                                 >
-                                    <Image
+                                    <img
                                         src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
                                         width={22}
                                         height={22}
@@ -152,7 +152,7 @@ export default function SignIn() {
                                     variant="outline"
                                     className="w-full flex items-center justify-center gap-3 bg-white"
                                 >
-                                    <Image
+                                    <img
                                         src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/apple/apple-original.svg"
                                         width={22}
                                         height={22}
