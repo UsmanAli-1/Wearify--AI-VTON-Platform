@@ -26,6 +26,8 @@ export default function UploadTryOnSection() {
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [garments, setGarments] = useState<Garment[]>([]);
+    const [selectedGarment, setSelectedGarment] = useState<Garment | null>(null);
+
 
 
 
@@ -54,7 +56,12 @@ export default function UploadTryOnSection() {
     // check image upload 
     const handleImageCheck = async () => {
         if (!uploadedImage) {
-            toast.error("Please upload image first");
+            toast.error("Please upload your photo");
+            return;
+        }
+
+        if (!selectedGarment) {
+            toast.error("Please select a garment");
             return;
         }
 
@@ -66,11 +73,12 @@ export default function UploadTryOnSection() {
 
         const formData = new FormData();
         formData.append("image", fileInput.files[0]);
+        formData.append("garmentId", selectedGarment._id);
 
         const res = await fetch(`${BASE_URL}/api/users/generate`, {
             method: "POST",
             credentials: "include",
-            body: formData, // image included
+            body: formData,
         });
 
         const data = await res.json();
@@ -80,16 +88,14 @@ export default function UploadTryOnSection() {
             return;
         }
 
-        // remove selected image after upload 
-
         setUploadedImage(null);
-        const fileInputremove = document.getElementById("fileInput") as HTMLInputElement;
-        if (fileInputremove) fileInputremove.value = "";
+        setSelectedGarment(null);
 
+        toast.success("Image & garment submitted successfully");
 
-        window.dispatchEvent(new Event("auth-changed"));
-        toast.success("Image uploaded & points deducted");
+        window.location.reload();
     };
+
 
 
 
@@ -119,15 +125,19 @@ export default function UploadTryOnSection() {
                     <Motion variant={popUpslow}>
                         <Card className="bg-[#1C1C1C]/50 rounded-2xl p-3 max-w-xl hover:scale-105 duration-300 transition shadow-xl">
                             <CardContent className="flex gap-3 overflow-x-scroll no-scrollbar">
-                                {garments.map((g, i) => (
+                                {garments.map((g) => (
                                     <img
-                                        key={i}
+                                        key={g._id}
                                         src={`${BASE_URL}/uploads/${g.imagePath}`}
                                         alt={g.name}
-                                        className="w-[80px] h-[110px] rounded-xl object-cover hover:scale-110 duration-300 transition"
+                                        onClick={() => setSelectedGarment(g)}
+                                        className={`w-[80px] h-[110px] rounded-xl object-cover cursor-pointer
+      transition hover:scale-110
+      ${selectedGarment?._id === g._id ? "ring-4 ring-[#A06CE3]" : ""}
+    `}
                                     />
-
                                 ))}
+
 
                             </CardContent>
                         </Card>
@@ -151,7 +161,21 @@ export default function UploadTryOnSection() {
                                             <p className="border shadow-xl absolute z-10 w-17 h-25 md:w-18 md:h-20 lg:w-22 lg:h-30 left-0 top-0 rounded-xl text-gray-400/60 pt-9 text-xs md:text-sm ">selected image</p>
                                         }
                                     </div>
-                                    <div className=" border shadow-xl absolute z-10 w-17 h-25 md:w-18 md:h-20 lg:w-22 lg:h-30 right-0 top-0 rounded-xl text-gray-400/60 pt-9 text-xs md:text-sm">selected garment</div>
+                                    {/* <div className=" border shadow-xl absolute z-10 w-17 h-25 md:w-18 md:h-20 lg:w-22 lg:h-30 right-0 top-0 rounded-xl text-gray-400/60 pt-9 text-xs md:text-sm">selected garment</div> */}
+                                    <div className="absolute z-10 w-17 h-25 md:w-18 md:h-20 lg:w-22 lg:h-30 right-0 top-0">
+                                        {selectedGarment ? (
+                                            <img
+                                                src={`${BASE_URL}/uploads/${selectedGarment.imagePath}`}
+                                                alt={selectedGarment.name}
+                                                className="w-full h-full object-cover rounded-xl border shadow-xl"
+                                            />
+                                        ) : (
+                                            <p className="border shadow-xl w-full h-full rounded-xl text-gray-400/60 pt-9 text-xs md:text-sm text-center">
+                                                selected garment
+                                            </p>
+                                        )}
+                                    </div>
+
                                 </div>
                             )}
                             <h3 className="font-semibold">Upload Your Photo</h3>

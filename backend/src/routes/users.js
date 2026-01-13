@@ -103,13 +103,18 @@ router.get("/me", auth, async (req, res) => {
 router.post("/generate", auth, upload.single("image"), async (req, res) => {
   try {
     const COST = 40;
+    const { garmentId } = req.body;
 
+    // validations
     if (!req.file) {
       return res.status(400).json({ message: "No image uploaded" });
     }
 
-    const user = await User.findById(req.user.id);
+    if (!garmentId) {
+      return res.status(400).json({ message: "No garment selected" });
+    }
 
+    const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -118,9 +123,11 @@ router.post("/generate", auth, upload.single("image"), async (req, res) => {
       return res.status(400).json({ message: "Not enough points" });
     }
 
+    // save both image + garment
     await Image.create({
       user: user._id,
       imagePath: req.file.filename,
+      garment: garmentId,
       pointsUsed: COST,
     });
 
@@ -129,17 +136,16 @@ router.post("/generate", auth, upload.single("image"), async (req, res) => {
     await user.save();
 
     res.json({
-      message: "Image uploaded & points deducted",
+      message: "Image & garment uploaded",
       points: user.points,
-      image: req.file.filename,
     });
 
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }
-}
-);
+});
+
 
 
 router.post("/logout", (req, res) => {

@@ -6,18 +6,30 @@ const imageSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+
+  // user's uploaded image
   imagePath: {
     type: String,
     required: true,
   },
+
+  // selected garment
+  garment: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Garment",
+    required: true,
+  },
+
   pointsUsed: {
     type: Number,
     default: 40,
   },
-    status: {
+
+  status: {
     type: String,
     default: "uploaded", // later: processing, done
   },
+
   createdAt: {
     type: Date,
     default: Date.now,
