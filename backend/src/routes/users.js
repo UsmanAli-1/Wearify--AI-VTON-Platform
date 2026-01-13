@@ -54,21 +54,23 @@ router.post("/login", async (req, res) => {
       { expiresIn: "1h" }
     )
 
+res.cookie("token", token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  path: "/",
+  maxAge: 1000 * 60 * 60 * 24 * 7,
+});
+
+
+
     // res.cookie("token", token, {
     //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === "production",
-    //   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    //   maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    //   secure: true,
+    //   sameSite: "none",
+    //   path: "/",
+    //   maxAge: 1000 * 60 * 60 * 24 * 7,
     // });
-
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      path: "/",
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-    });
 
 
 
@@ -96,7 +98,6 @@ router.get("/me", auth, async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: "server error" });
   }
-
 });
 
 
@@ -126,10 +127,11 @@ router.post("/generate", auth, upload.single("image"), async (req, res) => {
     // save both image + garment
     await Image.create({
       user: user._id,
-      imagePath: req.file.filename,
+      imagePath: req.file.path, //  Cloudinary URL
       garment: garmentId,
       pointsUsed: COST,
     });
+
 
     // deduct points
     user.points -= COST;

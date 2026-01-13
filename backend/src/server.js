@@ -32,10 +32,10 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(
-  "/uploads",
-  express.static(path.join(__dirname, "..", "uploads"))
-);
+// app.use(
+//   "/uploads",
+//   express.static(path.join(__dirname, "..", "uploads"))
+// );
 
 const userRoutes = require("./routes/users");
 app.use("/api/users", userRoutes);

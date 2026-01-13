@@ -128,12 +128,12 @@ export default function UploadTryOnSection() {
                                 {garments.map((g) => (
                                     <img
                                         key={g._id}
-                                        src={`${BASE_URL}/uploads/${g.imagePath}`}
+                                        src={g.imagePath}
                                         alt={g.name}
                                         onClick={() => setSelectedGarment(g)}
                                         className={`w-[80px] h-[110px] rounded-xl object-cover cursor-pointer
-      transition hover:scale-110
-      ${selectedGarment?._id === g._id ? "ring-4 ring-[#A06CE3]" : ""}
+      transition hover:scale-110 duration-300 transition
+      ${selectedGarment?._id === g._id ? "ring-4 ring-[#6B7A4C]" : ""}
     `}
                                     />
                                 ))}
@@ -165,10 +165,11 @@ export default function UploadTryOnSection() {
                                     <div className="absolute z-10 w-17 h-25 md:w-18 md:h-20 lg:w-22 lg:h-30 right-0 top-0">
                                         {selectedGarment ? (
                                             <img
-                                                src={`${BASE_URL}/uploads/${selectedGarment.imagePath}`}
+                                                src={selectedGarment.imagePath}
                                                 alt={selectedGarment.name}
                                                 className="w-full h-full object-cover rounded-xl border shadow-xl"
                                             />
+
                                         ) : (
                                             <p className="border shadow-xl w-full h-full rounded-xl text-gray-400/60 pt-9 text-xs md:text-sm text-center">
                                                 selected garment
