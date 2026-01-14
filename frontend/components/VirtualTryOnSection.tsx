@@ -96,10 +96,6 @@ export default function UploadTryOnSection() {
         window.location.reload();
     };
 
-
-
-
-
     useEffect(() => {
         fetch(`${BASE_URL}/api/garments`)
             .then(res => res.json())
