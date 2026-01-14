@@ -30,13 +30,25 @@ export default function UploadTryOnSection() {
 
 
     // Check login ONCE
+    // useEffect(() => {
+    //     fetch(`${BASE_URL}/api/users/me`, {
+    //         credentials: "include",
+    //     })
+    //         .then((res) => setIsLoggedIn(res.ok))
+    //         .catch(() => setIsLoggedIn(false));
+    // }, []);
+
     useEffect(() => {
         fetch(`${BASE_URL}/api/users/me`, {
             credentials: "include",
         })
-            .then((res) => setIsLoggedIn(res.ok))
+            .then(res => {
+                if (res.ok) setIsLoggedIn(true);
+                else setIsLoggedIn(false);
+            })
             .catch(() => setIsLoggedIn(false));
     }, []);
+
 
 
     // Upload handler
@@ -92,13 +104,20 @@ export default function UploadTryOnSection() {
         window.location.reload();
     };
 
+    // useEffect(() => {
+    //     fetch(`${BASE_URL}/api/garments`)
+    //         .then(res => res.json())
+    //         .then(data => {
+    //             setGarments(data);
+    //         });
+    // }, []);
+
+
     useEffect(() => {
         fetch(`${BASE_URL}/api/garments`)
             .then(res => res.json())
-            .then(data => {
-                // console.log("GARMENTS DATA:", data);
-                setGarments(data);
-            });
+            .then(setGarments)
+            .catch(console.error);
     }, []);
 
 

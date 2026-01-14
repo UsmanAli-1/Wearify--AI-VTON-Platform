@@ -1,6 +1,17 @@
+process.on("uncaughtException", (err) => {
+  console.error("UNCAUGHT:", err);
+});
+
+process.on("unhandledRejection", (err) => {
+  console.error("UNHANDLED:", err);
+});
+
+
 if (process.env.RAILWAY_ENVIRONMENT !== "production") {
   require("dotenv").config();
 }
+
+
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -11,15 +22,15 @@ const path = require("path");
 const app = express();
 
 /* CORS */
-const corsOptions = {
+
+app.use(cors({
   origin: [
     "http://localhost:3000",
     "https://wearify-mu.vercel.app",
   ],
   credentials: true,
-};
+}));
 
-app.use(cors(corsOptions)); 
 
 
 /* EXPRESS 5 SAFE PREFLIGHT HANDLER */
