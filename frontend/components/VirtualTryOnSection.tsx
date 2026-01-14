@@ -32,15 +32,18 @@ export default function UploadTryOnSection() {
 
 
     // Check login ONCE
-    useEffect(() => {
-        fetch(`${BASE_URL}/api/users/me`, {
-            credentials: "include",
-        })
-            .then((res) => setIsLoggedIn(res.ok))
-            .catch(() => setIsLoggedIn(false));
-    }, []);
+    // useEffect(() => {
+    //     fetch(`${BASE_URL}/api/users/me`, {
+    //         credentials: "include",
+    //     })
+    //         .then((res) => setIsLoggedIn(res.ok))
+    //         .catch(() => setIsLoggedIn(false));
+    // }, []);
 
 
+useEffect(() => {
+  setIsLoggedIn(false);
+}, []);
 
 
     // Upload handler
