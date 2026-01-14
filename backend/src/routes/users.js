@@ -135,7 +135,7 @@ router.post("/generate", auth, upload.single("image"), async (req, res) => {
 
     await Image.create({
       user: user._id,
-      imagePath: req.file.secure_url, // ✅ FIX
+      imagePath: req.file.secure_url, // FIX
       garment: garmentId,
       pointsUsed: COST,
     });

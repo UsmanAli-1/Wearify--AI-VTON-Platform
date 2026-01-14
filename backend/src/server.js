@@ -106,8 +106,6 @@
 
 
 
-
-
 process.on("uncaughtException", (err) => {
   console.error("UNCAUGHT:", err);
 });
@@ -139,15 +137,25 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+/* ROUTES (THIS WAS MISSING) */
 const garmentRoutes = require("./routes/garments");
 const userRoutes = require("./routes/users");
+
+app.use("/api/garments", garmentRoutes);
+app.use("/api/users", userRoutes);
+
+/* ERROR HANDLER */
+app.use((err, req, res, next) => {
+  console.error("🔥 EXPRESS ERROR:", err);
+  res.status(500).json({ message: "Internal server error" });
+});
 
 async function start() {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log("✅ connected to mongoDB");
 
-    const port = Number(process.env.PORT); // ⬅️ REQUIRED
+    const port = Number(process.env.PORT);
     app.listen(port, "0.0.0.0", () => {
       console.log(`🚀 Server running on port ${port}`);
     });
@@ -157,11 +165,5 @@ async function start() {
     process.exit(1);
   }
 }
-
-app.use((err, req, res, next) => {
-  console.error("🔥 EXPRESS ERROR:", err);
-  res.status(500).json({ message: "Internal server error" });
-});
-
 
 start();

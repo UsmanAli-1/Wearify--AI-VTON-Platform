@@ -32,7 +32,7 @@ router.post("/upload", upload.single("image"), async (req, res) => {
 
     const garment = await Garment.create({
       name: req.body.name || "Garment",
-      imagePath: req.file.secure_url, // ✅ FIX
+      imagePath: req.file.secure_url, // FIX
     });
 
     res.json({
