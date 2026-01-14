@@ -152,18 +152,22 @@ app.use((err, req, res, next) => {
 
 async function start() {
   try {
+    console.log("🔧 Starting server...");
+
     await mongoose.connect(process.env.MONGODB_URI);
     console.log("✅ connected to mongoDB");
 
-    const port = Number(process.env.PORT);
+    const port = process.env.PORT || 8080;
+
     app.listen(port, "0.0.0.0", () => {
       console.log(`🚀 Server running on port ${port}`);
     });
 
   } catch (err) {
-    console.error("startup error", err);
+    console.error("❌ startup error", err);
     process.exit(1);
   }
 }
 
 start();
+
