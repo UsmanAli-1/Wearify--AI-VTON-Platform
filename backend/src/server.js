@@ -158,5 +158,10 @@ async function start() {
   }
 }
 
+app.use((err, req, res, next) => {
+  console.error("🔥 EXPRESS ERROR:", err);
+  res.status(500).json({ message: "Internal server error" });
+});
+
 
 start();
