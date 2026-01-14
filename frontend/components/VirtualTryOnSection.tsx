@@ -29,21 +29,14 @@ export default function UploadTryOnSection() {
     const [selectedGarment, setSelectedGarment] = useState<Garment | null>(null);
 
 
-
-
     // Check login ONCE
-    // useEffect(() => {
-    //     fetch(`${BASE_URL}/api/users/me`, {
-    //         credentials: "include",
-    //     })
-    //         .then((res) => setIsLoggedIn(res.ok))
-    //         .catch(() => setIsLoggedIn(false));
-    // }, []);
-
-
-useEffect(() => {
-  setIsLoggedIn(false);
-}, []);
+    useEffect(() => {
+        fetch(`${BASE_URL}/api/users/me`, {
+            credentials: "include",
+        })
+            .then((res) => setIsLoggedIn(res.ok))
+            .catch(() => setIsLoggedIn(false));
+    }, []);
 
 
     // Upload handler

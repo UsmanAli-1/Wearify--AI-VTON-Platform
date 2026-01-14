@@ -11,21 +11,15 @@ const path = require("path");
 const app = express();
 
 /* CORS */
-app.use(cors({
-  origin: function (origin, callback) {
-    const allowedOrigins = [
-      "http://localhost:3000",
-      "https://wearify-mu.vercel.app",
-    ];
-
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+const corsOptions = {
+  origin: [
+    "http://localhost:3000",
+    "https://wearify-mu.vercel.app",
+  ],
   credentials: true,
-}));
+};
+
+app.use(cors(corsOptions)); 
 
 
 /* EXPRESS 5 SAFE PREFLIGHT HANDLER */
