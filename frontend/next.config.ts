@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "wearify-backend-production.up.railway.app",
+        hostname: "https://wearify-55y3.onrender.com",
         pathname: "/uploads/**",
       },
     ],
