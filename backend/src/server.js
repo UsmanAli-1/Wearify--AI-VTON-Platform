@@ -147,11 +147,7 @@ async function start() {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log("✅ connected to mongoDB");
 
-    // ⬅️ ROUTES ONLY AFTER DB IS READY
-    app.use("/api/garments", garmentRoutes);
-    app.use("/api/users", userRoutes);
-
-    const port = process.env.PORT || 4000;
+    const port = Number(process.env.PORT); // ⬅️ REQUIRED
     app.listen(port, "0.0.0.0", () => {
       console.log(`🚀 Server running on port ${port}`);
     });
@@ -161,5 +157,6 @@ async function start() {
     process.exit(1);
   }
 }
+
 
 start();
