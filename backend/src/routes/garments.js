@@ -46,8 +46,21 @@ router.post("/upload", upload.single("image"), async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
-  const garments = await Garment.find().sort({ createdAt: 1 });
-  res.json(garments);
+  try {
+    console.log("📥 GET /api/garments HIT");
+
+    const garments = await Garment.find().sort({ createdAt: 1 });
+
+    console.log("🧾 Garments fetched:", garments.length);
+    console.log("🧾 Sample garment:", garments[0]);
+
+    res.status(200).json(garments);
+
+  } catch (err) {
+    console.error("❌ GET /api/garments ERROR:", err);
+    res.status(500).json({ message: "Failed to fetch garments" });
+  }
 });
+
 
 module.exports = router;

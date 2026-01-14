@@ -13,14 +13,11 @@ import { popUp } from "@/lib/motion";
 import { popUpslow } from "@/lib/motion";
 import BASE_URL from "@/config/api";
 
-
 type Garment = {
     _id: string;
     name: string;
     imagePath: string;
 };
-
-
 
 export default function UploadTryOnSection() {
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -114,11 +111,22 @@ export default function UploadTryOnSection() {
 
 
     useEffect(() => {
+        console.log("Fetching garments...");
+
         fetch(`${BASE_URL}/api/garments`)
-            .then(res => res.json())
-            .then(setGarments)
-            .catch(console.error);
+            .then(res => {
+                console.log("Response received:", res);
+                return res.json();
+            })
+            .then(data => {
+                console.log("Garments data:", data);
+                setGarments(data);
+            })
+            .catch(err => {
+                console.error("Error fetching garments:", err);
+            });
     }, []);
+
 
 
 
