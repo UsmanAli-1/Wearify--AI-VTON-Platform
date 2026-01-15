@@ -38,7 +38,6 @@ export default function UploadTryOnSection() {
     }, []);
 
 
-
     // Upload handler
     const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files) return;
