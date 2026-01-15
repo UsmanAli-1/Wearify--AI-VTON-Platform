@@ -1,4 +1,3 @@
-
 // app/page.tsx
 import VirtualTryOnSection from "@/components/VirtualTryOnSection"
 import HeroSection from "@/components/HeroSection"
@@ -7,6 +6,7 @@ import HowItWorksSection from "@/components/HowItWorksSection"
 import VirtualTryOnGallery from "@/components/VirtualTryOnGallery"
 import Footer from "@/components/Footer";
 import AboutSection from "@/components/AboutSection"
+
 
 
 export default function Home() {
@@ -28,9 +28,7 @@ export default function Home() {
         <VirtualTryOnGallery />
       </section>
         <AiPoweredFeatures />
-
       <Footer />
-
     </div>
   );
 }

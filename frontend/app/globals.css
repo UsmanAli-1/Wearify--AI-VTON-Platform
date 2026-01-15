@@ -131,6 +131,7 @@ html {
   scroll-behavior: smooth;
 }
 
+
 /* Hide scrollbar but keep scroll functionality */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -144,6 +145,30 @@ html {
 section {
   scroll-margin-top: 90px;
 }
+
+
+
+
+@keyframes scaleLoop {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+}
+
+.animate-scale-loop {
+  animation: scaleLoop 1.2s ease-in-out infinite;
+}
+
+
 
 
 

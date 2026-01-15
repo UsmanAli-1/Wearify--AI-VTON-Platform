@@ -12,6 +12,7 @@ import { fadeIn } from "@/lib/motion";
 import { popUp } from "@/lib/motion";
 import { popUpslow } from "@/lib/motion";
 import BASE_URL from "@/config/api";
+import Loader from "./Loader";
 
 type Garment = {
     _id: string;
@@ -19,7 +20,11 @@ type Garment = {
     imagePath: string;
 };
 
+
+
 export default function UploadTryOnSection() {
+    const [loading, setLoading] = useState(true);
+
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [garments, setGarments] = useState<Garment[]>([]);
@@ -94,28 +99,56 @@ export default function UploadTryOnSection() {
     };
 
 
+    // useEffect(() => {
+    //     console.log("Fetching garments...");
+    //     setLoading(true);
+
+    //     fetch(`${BASE_URL}/api/garments`)
+    //         .then(res => res.json())
+    //         .then(data => {
+    //             setGarments(data);
+    //             setLoading(false);
+    //         })
+    //         .catch(err => {
+    //             console.error(err);
+    //             setLoading(false);
+    //         });
+    // }, []);
+
     useEffect(() => {
-        console.log("Fetching garments...");
+        console.log("📡 Fetching garments...");
+        setLoading(true);
 
         fetch(`${BASE_URL}/api/garments`)
-            .then(res => {
-                console.log("Response received:", res);
-                return res.json();
-            })
-            .then(data => {
-                console.log("Garments data:", data);
+            .then(async (res) => {
+                console.log("📥 Garments response status:", res.status);
+
+                if (!res.ok) {
+                    throw new Error("Garments API failed");
+                }
+
+                const data = await res.json();
+                console.log("✅ Garments data:", data);
                 setGarments(data);
             })
-            .catch(err => {
-                console.error("Error fetching garments:", err);
+            .catch((err) => {
+                console.error("❌ Garments fetch error:", err);
+            })
+            .finally(() => {
+                console.log("🧹 Stopping loader");
+                setLoading(false);
             });
     }, []);
 
 
-
+    if (loading) {
+        return <Loader />;
+    }
 
     return (
+
         <section className="w-full px-6 md:px-20 py-8 flex flex-col gap-5 bg-gradient-to-r  from-[#4F5D3A] to-[#6B7A4C]">
+
             <h1 className="m-auto md:text-5xl text-3xl font-bold text-[#1C1C1C]">
                 <Motion variant={fadeIn}>
                     Virtual Try On
@@ -241,4 +274,5 @@ export default function UploadTryOnSection() {
         </section>
     );
 }
+
 

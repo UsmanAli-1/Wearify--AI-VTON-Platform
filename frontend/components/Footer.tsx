@@ -100,9 +100,9 @@ export default function Footer() {
 
                     {/* BOTTOM COPYRIGHT */}
                     <Motion variant={fadeIn}>
-                        <div className="text-sm text-gray-700">
-                            © 2025 Wearify. Virtual AI Try-On.
-                            <br />All rights reserved.
+                        <div className="text-md text-[#1C1C1C] text-center">
+                            © 2025 <strong>Wearify</strong>.
+                            All rights reserved.
                         </div>
                     </Motion>
                 </div>
