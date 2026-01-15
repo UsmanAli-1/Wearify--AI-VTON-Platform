@@ -3,26 +3,6 @@ const router = express.Router();
 const upload = require("../middleware/upload");
 const Garment = require("../models/Garment");
 
-// router.post("/upload", upload.single("image"), async (req, res) => {
-//   try {
-//     if (!req.file) {
-//       return res.status(400).json({ message: "No image uploaded" });
-//     }
-
-//     const garment = await Garment.create({
-//       name: req.body.name || "Garment",
-//       imagePath: req.file.path,
-//     });
-
-//     res.json({
-//       message: "Garment uploaded",
-//       garment,
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// });
 
 router.post("/upload", upload.single("image"), async (req, res) => {
   try {

@@ -26,15 +26,6 @@ export default function UploadTryOnSection() {
     const [selectedGarment, setSelectedGarment] = useState<Garment | null>(null);
 
 
-    // Check login ONCE
-    // useEffect(() => {
-    //     fetch(`${BASE_URL}/api/users/me`, {
-    //         credentials: "include",
-    //     })
-    //         .then((res) => setIsLoggedIn(res.ok))
-    //         .catch(() => setIsLoggedIn(false));
-    // }, []);
-
     useEffect(() => {
         fetch(`${BASE_URL}/api/users/me`, {
             credentials: "include",
@@ -98,16 +89,10 @@ export default function UploadTryOnSection() {
 
         toast.success("Image & garment submitted successfully");
 
-        window.location.reload();
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
     };
-
-    // useEffect(() => {
-    //     fetch(`${BASE_URL}/api/garments`)
-    //         .then(res => res.json())
-    //         .then(data => {
-    //             setGarments(data);
-    //         });
-    // }, []);
 
 
     useEffect(() => {

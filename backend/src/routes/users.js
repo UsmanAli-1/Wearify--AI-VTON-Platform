@@ -62,8 +62,6 @@ router.post("/login", async (req, res) => {
     //   maxAge: 1000 * 60 * 60 * 24 * 7,
     // });
 
-
-
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
@@ -103,10 +101,13 @@ router.get("/me", auth, async (req, res) => {
 
 router.post("/generate", auth, upload.single("image"), async (req, res) => {
   try {
+    console.log("📥 GENERATE HIT");
+    console.log("📦 Body:", req.body);
+    console.log("📸 File:", req.file);
+
     const COST = 40;
     const { garmentId } = req.body;
 
-    // validations
     if (!req.file) {
       return res.status(400).json({ message: "No image uploaded" });
     }
@@ -124,25 +125,17 @@ router.post("/generate", auth, upload.single("image"), async (req, res) => {
       return res.status(400).json({ message: "Not enough points" });
     }
 
-    // save both image + garment
-    // await Image.create({
-    //   user: user._id,
-    //   imagePath: req.file.path, //  Cloudinary URL
-    //   garment: garmentId,
-    //   pointsUsed: COST,
-    // });
-
-
-    await Image.create({
+    const imageDoc = await Image.create({
       user: user._id,
-      imagePath: req.file.secure_url, // FIX
+      imagePath: req.file.path,   // CLOUDINARY URL
       garment: garmentId,
       pointsUsed: COST,
     });
 
-    // deduct points
     user.points -= COST;
     await user.save();
+
+    console.log("✅ IMAGE SAVED:", imageDoc);
 
     res.json({
       message: "Image & garment uploaded",
@@ -150,7 +143,7 @@ router.post("/generate", auth, upload.single("image"), async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("🔥 GENERATE ERROR:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
