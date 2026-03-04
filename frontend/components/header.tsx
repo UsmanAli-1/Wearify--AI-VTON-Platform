@@ -12,6 +12,7 @@ import {
   faShirt,
 } from "@fortawesome/free-solid-svg-icons";
 import { faCircleQuestion , faImages  } from "@fortawesome/free-regular-svg-icons";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { useRouter } from "next/navigation";
 import BASE_URL from "@/config/api";
 
@@ -103,7 +104,7 @@ export default function Header() {
   }, [pathname]);
 
   // linking and active section underline
-  const links = [
+  const links: { id: string; label: string; icon: IconProp }[] = [
     { id: "tryon", label: "Try On", icon: faShirt },
     { id: "about", label: "About", icon: faCircleQuestion },
     { id: "collection", label: "Collection", icon: faImages },
