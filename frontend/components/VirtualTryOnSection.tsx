@@ -15,264 +15,251 @@ import BASE_URL from "@/config/api";
 import Loader from "./Loader";
 
 type Garment = {
-    _id: string;
-    name: string;
-    imagePath: string;
+  _id: string;
+  name: string;
+  imagePath: string;
 };
 
-
-
 export default function UploadTryOnSection() {
-    const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [garments, setGarments] = useState<Garment[]>([]);
+  const [selectedGarment, setSelectedGarment] = useState<Garment | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-    const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [garments, setGarments] = useState<Garment[]>([]);
-    const [selectedGarment, setSelectedGarment] = useState<Garment | null>(null);
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/users/me`, {
+      credentials: "include",
+    })
+      .then((res) => {
+        if (res.ok) setIsLoggedIn(true);
+        else setIsLoggedIn(false);
+      })
+      .catch(() => setIsLoggedIn(false));
+  }, []);
 
+  // Upload handler
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.[0]) return;
 
-    useEffect(() => {
-        fetch(`${BASE_URL}/api/users/me`, {
-            credentials: "include",
-        })
-            .then(res => {
-                if (res.ok) setIsLoggedIn(true);
-                else setIsLoggedIn(false);
-            })
-            .catch(() => setIsLoggedIn(false));
-    }, []);
+    const file = e.target.files[0];
 
+    setSelectedFile(file); // store real file
+    setUploadedImage(URL.createObjectURL(file)); // preview
+  };
 
-    // Upload handler
-    const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!e.target.files) return;
-
-        const file = e.target.files[0];
-        setUploadedImage(URL.createObjectURL(file));
-    };
-
-
-
-    // check image upload 
-    const handleImageCheck = async () => {
-        if (!uploadedImage) {
-            toast.error("Please upload your photo");
-            return;
-        }
-
-        if (!selectedGarment) {
-            toast.error("Please select a garment");
-            return;
-        }
-
-        const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
-        if (!fileInput?.files?.[0]) {
-            toast.error("File missing");
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append("image", fileInput.files[0]);
-        formData.append("garmentId", selectedGarment._id);
-
-        const res = await fetch(`${BASE_URL}/api/users/generate`, {
-            method: "POST",
-            credentials: "include",
-            body: formData,
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            toast.error(data.message);
-            return;
-        }
-
-        setUploadedImage(null);
-        setSelectedGarment(null);
-
-        toast.success("Image & garment submitted successfully");
-
-        setTimeout(() => {
-            window.location.reload();
-        }, 1000);
-    };
-
-
-    // useEffect(() => {
-    //     console.log("Fetching garments...");
-    //     setLoading(true);
-
-    //     fetch(`${BASE_URL}/api/garments`)
-    //         .then(res => res.json())
-    //         .then(data => {
-    //             setGarments(data);
-    //             setLoading(false);
-    //         })
-    //         .catch(err => {
-    //             console.error(err);
-    //             setLoading(false);
-    //         });
-    // }, []);
-
-    useEffect(() => {
-        console.log("📡 Fetching garments...");
-        setLoading(true);
-
-        fetch(`${BASE_URL}/api/garments`)
-            .then(async (res) => {
-                console.log("📥 Garments response status:", res.status);
-
-                if (!res.ok) {
-                    throw new Error("Garments API failed");
-                }
-
-                const data = await res.json();
-                console.log("✅ Garments data:", data);
-                setGarments(data);
-            })
-            .catch((err) => {
-                console.error("❌ Garments fetch error:", err);
-            })
-            .finally(() => {
-                console.log("🧹 Stopping loader");
-                setLoading(false);
-            });
-    }, []);
-
-
-    if (loading) {
-        return <Loader />;
+  // check image upload
+  const handleImageCheck = async () => {
+    if (!uploadedImage) {
+      toast.error("Please upload your photo");
+      return;
     }
 
-    return (
+    if (!selectedGarment) {
+      toast.error("Please select a garment");
+      return;
+    }
 
-        <section className="w-full px-6 md:px-20 py-8 flex flex-col gap-5 bg-gradient-to-r  from-[#4F5D3A] to-[#6B7A4C]">
+    if (!selectedFile) {
+      toast.error("File missing");
+      return;
+    }
 
-            <h1 className="m-auto md:text-5xl text-3xl font-bold text-[#1C1C1C]">
-                <Motion variant={fadeIn}>
+    const formData = new FormData();
+    formData.append("image", selectedFile);
+    formData.append("garmentId", selectedGarment._id);
+
+    console.log(selectedFile.size / 1024 / 1024, "MB");
+
+    const res = await fetch(`${BASE_URL}/api/users/generate`, {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      toast.error(data.message);
+      return;
+    }
+
+    setUploadedImage(null);
+    setSelectedGarment(null);
+    setSelectedFile(null);
+
+    toast.success("Image & garment submitted successfully");
+
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  };
+
+  useEffect(() => {
+    console.log("📡 Fetching garments...");
+    setLoading(true);
+
+    fetch(`${BASE_URL}/api/garments`)
+      .then(async (res) => {
+        console.log("📥 Garments response status:", res.status);
+
+        if (!res.ok) {
+          throw new Error("Garments API failed");
+        }
+
+        const data = await res.json();
+        console.log("✅ Garments data:", data);
+        setGarments(data);
+      })
+      .catch((err) => {
+        console.error("❌ Garments fetch error:", err);
+      })
+      .finally(() => {
+        console.log("🧹 Stopping loader");
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <Loader />;
+  }
+
+  return (
+    <section className="w-full px-6 md:px-20 flex flex-col gap-5 ">
+      {/* <h1 className="m-auto md:text-5xl text-3xl font-bold text-[#1C1C1C]">
                     Virtual Try On
-                </Motion>
-            </h1>
+            </h1> */}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* LEFT */}
-                <div className="flex flex-col gap-6">
-                    <Motion variant={popUpslow}>
-                        <Card className="bg-[#1C1C1C]/50 rounded-2xl p-3 max-w-xl hover:scale-105 duration-300 transition shadow-xl">
-                            <CardContent className="flex gap-3 overflow-x-scroll no-scrollbar">
-                                {garments.map((g) => (
-                                    <img
-                                        key={g._id}
-                                        src={g.imagePath}
-                                        alt={g.name}
-                                        onClick={() => setSelectedGarment(g)}
-                                        className={`w-[80px] h-[110px] rounded-xl object-cover cursor-pointer
+      <div
+        className="grid grid-cols-1 md:grid-cols-[2.8fr_1.2fr] 
+                max-w-[1210px] w-full mx-auto  gap-6"
+      >
+        {/* LEFT */}
+        <div className="flex flex-col gap-6 ">
+          <Card className=" rounded-2xl p-3 max-w-xxl hover:scale-105 duration-300 transition shadow-xl bg-white/5 backdrop-blur-md border border-white/10">
+            <CardContent className="flex gap-3 overflow-x-scroll no-scrollbar">
+              {garments.map((g) => (
+                <img
+                  key={g._id}
+                  src={g.imagePath}
+                  alt={g.name}
+                  onClick={() => setSelectedGarment(g)}
+                  className={`w-[80px] h-[110px] rounded-xl object-cover cursor-pointer
       transition hover:scale-110 duration-300 transition
-      ${selectedGarment?._id === g._id ? "ring-4 ring-[#6B7A4C]" : ""}
+      ${selectedGarment?._id === g._id ? "ring-4 ring-[#FFFFFF]" : ""}
     `}
-                                    />
-                                ))}
+                />
+              ))}
+            </CardContent>
+          </Card>
 
+          {/* Upload */}
+          <Card className="max-w-xxl p-0 bg-transparent border-0 shadow-none">
+            <div className="grid grid-cols-2 gap-6">
+              {/* UPLOAD PERSON CARD */}
+              <Card
+                className="relative h-[333px] p-5 rounded-2xl shadow-md 
+              hover:scale-105 duration-300 transition bg-white/5 backdrop-blur-md border border-white/10"
+              >
+                <div className="w-full h-full border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center">
+                  {uploadedImage ? (
+                    <div className="max-h-full max-w-full rounded-xl overflow-hidden">
+                      <Image
+                        src={uploadedImage}
+                        alt=""
+                        width={500}
+                        height={500}
+                        className="object-contain w-full h-full"
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <h3 className="font-semibold mb-1  items-center ">Upload Person</h3>
+                      <p className="text-gray-500 text-xs mb-8 ">
+                        png , jpg , jpeg  
+                      </p>
 
-                            </CardContent>
-                        </Card>
-                    </Motion>
+                      <label
+                        className={`font-semibold text-sm ${
+                          isLoggedIn
+                            ? "text-[#A06CE3] cursor-pointer"
+                            : "text-gray-400 cursor-not-allowed"
+                        }`}
+                      >
+                        <Input
+                          type="file"
+                          className="hidden"
+                          disabled={!isLoggedIn}
+                          onChange={handleUpload}
+                        />
+                        Select Image
+                      </label>
 
-                    {/* Upload */}
-                    <Motion variant={popUp} >
-                        <Card className="relative bg-[#F5F5DC] rounded-3xl p-4 md:p-6 h-[285px] flex flex-col items-center justify-center text-center max-w-xl hover:scale-105 duration-300 transition shadow-xl">
-                            {isLoggedIn && (
-                                <div className=" relative w-full h-full flex justify-between">
-                                    <div className=" absolute z-10 w-17 h-25 md:w-18 md:h-20 lg:w-22 lg:h-30 left-0 top-0  ">
-                                        {uploadedImage ? (
-                                            <Image
-                                                src={uploadedImage}
-                                                alt=""
-                                                width={100}
-                                                height={100}
-                                                className="object-contain rounded-xl border shadow-xl "
-                                            />
-                                        ) :
-                                            <p className="border shadow-xl absolute z-10 w-17 h-25 md:w-18 md:h-20 lg:w-22 lg:h-30 left-0 top-0 rounded-xl text-gray-400/60 pt-9 text-xs md:text-sm ">selected image</p>
-                                        }
-                                    </div>
-                                    {/* <div className=" border shadow-xl absolute z-10 w-17 h-25 md:w-18 md:h-20 lg:w-22 lg:h-30 right-0 top-0 rounded-xl text-gray-400/60 pt-9 text-xs md:text-sm">selected garment</div> */}
-                                    <div className="absolute z-10 w-17 h-25 md:w-18 md:h-20 lg:w-22 lg:h-30 right-0 top-0">
-                                        {selectedGarment ? (
-                                            <img
-                                                src={selectedGarment.imagePath}
-                                                alt={selectedGarment.name}
-                                                className="w-full h-full object-cover rounded-xl border shadow-xl"
-                                            />
-
-                                        ) : (
-                                            <p className="border shadow-xl w-full h-full rounded-xl text-gray-400/60 pt-9 text-xs md:text-sm text-center">
-                                                selected garment
-                                            </p>
-                                        )}
-                                    </div>
-
-                                </div>
-                            )}
-                            <h3 className="font-semibold">Upload Your Photo</h3>
-                            <p className="text-gray-500 text-xs">
-                                PNG, JPG, JPEG up to 10MB
-                            </p>
-
-                            <label
-                                className={`mt-3 font-semibold text-sm ${isLoggedIn
-                                    ? "text-[#A06CE3] cursor-pointer"
-                                    : "text-gray-400 cursor-not-allowed"
-                                    }`}
-                            >
-                                <Input
-                                    type="file"
-                                    className="hidden"
-                                    disabled={!isLoggedIn}
-                                    onChange={handleUpload}
-                                />
-                                Select Image
-                            </label>
-
-                            {!isLoggedIn && (
-                                <p className="text-xs text-red-500 mt-2">
-                                    Login required to upload image
-                                </p>
-                            )}
-                        </Card>
-                    </Motion>
+                      {!isLoggedIn && (
+                        <p className="text-xs text-red-500 mt-2">
+                          Login required
+                        </p>
+                      )}
+                    </>
+                  )}
                 </div>
+              </Card>
 
-                {/* RIGHT */}
-                <Motion variant={popUp}>
-                    <Card className="bg-[#F5F5DC] rounded-3xl p-6 h-[446px] flex items-center justify-center hover:scale-105 duration-300 transition shadow-xl">
-                        <div className="w-full h-full border-2 border-dashed rounded-2xl flex items-center justify-center">
-                            <p className="text-gray-500 text-sm text-center">
-                                Upload image to preview
-                            </p>
-                        </div>
-                    </Card>
-                </Motion>
+              {/* SELECTED GARMENT CARD */}
+              <Card
+                className="relative h-[333px] p-5 flex  items-center justify-center text-center rounded-2xl shadow-md 
+                hover:scale-105 duration-300 transition bg-white/5 backdrop-blur-md border border-white/10"
+              >
+                <div className="w-full h-full border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center">
+                  {selectedGarment ? (
+                    <img
+                      src={selectedGarment.imagePath}
+                      alt={selectedGarment.name}
+                      className="w-[140px] h-[200px] object-cover rounded-xl border shadow"
+                    />
+                  ) : (
+                    <>
+                      <h3 className="font-semibold mb-3">Selected Garment</h3>
+                      <p className="text-gray-400 text-xs">Choose from above</p>
+                    </>
+                  )}
+                </div>
+              </Card>
             </div>
+          </Card>
+        </div>
 
-            {/* Generate */}
-            <div className="flex justify-center ">
-                <Motion variant={fadeUp}>
-                    <Button
-                        disabled={!isLoggedIn}
-                        className={`px-32 py-6 rounded-full text-[#F5F5DC] shadow-2xl hover:scale-105 duration-300 transition ${isLoggedIn
-                            ? "bg-[#1C1C1C] cursor-pointer"
-                            : "bg-[#1C1C1C] cursor-not-allowed"
-                            }`}
-                        onClick={handleImageCheck}
-                    >
-                        Generate
-                    </Button>
-                </Motion>
+        {/* RIGHT COLUMN */}
+        <div className="flex flex-col items-center gap-6">
+          <Card
+            className="rounded-3xl w-full p-5 h-[420px] flex items-center justify-center
+    hover:scale-105 duration-300 transition shadow-xl 
+    bg-white/5 backdrop-blur-md border border-white/10"
+          >
+            <div className="w-full h-full border-2 border-dashed border-white/30 rounded-2xl flex items-center justify-center">
+              <p className="text-gray-500 text-sm text-center">
+                Upload image to preview
+              </p>
             </div>
-        </section>
-    );
+          </Card>
+
+          <Button
+            disabled={!isLoggedIn}
+            className={`w-full py-6 rounded-full text-[#F5F5DC] shadow-xl mb-5
+      hover:scale-105 duration-300 transition hover:from-[#4287f5] hover:to-[#6a339e]
+      disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-auto  
+      ${
+        isLoggedIn
+          ? "bg-gradient-to-r from-purple-400/50 to-blue-600/90 cursor-pointer"
+          : "bg-gradient-to-r from-purple-400/50 to-blue-600/90  "
+      }`}
+            onClick={handleImageCheck}
+          >
+            Try On
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
 }
-
-

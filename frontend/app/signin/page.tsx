@@ -50,8 +50,8 @@ export default function SignIn() {
     }
     return (
         <>
-            <section className="bg-[#F5F5DC] h-full">
-                <div className="h-full w-full pt-27 flex items-center justify-center ">
+            <section className=" h-full">
+                <div className="h-full w-full  flex items-center justify-center ">
                     <div className="max-w-5xl w-full flex flex-col md:flex-row items-center justify-between px-4 md:px-12 md:gap-45">
 
                         {/* LEFT SIDE */}
@@ -66,24 +66,17 @@ export default function SignIn() {
                                 className="hidden md:block md:w-64 lg:w-80 object-contain md:mb-4 mx-auto"
                             />
 
-
-                            <p className="md:block hidden text-sm text-gray-600">
-                                Don’t have an account?
-                                <a href="/signup" className="text-blue-600 ml-1 font-medium hover:underline">
-                                    Sign Up
-                                </a>
-                            </p>
                         </div>
 
                         {/* RIGHT SIDE - LOGIN CARD */}
                         <Card
-                            className="w-full md:w-1/2 rounded-xl bg-gradient-to-r from-[#6B7A4C] to-[#F5F5DC] md:py-6 py-5
-                    border-none shadow-2xl "
+                            className="w-full md:w-1/2 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 md:py-6 py-5
+                     shadow-2xl hover:scale-105 duration-300 transition"
                         >
                             <CardContent className="">
 
                                 {/* Gradient Login Text */}
-                                <h2 className="md:text-4xl text-3xl font-bold text-center text-[#1C1C1C]/80  pb-8">
+                                <h2 className="md:text-4xl text-3xl font-bold text-center bg-gradient-to-r from-purple-400/50 to-blue-600/90 bg-clip-text text-transparent  pb-8">
                                     Sign In
                                 </h2>
 
@@ -94,7 +87,7 @@ export default function SignIn() {
                                         type="email"
                                         name="email"
                                         placeholder="Email"
-                                        className="mb-4 bg-white"
+                                        className="mb-4 bg-white/5 backdrop-blur-xl border border-white/10 text-white placeholder:text-gray-300 focus:border-purple-400 shadow-md"
                                         onChange={handleChanges}
                                         value={formloginData.email}
                                         required
@@ -105,20 +98,20 @@ export default function SignIn() {
                                         type="password"
                                         name="password"
                                         placeholder="Password"
-                                        className="mb-2 bg-white"
+                                        className="mb-4 bg-white/5 backdrop-blur-xl border border-white/10 text-white placeholder:text-gray-300 focus:border-purple-400 shadow-md"
                                         onChange={handleChanges}
                                         value={formloginData.password}
                                         required
                                     />
 
                                     {/* Forgot Password */}
-                                    <p className="text-center text-sm text-gray-700 mb-4 hover:underline cursor-pointer">
+                                    {/* <p className="text-center text-sm text-gray-700 mb-4 hover:underline cursor-pointer">
                                         Forget Password?
-                                    </p>
+                                    </p> */}
 
                                     {/* Login Button */}
                                     <Button
-                                        className="w-full py-2 mb-4 rounded-lg text-white font-semibold bg-gradient-to-r  from-[#4F5D3A] to-[#6B7A4C]/70"
+                                        className="w-full py-2 shadow-md mb-2 rounded-lg text-white font-semibold bg-gradient-to-r from-purple-400/50 to-blue-600/90"
                                         
                                         type="submit"
                                     >
@@ -127,14 +120,14 @@ export default function SignIn() {
                                 </form>
 
                                 {/* OR */}
-                                <div className="flex items-center my-4">
+                                <div className="flex items-center my-2">
                                     <div className="flex-1 h-[1px] bg-gray-400" />
-                                    <span className="px-4 text-gray-700">OR</span>
+                                    <span className="px-4 text-gray-400">OR</span>
                                     <div className="flex-1 h-[1px] bg-gray-400" />
                                 </div>
 
                                 {/* Google Login */}
-                                <Button
+                                {/* <Button
                                     variant="outline"
                                     className="w-full mb-3 flex items-center justify-center gap-3 bg-white"
                                 >
@@ -145,10 +138,10 @@ export default function SignIn() {
                                         alt="Google"
                                     />
                                     Continue With Google
-                                </Button>
+                                </Button> */}
 
                                 {/* Apple Login */}
-                                <Button
+                                {/* <Button
                                     variant="outline"
                                     className="w-full flex items-center justify-center gap-3 bg-white"
                                 >
@@ -159,7 +152,7 @@ export default function SignIn() {
                                         alt="Apple"
                                     />
                                     Continue With Apple
-                                </Button>
+                                </Button> */}
 
                                 {/* Register Link */}
                                 <p className="text-center text-sm mt-6 text-black">
