@@ -2,7 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import BackgroundDots from "@/components/BackgroundDots";
-import Header from "@/components/header-temp";
+import Header from "@/components/Header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +27,7 @@ export default function RootLayout({
         <div className="bg-blob-top-right"></div>
         <div className="bg-blob-bottom-left"></div>
         <BackgroundDots />
-        <Header/>
+        <Header />
 
         {/* Main wrapper handles spacing */}
         <main className="pt-[95px] md:pt-5 ">{children}</main>
