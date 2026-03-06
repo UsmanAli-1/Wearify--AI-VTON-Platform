@@ -171,7 +171,7 @@ export default function Header() {
               <Button
                 variant="outline"
                 onClick={toggleMenu}
-                className="p-2 rounded-md bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-[#1C1C1C] border-none"
+                className="p-2 rounded-md bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-white/80 border-none"
               >
                 <FontAwesomeIcon icon={isOpen ? faXmark : faBars} size="lg" />
               </Button>

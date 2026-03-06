@@ -46,9 +46,9 @@ export default function SignIn() {
   };
   return (
     <>
-      <section className=" h-full">
-        <div className="h-full w-full  flex items-center justify-center ">
-          <div className="max-w-5xl w-full flex flex-col md:flex-row items-center justify-between px-4 md:px-12 md:gap-45">
+      <section className="min-h-[calc(100vh-100px)] flex items-center justify-center ">
+        <div className="h-full w-full flex items-center justify-center ">
+          <div className="max-w-5xl w-full flex flex-col md:flex-row items-center justify-between px-6 md:px-12 md:gap-45">
             {/* LEFT SIDE */}
             <div className="-top-20 flex flex-col items-center justify-center text-center w-full h-full md:w-1/2">
               {/* Bigger Side Logo */}
@@ -117,7 +117,7 @@ export default function SignIn() {
                 </div>
 
                 {/* Register Link */}
-                <p className="text-center text-sm mt-6 text-black">
+                <p className="text-center text-sm mt-6 text-gray-300">
                   Don’t have an account?
                   <a
                     href="/signup"

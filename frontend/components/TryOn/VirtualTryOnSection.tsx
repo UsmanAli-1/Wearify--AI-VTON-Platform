@@ -126,18 +126,14 @@ export default function UploadTryOnSection() {
   }
 
   return (
-    <section className="w-full px-6 md:px-20 flex flex-col gap-5 ">
-      {/* <h1 className="m-auto md:text-5xl text-3xl font-bold text-[#1C1C1C]">
-                    Virtual Try On
-            </h1> */}
-
+    <section className="w-full px-6 md:px-12 xl:px-20 flex flex-col gap-5 min-h-[calc(100vh-120px)]">
       <div
-        className="grid grid-cols-1 md:grid-cols-[2.8fr_1.2fr] 
-                max-w-[1210px] w-full mx-auto  gap-6"
+        className="grid grid-cols-1 md:grid-cols-[2fr_1fr] xl:grid-cols-[2.4fr_1fr]
+       max-w-[1600px] 2xl:max-w-[1800px] w-full mx-auto gap-6 flex-1"
       >
         {/* LEFT */}
         <div className="flex flex-col gap-6 ">
-          <Card className=" rounded-2xl p-3 max-w-xxl hover:scale-105 duration-300 transition shadow-xl bg-white/5 backdrop-blur-md border border-white/10">
+          <Card className=" rounded-2xl 2xl:min-h-[170px] p-3 max-w-xxl hover:scale-105 duration-300 transition shadow-xl bg-white/5 backdrop-blur-md border border-white/10">
             <CardContent className="flex gap-3 overflow-x-scroll no-scrollbar">
               {garments.map((g) => (
                 <img
@@ -145,7 +141,7 @@ export default function UploadTryOnSection() {
                   src={g.imagePath}
                   alt={g.name}
                   onClick={() => setSelectedGarment(g)}
-                  className={`w-[80px] h-[110px] rounded-xl object-cover cursor-pointer
+                  className={`w-[90px] h-[110px] 2xl:min-h-[150px] rounded-xl object-cover cursor-pointer
       transition hover:scale-110 duration-300 transition
       ${selectedGarment?._id === g._id ? "ring-4 ring-[#FFFFFF]" : ""}
     `}
@@ -159,7 +155,7 @@ export default function UploadTryOnSection() {
             <div className="grid grid-cols-2 gap-6">
               {/* UPLOAD PERSON CARD */}
               <Card
-                className="relative h-[333px] p-5 rounded-2xl shadow-md 
+                className="relative h-[333px] 2xl:min-h-[450px] p-5 rounded-2xl shadow-md 
               hover:scale-105 duration-300 transition bg-white/5 backdrop-blur-md border border-white/10"
               >
                 <div className="w-full h-full text-center border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center">
@@ -210,7 +206,7 @@ export default function UploadTryOnSection() {
 
               {/* SELECTED GARMENT CARD */}
               <Card
-                className="relative h-[333px] p-5 flex  items-center justify-center text-center rounded-2xl shadow-md 
+                className="relative h-[333px] 2xl:min-h-[450px] p-5 flex  items-center justify-center text-center rounded-2xl shadow-md 
                 hover:scale-105 duration-300 transition bg-white/5 backdrop-blur-md border border-white/10"
               >
                 <div className="w-full h-full border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center">
@@ -233,9 +229,9 @@ export default function UploadTryOnSection() {
         </div>
 
         {/* RIGHT COLUMN */}
-        <div className="flex flex-col items-center gap-6">
+        <div className="flex flex-col items-center gap-6 h-full ">
           <Card
-            className="rounded-3xl w-full p-5 h-[420px] flex items-center justify-center
+            className="rounded-3xl w-full p-5 h-[420px] 2xl:min-h-[580px] flex items-center justify-center
     hover:scale-105 duration-300 transition shadow-xl 
     bg-white/5 backdrop-blur-md border border-white/10"
           >

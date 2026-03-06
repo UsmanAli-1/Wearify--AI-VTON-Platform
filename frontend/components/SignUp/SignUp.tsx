@@ -49,9 +49,9 @@ export default function SignUp() {
   };
   return (
     <>
-      <section>
+      <section className="min-h-[calc(100vh-110px)] flex items-center justify-center ">
         <div className="h-full  w-full flex items-center justify-center">
-          <div className="max-w-5xl w-full flex flex-col md:flex-row items-center justify-between px-4 md:px-12 md:gap-45">
+          <div className="max-w-5xl w-full flex flex-col md:flex-row items-center justify-between px-6 md:px-12 md:gap-45">
             {/* LEFT SIDE */}
             <div className="flex flex-col items-center justify-center text-center w-full md:w-1/2">
               {/* Logo */}
@@ -142,7 +142,7 @@ export default function SignUp() {
                   </Button>
 
                   {/* Login Link */}
-                  <p className="text-center text-sm text-black">
+                  <p className="text-center text-sm text-gray-300">
                     Already have an account?
                     <a
                       href="/signin"
