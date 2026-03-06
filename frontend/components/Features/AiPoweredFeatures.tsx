@@ -27,11 +27,11 @@ export default function AiPoweredFeatures() {
             title: "Style Recommendations",
             desc: "Get personalized outfit suggestions based on your preferences, body type, and skin tone.",
         },
-        {
-            icon: faLayerGroup,
-            title: "Mix & Match Outfits",
-            desc: "Combine different pieces virtually to create complete looks. See how  tops, bottoms work together.",
-        },
+        // {
+        //     icon: faLayerGroup,
+        //     title: "Mix & Match Outfits",
+        //     desc: "Combine different pieces virtually to create complete looks. See how  tops, bottoms work together.",
+        // },
         {
             icon: faShareNodes,
             title: "Social Sharing",
@@ -40,8 +40,8 @@ export default function AiPoweredFeatures() {
     ];
 
     return (
-        <section className="w-full px-6 md:px-20 py-13 bg-[#F5F5DC]">
-            <Motion variant={fadeUp}>
+        <section className="w-full px-6 md:px-20 ">
+            {/* <Motion variant={fadeUp}>
                 <h2 className="text-center md:text-4xl text-3xl font-bold mb-3 text-[#1C1C1C]">
                     AI-Powered Features
                 </h2>
@@ -50,33 +50,28 @@ export default function AiPoweredFeatures() {
                 <p className="text-center text-gray-500 mb-12">
                     Experience cutting-edge technology that revolutionizes how you shop for clothes online
                 </p>
-            </Motion>
+            </Motion> */}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 {features.map((feat, i) => (
                     <Motion key={i} variant={popUpslow}>
                         <Card
-                            className="shadow-xl transition hover:scale-105 duration-300 border-none"
-                            style={{
-                                background: "linear-gradient(135deg, #6B7A4C 0%, #F5F5DC 100%)",
-                            }}
+                            className="shadow-xl transition hover:scale-105 duration-300 h-[230] md:h-[200  ]
+                            bg-white/5 backdrop-blur-md border border-white/10"
                         >
                             <CardContent>
                                 {/* Gradient Icon */}
                                 <div
-                                    className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-white text-xl shadow-lg"
-                                    style={{
-                                        background:
-                                            "linear-gradient(135deg, #4F5D3A 0%, #6B7A4C 100%)",
-                                    }}
+                                    className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-white text-xl shadow-lg
+                                    bg-gradient-to-r from-purple-400/50 to-blue-600/90"
                                 >
                                     <FontAwesomeIcon icon={feat.icon} />
                                 </div>
 
-                                <h3 className="font-semibold text-lg mb-2 text-[#1C1C1C]/90">
+                                <h3 className="font-semibold text-lg mb-2 text-gray-200">
                                     {feat.title}
                                 </h3>
-                                <p className="text-gray-700 text-sm leading-relaxed">
+                                <p className="text-gray-100/50 text-sm leading-relaxed">
                                     {feat.desc}
                                 </p>
                             </CardContent>

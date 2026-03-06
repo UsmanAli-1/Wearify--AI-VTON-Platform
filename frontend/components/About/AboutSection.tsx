@@ -55,7 +55,7 @@ export default function AboutSection() {
               <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-white shadow-md">
                 <Sparkles className="w-6 h-6" />
               </div>
-              <CardTitle className=" text-xl font-bold text-white">
+              <CardTitle className=" text-xl font-bold text-gray-200">
                 Project Title
               </CardTitle>
             </CardHeader>

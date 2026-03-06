@@ -10,7 +10,7 @@ export default function BackgroundDots() {
       top: `${Math.random() * 100}%`,
       left: `${Math.random() * 100}%`,
       size: `${Math.random() * 2 + 2}px`,
-      delay: `${Math.random() * 2}s`,
+      delay: `${Math.random() * 1}s`,
     }));
     setDots(generatedDots);
   }, []);

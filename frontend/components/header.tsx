@@ -10,6 +10,7 @@ import {
   faXmark,
   faGem,
   faShirt,
+  faWandSparkles,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faCircleQuestion,
@@ -84,7 +85,7 @@ export default function Header() {
   const links = [
     { href: "/", label: "Try On", icon: faShirt },
     { href: "/about", label: "About", icon: faCircleQuestion },
-    { href: "/collection", label: "Collection", icon: faImages },
+    { href: "/features", label: "Features", icon: faWandSparkles },
   ];
 
   const linkClass = (href: string) =>
@@ -102,10 +103,12 @@ export default function Header() {
     }`;
 
   return (
-    <header className="  left-0 right-0 z-50 flex justify-center pointer-events-none">
+    <div className="fixed md:relative top-2 md:top-0 left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 w-[88%] md:w-full z-50 flex justify-center pointer-events-none">
       {/* Header Card */}
-      {/* <div className="pointer-events-auto w-[92%] md:w-[90%] max-w-7xl bg-[#1C1C1C]/30 backdrop-blur-md rounded-2xl shadow-lg"> */}
-      <div className="pointer-events-auto w-[100%] ">
+      <div
+        className="pointer-events-auto w-full rounded-2xl bg-white/10 backdrop-blur-md 
+      border border-white/10 shadow-lg md:bg-transparent md:backdrop-blur-none md:border-none md:shadow-none"
+      >
         <nav className="flex items-center justify-between px-6 md:px-8 ">
           {/* Logo */}
           <a href="/" className="flex items-center hover:scale-110  transition">
@@ -179,7 +182,7 @@ export default function Header() {
 
       {/* Mobile Menu */}
       <div
-        className={`pointer-events-auto z-[100] md:hidden fixed top-[95px] left-1/2 -translate-x-1/2 w-[92%] bg-[#1C1C1C]/30 backdrop-blur-md rounded-2xl shadow-lg overflow-hidden transition-all duration-300 ${
+        className={`pointer-events-auto z-[100] md:hidden fixed top-[75px] left-1/2 -translate-x-1/2 w-[100%] bg-white/10 backdrop-blur-md rounded-2xl shadow-lg overflow-hidden transition-all duration-300 ${
           isOpen ? "max-h-screen py-4" : "max-h-0"
         }`}
       >
@@ -210,6 +213,6 @@ export default function Header() {
           )}
         </div>
       </div>
-    </header>
+    </div>
   );
 }

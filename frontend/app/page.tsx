@@ -1,4 +1,4 @@
-import VirtualTryOnSection from "@/components/Home/VirtualTryOnSection";
+import VirtualTryOnSection from "@/components/TryOn/VirtualTryOnSection";
 
 export default function Home() {
   return (
