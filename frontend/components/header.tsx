@@ -11,8 +11,10 @@ import {
   faGem,
   faShirt,
 } from "@fortawesome/free-solid-svg-icons";
-import { faCircleQuestion , faImages  } from "@fortawesome/free-regular-svg-icons";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import {
+  faCircleQuestion,
+  faImages,
+} from "@fortawesome/free-regular-svg-icons";
 import { useRouter } from "next/navigation";
 import BASE_URL from "@/config/api";
 
@@ -27,7 +29,6 @@ export default function Header() {
 
   const [user, setUser] = useState<User | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState("");
   const pathname = usePathname();
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -79,47 +80,23 @@ export default function Header() {
     }
   };
 
-  // Only detect sections on homepage
-  useEffect(() => {
-    if (pathname !== "/") return; // Do nothing on signin/signup pages
-
-    const sections = ["tryon", "about", "collection"];
-    const observers: IntersectionObserver[] = [];
-
-    sections.forEach((id) => {
-      const element = document.getElementById(id);
-      if (!element) return;
-
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) setActiveSection(id);
-        },
-        { threshold: 0.5 },
-      );
-      observer.observe(element);
-      observers.push(observer);
-    });
-
-    return () => observers.forEach((obs) => obs.disconnect());
-  }, [pathname]);
-
   // linking and active section underline
-  const links: { id: string; label: string; icon: IconProp }[] = [
-    { id: "tryon", label: "Try On", icon: faShirt },
-    { id: "about", label: "About", icon: faCircleQuestion },
-    { id: "collection", label: "Collection", icon: faImages },
+  const links = [
+    { href: "/", label: "Try On", icon: faShirt },
+    { href: "/about", label: "About", icon: faCircleQuestion },
+    { href: "/collection", label: "Collection", icon: faImages },
   ];
 
-  const linkClass = (id: string) =>
+  const linkClass = (href: string) =>
     `px-2 py-1 rounded-md relative transition  ${
-      pathname === "/" && activeSection === id
+      pathname === href
         ? "bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-[white] "
         : "text-gray-500 "
     }`;
 
-  const mobileLinkClass = (id: string) =>
-    `px-4 py-2 rounded-xl transition ${
-      pathname === "/" && activeSection === id
+  const mobileLinkClass = (href: string) =>
+    `px-4 py-2 rounded-xl transition  ${
+      pathname === href
         ? "bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-[white] "
         : "text-gray-500"
     }`;
@@ -145,10 +122,9 @@ export default function Header() {
           <div className="hidden md:flex gap-6 text-gray-500 relative ">
             {links.map((link) => (
               <a
-                key={link.id}
-                href={`/#${link.id}`}
-                onClick={() => setActiveSection(link.id)}
-                className={`${linkClass(link.id)} flex items-center gap-2`}
+                key={link.href}
+                href={link.href}
+                className={`${linkClass(link.href)} flex items-center gap-2`}
               >
                 <FontAwesomeIcon icon={link.icon} className="text-sm" />
                 {link.label}
@@ -203,20 +179,17 @@ export default function Header() {
 
       {/* Mobile Menu */}
       <div
-        className={`pointer-events-auto md:hidden fixed top-[95px] left-1/2 -translate-x-1/2 w-[92%] bg-[#1C1C1C]/30 backdrop-blur-md rounded-2xl shadow-lg overflow-hidden transition-all duration-300 ${
+        className={`pointer-events-auto z-[100] md:hidden fixed top-[95px] left-1/2 -translate-x-1/2 w-[92%] bg-[#1C1C1C]/30 backdrop-blur-md rounded-2xl shadow-lg overflow-hidden transition-all duration-300 ${
           isOpen ? "max-h-screen py-4" : "max-h-0"
         }`}
       >
         <div className="flex flex-col  px-6 font-medium">
           {links.map((link) => (
             <a
-              key={link.id}
-              href={`/#${link.id}`}
-              onClick={() => {
-                setActiveSection(link.id);
-                toggleMenu();
-              }}
-              className={`${mobileLinkClass(link.id)} flex items-center gap-2`}
+              key={link.href}
+              href={link.href}
+              onClick={toggleMenu}
+              className={`${mobileLinkClass(link.href)} flex items-center gap-2`}
             >
               <FontAwesomeIcon icon={link.icon} className="text-sm" />
               {link.label}

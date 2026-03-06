@@ -12,7 +12,7 @@ import { fadeIn } from "@/lib/motion";
 import { popUp } from "@/lib/motion";
 import { popUpslow } from "@/lib/motion";
 import BASE_URL from "@/config/api";
-import Loader from "./Loader";
+import Loader from "../Loader";
 
 type Garment = {
   _id: string;
@@ -162,7 +162,7 @@ export default function UploadTryOnSection() {
                 className="relative h-[333px] p-5 rounded-2xl shadow-md 
               hover:scale-105 duration-300 transition bg-white/5 backdrop-blur-md border border-white/10"
               >
-                <div className="w-full h-full border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center">
+                <div className="w-full h-full text-center border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center">
                   {uploadedImage ? (
                     <div className="max-h-full max-w-full rounded-xl overflow-hidden">
                       <Image
@@ -175,9 +175,11 @@ export default function UploadTryOnSection() {
                     </div>
                   ) : (
                     <>
-                      <h3 className="font-semibold mb-1  items-center ">Upload Person</h3>
+                      <h3 className="font-semibold mb-1 items-center ">
+                        Upload Person
+                      </h3>
                       <p className="text-gray-500 text-xs mb-8 ">
-                        png , jpg , jpeg  
+                        png , jpg , jpeg
                       </p>
 
                       <label
