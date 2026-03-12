@@ -6,11 +6,6 @@ import { Button } from "@/ui/button";
 import { Card, CardContent } from "@/ui/card";
 import { Input } from "@/ui/input";
 import toast from "react-hot-toast";
-import Motion from "@/components/Motion";
-import { fadeUp } from "@/lib/motion";
-import { fadeIn } from "@/lib/motion";
-import { popUp } from "@/lib/motion";
-import { popUpslow } from "@/lib/motion";
 import BASE_URL from "@/config/api";
 import Loader from "../Loader";
 

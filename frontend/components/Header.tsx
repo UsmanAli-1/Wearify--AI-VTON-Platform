@@ -113,11 +113,11 @@ export default function Header() {
           {/* Logo */}
           <a href="/" className="flex items-center hover:scale-110  transition">
             <Image
-              src="/images/logo5.png"
+              src="/images/logow.png"
               alt="Logo"
-              width={160}
+              width={90}
               height={0}
-              className="object-cover py-2"
+              className="object-cover py-4"
             />
           </a>
 

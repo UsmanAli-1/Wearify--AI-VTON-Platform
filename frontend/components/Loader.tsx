@@ -18,7 +18,7 @@ export default function Loader() {
         }}
       >
         <Image
-          src="/images/logo3.png"
+          src="/images/logo8.png"
           alt="Wearify"
           width={120}
           height={120}
