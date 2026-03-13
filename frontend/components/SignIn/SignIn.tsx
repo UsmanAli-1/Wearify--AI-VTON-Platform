@@ -50,15 +50,36 @@ export default function SignIn() {
         <div className="h-full w-full flex items-center justify-center ">
           <div className="max-w-5xl w-full flex flex-col md:flex-row items-center justify-between px-6 md:px-12 md:gap-45">
             {/* LEFT SIDE */}
-            <div className="-top-20 flex flex-col items-center justify-center text-center w-full h-full md:w-1/2">
-              {/* Bigger Side Logo */}
-              <Image
-                src="/images/logo3.png"
-                alt="Side Logo"
-                width={340}
-                height={340}
-                className="hidden md:block md:w-64 lg:w-80 object-contain md:mb-4 mx-auto"
-              />
+            <div className="hidden md:flex md:w-1/2 items-center justify-center hover:scale-105 duration-300 transition">
+              <div className="relative w-[380px] h-[420px]">
+                {/* Glow behind */}
+                <div className="absolute inset-0 blur-3xl opacity-60 bg-gradient-to-r from-purple-500 to-blue-500"></div>
+
+                {/* Gradient Background Blob */}
+                <div
+                  className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-600 opacity-80 blur-[2px]"
+                  style={{
+                    clipPath:
+                      "path('M 60 40 C 140 -20, 320 10, 360 140 C 400 260, 300 380, 180 400 C 60 420, -40 300, 20 160 C 40 100, 20 80, 60 40 Z')",
+                  }}
+                />
+
+                {/* Image with same blob shape */}
+                <div
+                  className="absolute inset-0 overflow-hidden"
+                  style={{
+                    clipPath:
+                      "path('M 60 40 C 140 -20, 320 10, 360 140 C 400 260, 300 380, 180 400 C 60 420, -40 300, 20 160 C 40 100, 20 80, 60 40 Z')",
+                  }}
+                >
+                  <Image
+                    src="/images/hero6.jpeg"
+                    alt="AI Try On"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* RIGHT SIDE - LOGIN CARD */}
