@@ -125,8 +125,8 @@
 body {
   background: radial-gradient(
     ellipse at bottom right,
-    rgb(18, 60, 116) 0.001%,
-    /* rgb(85, 18, 116) */
+    /* rgb(18, 60, 116) 0.001%, */
+    rgb(85, 18, 116) ,
     #0a132b 100%
   );
   background-attachment: fixed;
@@ -189,8 +189,8 @@ section {
   border-radius: 9999px;
   background: radial-gradient(
     circle,
-    rgba(239, 62, 255, 0.55) 40%,
-    /* rgba(62, 107, 255, 0.55) 70% */
+    /* rgba(239, 62, 255, 0.55) 40%, */
+    rgba(62, 107, 255, 0.55) 70%,
     rgba(62, 89, 255, 0) 60%
   );
   filter: blur(120px);
@@ -213,22 +213,10 @@ section {
   left: -10rem;
     background: radial-gradient(
     circle,
-    rgba(114, 16, 160, 0.55) 70%,
-    /* rgba(62, 107, 255, 0.55) 70% */
+    /* rgba(114, 16, 160, 0.55) 70%, */
+    rgba(62, 107, 255, 0.55) 70%,
     rgba(62, 89, 255, 0) 50%
   );
 }
 
 
-/* Primary: Charcoal Black #1C1C1C
-
-Secondary: Sand Beige #E6D5B8
-
-Accent: Olive Green #6B7A4C
-
-Text: Soft White #F5F5F5 */
-
-/* beige : #F5F5DC */
-
-
-/* button gradiant = bg-gradient-to-r  from-[#4F5D3A] to-[#6B7A4C] */
