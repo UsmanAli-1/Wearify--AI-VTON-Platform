@@ -11,6 +11,7 @@ import {
   faGem,
   faShirt,
   faWandSparkles,
+  faCrown
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faCircleQuestion,
@@ -86,6 +87,7 @@ export default function Header() {
     { href: "/", label: "Try On", icon: faShirt },
     { href: "/about", label: "About", icon: faCircleQuestion },
     { href: "/features", label: "Features", icon: faWandSparkles },
+    { href: "/plans", label: "Plans", icon: faCrown  },
   ];
 
   const linkClass = (href: string) =>
@@ -109,13 +111,13 @@ export default function Header() {
         className="pointer-events-auto w-full rounded-2xl bg-white/10 backdrop-blur-md 
       border border-white/10 shadow-lg md:bg-transparent md:backdrop-blur-none md:border-none md:shadow-none"
       >
-        <nav className="flex items-center justify-between px-6 md:px-8 ">
+        <nav className="flex items-center justify-between px-2 pr-4 md:px-8 ">
           {/* Logo */}
           <a href="/" className="flex items-center hover:scale-110  transition">
             <Image
               src="/images/logow.png"
               alt="Logo"
-              width={90}
+              width={70}
               height={0}
               className="object-cover py-4"
             />

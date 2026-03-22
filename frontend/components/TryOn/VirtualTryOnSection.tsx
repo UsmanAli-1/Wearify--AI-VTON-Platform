@@ -232,7 +232,7 @@ export default function UploadTryOnSection() {
           >
             <div className="w-full h-full border-2 border-dashed border-white/30 rounded-2xl flex items-center justify-center">
               <p className="text-gray-500 text-sm text-center">
-                Upload image to preview
+                Generated image preview
               </p>
             </div>
           </Card>

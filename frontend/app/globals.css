@@ -125,8 +125,8 @@
 body {
   background: radial-gradient(
     ellipse at bottom right,
-    /* rgb(18, 60, 116) 0.001%, */
-    rgb(85, 18, 116) ,
+    rgb(11, 46, 92) 0.001%,
+    /* rgb(85, 18, 116) , */
     #0a132b 100%
   );
   background-attachment: fixed;
@@ -189,8 +189,8 @@ section {
   border-radius: 9999px;
   background: radial-gradient(
     circle,
-    /* rgba(239, 62, 255, 0.55) 40%, */
-    rgba(62, 107, 255, 0.55) 70%,
+    rgba(239, 62, 255, 0.55) 40%,
+    /* rgba(62, 107, 255, 0.55) 70%, */
     rgba(62, 89, 255, 0) 60%
   );
   filter: blur(120px);
@@ -213,8 +213,8 @@ section {
   left: -10rem;
     background: radial-gradient(
     circle,
-    /* rgba(114, 16, 160, 0.55) 70%, */
-    rgba(62, 107, 255, 0.55) 70%,
+    rgba(114, 16, 160, 0.55) 70%,
+    /* rgba(62, 107, 255, 0.55) 70%, */
     rgba(62, 89, 255, 0) 50%
   );
 }
