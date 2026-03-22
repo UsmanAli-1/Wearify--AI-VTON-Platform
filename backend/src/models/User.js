@@ -7,6 +7,7 @@ const userSchema = new Schema(
     phone: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     points: { type: String, required: true },
+    plan:   { type: String, default: "free" },
   },
   { timestamps: true }
 );

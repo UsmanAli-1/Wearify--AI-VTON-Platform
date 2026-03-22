@@ -155,7 +155,7 @@ export default function Header() {
               <Button
                 onClick={handleSignOut}
                 className="hidden md:block rounded-full bg-gradient-to-r from-purple-400/50 to-blue-600/90
-                                hover:from-[#4287f5] hover:to-[#6a339e] text-black hover:scale-105 duration-300"
+                                hover:from-[#4287f5] hover:to-[#6a339e] text-white hover:scale-105 duration-300"
               >
                 Sign Out
               </Button>
@@ -163,7 +163,7 @@ export default function Header() {
               <Button
                 variant="secondary"
                 className="hidden shadow-md md:block rounded-full bg-gradient-to-r from-purple-400/50 to-blue-600/90
-                                hover:from-[#4287f5] hover:to-[#6a339e] text-black hover:scale-105 duration-300"
+                                hover:from-[#4287f5] hover:to-[#6a339e] text-white hover:scale-105 duration-300"
               >
                 <a href="/signin">Sign In / Sign Up</a>
               </Button>
@@ -204,12 +204,12 @@ export default function Header() {
           {user ? (
             <Button
               onClick={handleSignOut}
-              className="rounded-full shadow-lg bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-black mt-2"
+              className="rounded-full shadow-lg bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-white mt-2"
             >
               Sign Out
             </Button>
           ) : (
-            <Button className="rounded-full shadow-lg bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-black mt-2">
+            <Button className="rounded-full shadow-lg bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-white mt-2">
               <a href="/signin">Sign In / Sign Up</a>
             </Button>
           )}

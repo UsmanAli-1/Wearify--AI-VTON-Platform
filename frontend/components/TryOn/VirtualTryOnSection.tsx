@@ -166,7 +166,7 @@ export default function UploadTryOnSection() {
                     </div>
                   ) : (
                     <>
-                      <h3 className="font-semibold mb-1 items-center ">
+                      <h3 className="font-semibold mb-1 items-center text-white ">
                         Upload Person
                       </h3>
                       <p className="text-gray-500 text-xs mb-8 ">
@@ -174,7 +174,7 @@ export default function UploadTryOnSection() {
                       </p>
 
                       <label
-                        className={`font-semibold text-sm ${
+                        className={`font-semibold text-sm  ${
                           isLoggedIn
                             ? "text-[#A06CE3] cursor-pointer"
                             : "text-gray-400 cursor-not-allowed"
@@ -213,7 +213,7 @@ export default function UploadTryOnSection() {
                     />
                   ) : (
                     <>
-                      <h3 className="font-semibold mb-3">Selected Garment</h3>
+                      <h3 className="font-semibold mb-3 text-white">Selected Garment</h3>
                       <p className="text-gray-400 text-xs">Choose from above</p>
                     </>
                   )}

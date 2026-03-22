@@ -26,16 +26,23 @@ app.use(cors({
   ],
   credentials: true,
 }));
-
-app.use(express.json());
 app.use(cookieParser());
 
-/* ROUTES (THIS WAS MISSING) */
+
+// ⚠️ Webhook route MUST be before express.json() middleware
+app.use("/api/payment/webhook", require("./routes/payment"));
+app.use(express.json());
+
+app.use("/api/payment", require("./routes/payment"));
 const garmentRoutes = require("./routes/garments");
 const userRoutes = require("./routes/users");
 
 app.use("/api/garments", garmentRoutes);
 app.use("/api/users", userRoutes);
+
+
+/* ROUTES (THIS WAS MISSING) */
+
 
 /* ERROR HANDLER */
 app.use((err, req, res, next) => {
