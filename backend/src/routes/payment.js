@@ -32,7 +32,7 @@ router.post("/create-checkout", auth, async (req, res) => {
         quantity: 1,
       }],
       metadata: { userId: userId.toString(), plan },
-      success_url: `${process.env.CLIENT_URL}/success?plan=${plan}`,
+      success_url: `${process.env.CLIENT_URL}/plans?plan=${plan}`,
       cancel_url:  `${process.env.CLIENT_URL}/plans`,
     });
 

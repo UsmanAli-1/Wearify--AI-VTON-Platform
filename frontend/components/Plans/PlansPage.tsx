@@ -3,13 +3,31 @@
 import { Card } from "@/ui/card";
 import { Button } from "@/ui/button";
 import { Sparkles, Zap, Crown } from "lucide-react";
-import { useState } from "react";
-import BASE_URL from "@/config/api"; // ← same one used in SignUp/Login
+import { useState, useEffect } from "react";
+import BASE_URL from "@/config/api";
 
 type Plan = "basic" | "pro" | "premium";
 
 export default function PlansPage() {
-  const [loading, setLoading] = useState<Plan | "">("");
+  const [loading, setLoading]   = useState<Plan | "">("");
+  const [userPlan, setUserPlan] = useState<string>("free");
+
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const res = await fetch(`${BASE_URL}/api/users/me`, {
+          credentials: "include",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUserPlan(data.plan || "free");
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    fetchUser();
+  }, []);
 
   async function handleCheckout(plan: Plan): Promise<void> {
     setLoading(plan);
@@ -17,12 +35,10 @@ export default function PlansPage() {
       const res = await fetch(`${BASE_URL}/api/payment/create-checkout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // sends cookie automatically
+        credentials: "include",
         body: JSON.stringify({ plan }),
       });
-
       const data: { url?: string; message?: string } = await res.json();
-
       if (data.url) {
         window.location.href = data.url;
       } else {
@@ -39,6 +55,7 @@ export default function PlansPage() {
   return (
     <section className="pb-5 w-full min-h-[calc(100vh-100px)] px-6 md:px-12 xl:px-20 flex flex-col items-center justify-center">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full items-stretch">
+
         {/* BASIC */}
         <Card className="flex flex-col justify-between rounded-2xl p-6 bg-white/5 backdrop-blur-md border border-white/10 shadow-xl hover:scale-105 transition duration-300">
           <div className="flex flex-col">
@@ -58,10 +75,10 @@ export default function PlansPage() {
           </div>
           <Button
             onClick={() => handleCheckout("basic")}
-            disabled={loading === "basic"}
-            className="w-full bg-gradient-to-r from-purple-400/50 to-blue-600/90 mt-6"
+            disabled={userPlan === "basic" || loading === "basic"}
+            className="w-full bg-gradient-to-r from-purple-400/50 to-blue-600/90 mt-6 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
-            {loading === "basic" ? "Redirecting..." : "Get Started"}
+            {userPlan === "basic" ? "Current Plan" : loading === "basic" ? "Redirecting..." : "Get Started"}
           </Button>
         </Card>
 
@@ -75,9 +92,7 @@ export default function PlansPage() {
               <Zap />
             </div>
             <h3 className="text-2xl font-semibold text-white">Pro</h3>
-            <p className="text-gray-300 text-sm mt-0.5">
-              Best for regular users
-            </p>
+            <p className="text-gray-300 text-sm mt-0.5">Best for regular users</p>
             <h2 className="text-4xl font-bold text-white my-5">Rs. 3,000</h2>
             <p className="text-gray-300 text-lg mt-0.5">" 1000 Points "</p>
             <ul className="text-sm text-gray-200 space-y-2 mt-4">
@@ -89,10 +104,10 @@ export default function PlansPage() {
           </div>
           <Button
             onClick={() => handleCheckout("pro")}
-            disabled={loading === "pro"}
-            className="w-full bg-gradient-to-r from-purple-500 to-blue-700 text-white shadow-lg mt-6"
+            disabled={userPlan === "pro" || loading === "pro"}
+            className="w-full bg-gradient-to-r from-purple-500 to-blue-700 text-white shadow-lg mt-6 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
-            {loading === "pro" ? "Redirecting..." : "Upgrade Now"}
+            {userPlan === "pro" ? "Current Plan" : loading === "pro" ? "Redirecting..." : "Upgrade Now"}
           </Button>
         </Card>
 
@@ -115,13 +130,24 @@ export default function PlansPage() {
           </div>
           <Button
             onClick={() => handleCheckout("premium")}
-            disabled={loading === "premium"}
-            className="w-full bg-gradient-to-r from-purple-400/50 to-blue-600/90 mt-6"
+            disabled={userPlan === "premium" || loading === "premium"}
+            className="w-full bg-gradient-to-r from-purple-400/50 to-blue-600/90 mt-6 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
-            {loading === "premium" ? "Redirecting..." : "Go Premium"}
+            {userPlan === "premium" ? "Current Plan" : loading === "premium" ? "Redirecting..." : "Go Premium"}
           </Button>
         </Card>
+
       </div>
     </section>
   );
 }
+// ```
+
+// ---
+
+// ## Logic is dead simple
+// ```
+// userPlan === "basic"   → Basic button   = disabled + "Current Plan"
+// userPlan === "pro"     → Pro button     = disabled + "Current Plan"
+// userPlan === "premium" → Premium button = disabled + "Current Plan"
+// userPlan === "free"    → all 3 enabled

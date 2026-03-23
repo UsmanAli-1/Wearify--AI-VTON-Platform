@@ -11,7 +11,7 @@ import {
   faGem,
   faShirt,
   faWandSparkles,
-  faCrown
+  faCrown,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faCircleQuestion,
@@ -27,6 +27,7 @@ export default function Header() {
     name: string;
     email: string;
     points: number;
+    plan: string;
   };
 
   const [user, setUser] = useState<User | null>(null);
@@ -87,7 +88,7 @@ export default function Header() {
     { href: "/", label: "Try On", icon: faShirt },
     { href: "/about", label: "About", icon: faCircleQuestion },
     { href: "/features", label: "Features", icon: faWandSparkles },
-    { href: "/plans", label: "Plans", icon: faCrown  },
+    { href: "/plans", label: "Plans", icon: faCrown },
   ];
 
   const linkClass = (href: string) =>
@@ -139,6 +140,14 @@ export default function Header() {
 
           {/* Right Section */}
           <div className="flex items-center gap-2">
+            {user?.plan != null && (
+              <div className="md:flex items-center  py-1 rounded-lg">
+                {/* <span className="text-sm font-medium">{user.plan}</span> */}
+                <span className=" text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-400/30 capitalize">
+                  {user.plan}
+                </span>
+              </div>
+            )}
             {/* Points */}
             {user?.points != null && (
               <div className="md:flex items-center  bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-[White] px-3 py-1 rounded-lg">
