@@ -4,6 +4,7 @@ import { Card } from "@/ui/card";
 import { Button } from "@/ui/button";
 import { Sparkles, Zap, Crown } from "lucide-react";
 import { useState } from "react";
+import BASE_URL from "@/config/api"; // ← same one used in SignUp/Login
 
 type Plan = "basic" | "pro" | "premium";
 
@@ -13,15 +14,12 @@ export default function PlansPage() {
   async function handleCheckout(plan: Plan): Promise<void> {
     setLoading(plan);
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/payment/create-checkout`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include", // sends cookie automatically
-          body: JSON.stringify({ plan }),
-        }
-      );
+      const res = await fetch(`${BASE_URL}/api/payment/create-checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // sends cookie automatically
+        body: JSON.stringify({ plan }),
+      });
 
       const data: { url?: string; message?: string } = await res.json();
 
@@ -41,7 +39,6 @@ export default function PlansPage() {
   return (
     <section className="pb-5 w-full min-h-[calc(100vh-100px)] px-6 md:px-12 xl:px-20 flex flex-col items-center justify-center">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full items-stretch">
-
         {/* BASIC */}
         <Card className="flex flex-col justify-between rounded-2xl p-6 bg-white/5 backdrop-blur-md border border-white/10 shadow-xl hover:scale-105 transition duration-300">
           <div className="flex flex-col">
@@ -78,7 +75,9 @@ export default function PlansPage() {
               <Zap />
             </div>
             <h3 className="text-2xl font-semibold text-white">Pro</h3>
-            <p className="text-gray-300 text-sm mt-0.5">Best for regular users</p>
+            <p className="text-gray-300 text-sm mt-0.5">
+              Best for regular users
+            </p>
             <h2 className="text-4xl font-bold text-white my-5">Rs. 3,000</h2>
             <p className="text-gray-300 text-lg mt-0.5">" 1000 Points "</p>
             <ul className="text-sm text-gray-200 space-y-2 mt-4">
@@ -122,7 +121,6 @@ export default function PlansPage() {
             {loading === "premium" ? "Redirecting..." : "Go Premium"}
           </Button>
         </Card>
-
       </div>
     </section>
   );

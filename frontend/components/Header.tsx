@@ -144,7 +144,7 @@ export default function Header() {
               <div className="md:flex items-center  bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-[White] px-3 py-1 rounded-lg">
                 <FontAwesomeIcon
                   icon={faGem}
-                  className="text-[#1C1C1C] text-sm  pr-2"
+                  className="text-[#1C1C1C] text-sm text-blue-400 pr-2"
                 />
                 <span className="text-sm font-medium">{user.points}</span>
               </div>
