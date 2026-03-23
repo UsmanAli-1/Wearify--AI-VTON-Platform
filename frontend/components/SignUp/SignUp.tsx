@@ -14,7 +14,6 @@ export default function SignUp() {
     email: "",
     phone: "",
     password: "",
-    points: "120",
   });
 
   const handleChanges = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,7 +41,6 @@ export default function SignUp() {
         email: "",
         phone: "",
         password: "",
-        points: "120",
       });
       toast.success("user created");
     }
@@ -97,7 +95,6 @@ export default function SignUp() {
                     Sign Up
                   </h2>
 
-                  <Input type="hidden" name="points" value={formData.points} />
                   {/* Full Name */}
                   <label className="text-sm font-medium bg-gradient-to-r from-purple-400/50 to-blue-600/90 bg-clip-text text-transparent">
                     Full Name

@@ -10,7 +10,7 @@ const Image = require("../models/Image");
 
 router.post("/", async (req, res) => {
   // get data from frontend
-  const { name, email, phone, password, points } = req.body;
+  const { name, email, phone, password } = req.body;
 
   // password hash 
   const hashPassword = await bcrypt.hash(password, 10)
@@ -22,7 +22,6 @@ router.post("/", async (req, res) => {
       email,
       phone,
       password: hashPassword,
-      points,
     });
     res.status(201).json(user);
   } catch (err) {
