@@ -148,6 +148,15 @@ router.post("/generate", auth, upload.single("image"), async (req, res) => {
 });
 
 
+router.patch("/agree", auth, async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.user.id, { hasAgreed: true });
+    res.json({ message: "Agreement accepted" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 router.post("/logout", (req, res) => {
   // res.clearCookie("token", {

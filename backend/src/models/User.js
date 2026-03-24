@@ -8,6 +8,7 @@ const userSchema = new Schema(
     password: { type: String, required: true },
     points: { type: String, default: 120 },
     plan: { type: String, default: "free" },
+    hasAgreed: { type: Boolean, default: false }
   },
   { timestamps: true },
 );
