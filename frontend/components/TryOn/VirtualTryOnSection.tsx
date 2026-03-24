@@ -22,6 +22,7 @@ export default function UploadTryOnSection() {
   const [garments, setGarments] = useState<Garment[]>([]);
   const [selectedGarment, setSelectedGarment] = useState<Garment | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
     fetch(`${BASE_URL}/api/users/me`, {
@@ -61,6 +62,8 @@ export default function UploadTryOnSection() {
       return;
     }
 
+    setGenerating(true);
+
     const formData = new FormData();
     formData.append("image", selectedFile);
     formData.append("garmentId", selectedGarment._id);
@@ -77,12 +80,14 @@ export default function UploadTryOnSection() {
 
     if (!res.ok) {
       toast.error(data.message);
+      setGenerating(false);
       return;
     }
 
     setUploadedImage(null);
     setSelectedGarment(null);
     setSelectedFile(null);
+    setGenerating(false);
 
     toast.success("Image & garment submitted successfully");
 
@@ -213,7 +218,9 @@ export default function UploadTryOnSection() {
                     />
                   ) : (
                     <>
-                      <h3 className="font-semibold mb-3 text-white">Selected Garment</h3>
+                      <h3 className="font-semibold mb-3 text-white">
+                        Selected Garment
+                      </h3>
                       <p className="text-gray-400 text-xs">Choose from above</p>
                     </>
                   )}
@@ -238,18 +245,18 @@ export default function UploadTryOnSection() {
           </Card>
 
           <Button
-            disabled={!isLoggedIn}
+            disabled={!isLoggedIn || generating}
             className={`w-full py-6 rounded-full text-[#F5F5DC] shadow-xl mb-5
-      hover:scale-105 duration-300 transition hover:from-[#4287f5] hover:to-[#6a339e]
-      disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-auto  
-      ${
-        isLoggedIn
-          ? "bg-gradient-to-r from-purple-400/50 to-blue-600/90 cursor-pointer"
-          : "bg-gradient-to-r from-purple-400/50 to-blue-600/90  "
-      }`}
+    hover:scale-105 duration-300 transition hover:from-[#4287f5] hover:to-[#6a339e]
+    disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-auto  
+    ${
+      isLoggedIn
+        ? "bg-gradient-to-r from-purple-400/50 to-blue-600/90 cursor-pointer"
+        : "bg-gradient-to-r from-purple-400/50 to-blue-600/90"
+    }`}
             onClick={handleImageCheck}
           >
-            Try On
+            {generating ? "Generating..." : "Try On"}
           </Button>
         </div>
       </div>
