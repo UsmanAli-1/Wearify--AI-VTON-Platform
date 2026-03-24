@@ -7,6 +7,7 @@ import { Button } from "@/ui/button";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import BASE_URL from "@/config/api";
+import { useRouter } from "next/navigation";
 
 export default function SignUp() {
   const [formData, setFormData] = useState({
@@ -15,6 +16,8 @@ export default function SignUp() {
     phone: "",
     password: "",
   });
+
+  const router = useRouter();
 
   const handleChanges = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -43,6 +46,10 @@ export default function SignUp() {
         password: "",
       });
       toast.success("user created");
+      router.push("/signin");
+    } else {
+      const data = await response.json();
+      toast.error(data.error || "Something went wrong");
     }
   };
   return (

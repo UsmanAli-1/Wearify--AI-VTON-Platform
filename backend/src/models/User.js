@@ -6,10 +6,10 @@ const userSchema = new Schema(
     email: { type: String, required: true, unique: true },
     phone: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    points: { type: String, required: true },
-    plan:   { type: String, default: "free" },
+    points: { type: String, default: 120 },
+    plan: { type: String, default: "free" },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = model("User", userSchema);
