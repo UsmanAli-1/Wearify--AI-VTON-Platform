@@ -325,7 +325,7 @@ export default function Header() {
 
   // ← called when user clicks "Decline"
   const handleDecline = () => {
-    setShowAgreement(false);
+    // setShowAgreement(false);
     // hasAgreed stays false → banner will show on Try On page
   };
 

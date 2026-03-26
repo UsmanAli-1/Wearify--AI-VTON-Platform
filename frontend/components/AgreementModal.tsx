@@ -2,6 +2,7 @@
 
 import BASE_URL from "@/config/api";
 import toast from "react-hot-toast";
+import { useState } from "react";
 
 type Props = {
   onAgree: () => void;
@@ -9,6 +10,8 @@ type Props = {
 };
 
 export default function AgreementModal({ onAgree, onDecline }: Props) {
+  const [declined, setDeclined] = useState(false);
+
   const handleAgree = async () => {
     try {
       const res = await fetch(`${BASE_URL}/api/users/agree`, {
@@ -25,10 +28,60 @@ export default function AgreementModal({ onAgree, onDecline }: Props) {
     }
   };
 
+  const handleDecline = async () => {
+    try {
+      await fetch(`${BASE_URL}/api/users/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+      window.location.reload(); // ← back to logged out state
+    } catch (err) {
+      toast.error("Something went wrong.");
+    }
+  };
+
+  // ── WARNING SCREEN (after decline) ──
+  if (declined) {
+    return (
+      <div className="fixed inset-0 z-100 bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+        <div className="bg-[#0f1729] border border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl text-center">
+          <div className="text-5xl mb-4">⚠️</div>
+
+          <h2 className="text-xl font-bold text-white mb-3">
+            Try On is Disabled
+          </h2>
+
+          <p className="text-gray-400 text-sm mb-6">
+            You need to accept our Privacy Policy to use the Virtual Try-On
+            feature. Your photos are safe with us and will never be shared with
+            third parties.
+          </p>
+
+          <div className="flex gap-3">
+            {/* Close warning — user can still browse the site */}
+            <button
+              onClick={() => setDeclined(false)}
+              className="flex-1 py-3 rounded-xl border border-white/10 text-gray-400 hover:bg-white/5 transition text-sm font-medium cursor-pointer"
+            >
+              Close
+            </button>
+            {/* Review agreement again */}
+            <button
+              onClick={() => setDeclined(false)}
+              className="flex-1 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-600 text-white font-semibold text-sm hover:opacity-90 transition cursor-pointer"
+            >
+              Review Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── AGREEMENT SCREEN ──
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
       <div className="bg-[#0f1729] border border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl">
-
         {/* Title */}
         <h2 className="text-2xl font-bold text-white mb-4 flex justify-center">
           Your Privacy Matters 🛡️
@@ -47,7 +100,10 @@ export default function AgreementModal({ onAgree, onDecline }: Props) {
             "You can delete your generated images anytime",
             "Only you can see your generated results",
           ].map((item, i) => (
-            <li key={i} className="flex items-start gap-3 text-sm text-gray-300">
+            <li
+              key={i}
+              className="flex items-start gap-3 text-sm text-gray-300"
+            >
               <span className="text-green-400 mt-0.5">✔</span>
               {item}
             </li>
@@ -65,7 +121,7 @@ export default function AgreementModal({ onAgree, onDecline }: Props) {
         {/* Buttons */}
         <div className="flex gap-3">
           <button
-            onClick={onDecline}
+            onClick={handleDecline}
             className="flex-1 py-3 rounded-xl border border-white/10 text-gray-400 hover:bg-white/5 transition text-sm font-medium cursor-pointer"
           >
             Decline
@@ -78,6 +134,10 @@ export default function AgreementModal({ onAgree, onDecline }: Props) {
           </button>
         </div>
 
+        {/* Warning text */}
+        <p className="text-center text-xs text-gray-600 mt-3">
+          Declining will sign you out of your account
+        </p>
       </div>
     </div>
   );
