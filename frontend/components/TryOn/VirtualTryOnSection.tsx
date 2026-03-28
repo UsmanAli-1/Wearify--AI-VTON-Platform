@@ -139,7 +139,7 @@ export default function UploadTryOnSection() {
             <div className="grid grid-cols-2 gap-6">
               {/* UPLOAD PERSON CARD */}
               <Card className="relative h-[250px] md:h-[363px] 2xl:min-h-[450px] py-0 md:py-5 flex items-center justify-center hover:scale-105 duration-300 transition bg-white/5 backdrop-blur-md border border-white/10">
-                <div className="w-full md:w-[60%] h-full border-2 border-dashed border-white/10 rounded-2xl overflow-hidden flex flex-col items-center justify-center">
+                <div className="w-full md:w-[50%] h-full border-2 md:border-1 border-dashed border-white/10 rounded-2xl overflow-hidden flex flex-col items-center justify-center">
                   {uploadedImage ? (
                     <div className="relative w-full h-full">
                       <img
@@ -188,7 +188,7 @@ export default function UploadTryOnSection() {
 
               {/* SELECTED GARMENT CARD */}
               <Card className="relative h-[250px] md:h-[363px] 2xl:min-h-[450px] py-0 md:py-5 flex items-center justify-center text-center rounded-2xl shadow-md hover:scale-105 duration-300 transition bg-white/5 backdrop-blur-md border border-white/10">
-                <div className="w-full md:w-[60%] h-full border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center">
+                <div className="w-full md:w-[50%] h-full border-2 md:border-1 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center">
                   {selectedGarment ? (
                     <div className="relative w-full h-full">
                       <img

@@ -78,7 +78,7 @@ export default function PlansPage() {
             disabled={userPlan === "basic" || loading === "basic"}
             className="w-full bg-gradient-to-r from-purple-400/50 to-blue-600/90 mt-6 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
-            {userPlan === "basic" ? "Current Plan" : loading === "basic" ? "Redirecting..." : "Get Started"}
+            {userPlan === "basic" ? "Ø Current Plan" : loading === "basic" ? "Redirecting..." : "Get Started"}
           </Button>
         </Card>
 
@@ -107,7 +107,7 @@ export default function PlansPage() {
             disabled={userPlan === "pro" || loading === "pro"}
             className="w-full bg-gradient-to-r from-purple-500 to-blue-700 text-white shadow-lg mt-6 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
-            {userPlan === "pro" ? "Current Plan" : loading === "pro" ? "Redirecting..." : "Upgrade Now"}
+            {userPlan === "pro" ? "Ø Current Plan" : loading === "pro" ? "Redirecting..." : "Upgrade Now"}
           </Button>
         </Card>
 
@@ -133,7 +133,7 @@ export default function PlansPage() {
             disabled={userPlan === "premium" || loading === "premium"}
             className="w-full bg-gradient-to-r from-purple-400/50 to-blue-600/90 mt-6 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
-            {userPlan === "premium" ? "Current Plan" : loading === "premium" ? "Redirecting..." : "Go Premium"}
+            {userPlan === "premium" ? "Ø Current Plan" : loading === "premium" ? "Redirecting..." : "Go Premium"}
           </Button>
         </Card>
 
@@ -141,13 +141,3 @@ export default function PlansPage() {
     </section>
   );
 }
-// ```
-
-// ---
-
-// ## Logic is dead simple
-// ```
-// userPlan === "basic"   → Basic button   = disabled + "Current Plan"
-// userPlan === "pro"     → Pro button     = disabled + "Current Plan"
-// userPlan === "premium" → Premium button = disabled + "Current Plan"
-// userPlan === "free"    → all 3 enabled

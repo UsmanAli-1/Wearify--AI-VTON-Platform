@@ -86,12 +86,7 @@ export default function Header() {
     if (user) setUser({ ...user, hasAgreed: true });
   };
 
-  // ← called when user clicks "Decline"
-  const handleDecline = () => {
-    // setShowAgreement(false);
-    // hasAgreed stays false → banner will show on Try On page
-  };
-
+  
   const links = [
     { href: "/", label: "Try On", icon: faShirt },
     { href: "/about", label: "About", icon: faCircleQuestion },
@@ -233,7 +228,7 @@ export default function Header() {
 
       {/* Agreement Modal */}
       {showAgreement && (
-        <AgreementModal onAgree={handleAgree} onDecline={handleDecline} />
+        <AgreementModal onAgree={handleAgree} />
       )}
     </>
   );

@@ -6,10 +6,9 @@ import { useState } from "react";
 
 type Props = {
   onAgree: () => void;
-  onDecline: () => void;
 };
 
-export default function AgreementModal({ onAgree, onDecline }: Props) {
+export default function AgreementModal({ onAgree }: Props) {
   const [declined, setDeclined] = useState(false);
 
   const handleAgree = async () => {
@@ -97,7 +96,7 @@ export default function AgreementModal({ onAgree, onDecline }: Props) {
             "Your photos are used only for try-on generation",
             "We never share your photos with third parties",
             "Your data is stored securely on our servers",
-            "You can delete your generated images anytime",
+            // "You can delete your generated images anytime",
             "Only you can see your generated results",
           ].map((item, i) => (
             <li
@@ -128,7 +127,7 @@ export default function AgreementModal({ onAgree, onDecline }: Props) {
           </button>
           <button
             onClick={handleAgree}
-            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-600 text-white font-semibold text-sm hover:opacity-90 transition cursor-pointer"
+            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-600 text-white font-semibold text-sm hover:opacity-90 transition cursor-pointer hover:from-[#4287f5] hover:to-[#6a339e]"
           >
             I Agree
           </button>
