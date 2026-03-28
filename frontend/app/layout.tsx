@@ -31,7 +31,6 @@ export default function RootLayout({
 
         {/* Main wrapper handles spacing */}
         <main className="pt-[95px] md:pt-5 ">{children}</main>
-
         <Toaster
           containerStyle={{ top: 10 }}
           position="top-center"

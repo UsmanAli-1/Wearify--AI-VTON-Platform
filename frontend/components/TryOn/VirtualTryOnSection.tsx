@@ -25,17 +25,23 @@ export default function UploadTryOnSection() {
   const [selectedGarment, setSelectedGarment] = useState<Garment | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [generating, setGenerating] = useState(false);
-  const [generatedImage, setGeneratedImage] = useState<string | null>(
-    // "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400" // ← hardcoded for now, remove later
-  );
+  const [generatedImage, setGeneratedImage] = useState<string | null>();
+  // "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400" // ← hardcoded for now, remove later
 
   useEffect(() => {
-    fetch(`${BASE_URL}/api/users/me`, { credentials: "include" })
-      .then((res) => {
-        if (res.ok) setIsLoggedIn(true);
-        else setIsLoggedIn(false);
-      })
-      .catch(() => setIsLoggedIn(false));
+    const checkLogin = () => {
+      fetch(`${BASE_URL}/api/users/me`, { credentials: "include" })
+        .then((res) => {
+          if (res.ok) setIsLoggedIn(true);
+          else setIsLoggedIn(false);
+        })
+        .catch(() => setIsLoggedIn(false));
+    };
+
+    checkLogin(); // run on mount
+
+    window.addEventListener("auth-changed", checkLogin); // ← listen for changes
+    return () => window.removeEventListener("auth-changed", checkLogin);
   }, []);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,9 +52,18 @@ export default function UploadTryOnSection() {
   };
 
   const handleImageCheck = async () => {
-    if (!uploadedImage) { toast.error("Please upload your photo"); return; }
-    if (!selectedGarment) { toast.error("Please select a garment"); return; }
-    if (!selectedFile) { toast.error("File missing"); return; }
+    if (!uploadedImage) {
+      toast.error("Please upload your photo");
+      return;
+    }
+    if (!selectedGarment) {
+      toast.error("Please select a garment");
+      return;
+    }
+    if (!selectedFile) {
+      toast.error("File missing");
+      return;
+    }
 
     setGenerating(true);
 
@@ -72,14 +87,12 @@ export default function UploadTryOnSection() {
       return;
     }
 
-    setUploadedImage(null);
     setSelectedGarment(null);
-    setSelectedFile(null);
     setGenerating(false);
 
     toast.success("Image & garment submitted successfully");
 
-    setTimeout(() => { window.location.reload(); }, 1000);
+    window.dispatchEvent(new Event("auth-changed"));
   };
 
   useEffect(() => {
@@ -124,7 +137,6 @@ export default function UploadTryOnSection() {
           {/* Upload */}
           <Card className="max-w-xxl p-0 bg-transparent border-0 shadow-none">
             <div className="grid grid-cols-2 gap-6">
-
               {/* UPLOAD PERSON CARD */}
               <Card className="relative h-[250px] md:h-[363px] 2xl:min-h-[450px] py-0 md:py-5 flex items-center justify-center hover:scale-105 duration-300 transition bg-white/5 backdrop-blur-md border border-white/10">
                 <div className="w-full md:w-[60%] h-full border-2 border-dashed border-white/10 rounded-2xl overflow-hidden flex flex-col items-center justify-center">
@@ -136,7 +148,10 @@ export default function UploadTryOnSection() {
                         className="absolute inset-0 w-full h-full object-cover rounded-xl"
                       />
                       <button
-                        onClick={() => { setUploadedImage(null); setSelectedFile(null); }}
+                        onClick={() => {
+                          setUploadedImage(null);
+                          setSelectedFile(null);
+                        }}
                         className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-red-500 flex items-center justify-center transition duration-200 cursor-pointer"
                       >
                         <X className="w-4 h-4 text-white" />
@@ -144,13 +159,28 @@ export default function UploadTryOnSection() {
                     </div>
                   ) : (
                     <>
-                      <h3 className="font-semibold mb-1 items-center text-white">Upload Person</h3>
-                      <p className="text-gray-500 text-xs mb-8">png , jpg , jpeg</p>
-                      <label className={`font-semibold text-sm ${isLoggedIn ? "text-[#A06CE3] cursor-pointer" : "text-gray-400 cursor-not-allowed"}`}>
-                        <Input type="file" className="hidden" disabled={!isLoggedIn} onChange={handleUpload} />
+                      <h3 className="font-semibold mb-1 items-center text-white">
+                        Upload Person
+                      </h3>
+                      <p className="text-gray-500 text-xs mb-8">
+                        png , jpg , jpeg
+                      </p>
+                      <label
+                        className={`font-semibold text-sm ${isLoggedIn ? "text-[#A06CE3] cursor-pointer" : "text-gray-400 cursor-not-allowed"}`}
+                      >
+                        <Input
+                          type="file"
+                          className="hidden"
+                          disabled={!isLoggedIn}
+                          onChange={handleUpload}
+                        />
                         Select Image
                       </label>
-                      {!isLoggedIn && <p className="text-xs text-red-500 mt-2">Login required</p>}
+                      {!isLoggedIn && (
+                        <p className="text-xs text-red-500 mt-2">
+                          Login required
+                        </p>
+                      )}
                     </>
                   )}
                 </div>
@@ -175,13 +205,14 @@ export default function UploadTryOnSection() {
                     </div>
                   ) : (
                     <>
-                      <h3 className="font-semibold mb-3 text-white">Selected Garment</h3>
+                      <h3 className="font-semibold mb-3 text-white">
+                        Selected Garment
+                      </h3>
                       <p className="text-gray-400 text-xs">Choose from above</p>
                     </>
                   )}
                 </div>
               </Card>
-
             </div>
           </Card>
         </div>
@@ -206,14 +237,20 @@ export default function UploadTryOnSection() {
                       download="wearify-tryon.jpg"
                       className="w-7 h-7 rounded-full bg-black/60 hover:bg-green-500 flex items-center justify-center transition duration-200 cursor-pointer"
                     >
-                      <FontAwesomeIcon icon={faDownload} className="w-3 h-3 text-white" />
+                      <FontAwesomeIcon
+                        icon={faDownload}
+                        className="w-3 h-3 text-white"
+                      />
                     </a>
                     {/* Remove */}
                     <button
                       onClick={() => setGeneratedImage(null)}
                       className="w-7 h-7 rounded-full bg-black/60 hover:bg-red-500 flex items-center justify-center transition duration-200 cursor-pointer"
                     >
-                      <FontAwesomeIcon icon={faXmark} className="w-3 h-3 text-white" />
+                      <FontAwesomeIcon
+                        icon={faXmark}
+                        className="w-3 h-3 text-white"
+                      />
                     </button>
                   </div>
                 </>
@@ -230,9 +267,10 @@ export default function UploadTryOnSection() {
             className={`w-full py-6 rounded-full text-[#F5F5DC] shadow-xl mb-5
             hover:scale-105 duration-300 transition hover:from-[#4287f5] hover:to-[#6a339e]
             disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-auto
-            ${isLoggedIn
-              ? "bg-gradient-to-r from-purple-400/50 to-blue-600/90 cursor-pointer"
-              : "bg-gradient-to-r from-purple-400/50 to-blue-600/90"
+            ${
+              isLoggedIn
+                ? "bg-gradient-to-r from-purple-400/50 to-blue-600/90 cursor-pointer"
+                : "bg-gradient-to-r from-purple-400/50 to-blue-600/90"
             }`}
             onClick={handleImageCheck}
           >
