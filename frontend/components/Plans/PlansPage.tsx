@@ -5,12 +5,16 @@ import { Button } from "@/ui/button";
 import { Sparkles, Zap, Crown } from "lucide-react";
 import { useState, useEffect } from "react";
 import BASE_URL from "@/config/api";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 type Plan = "basic" | "pro" | "premium";
 
 export default function PlansPage() {
   const [loading, setLoading]   = useState<Plan | "">("");
   const [userPlan, setUserPlan] = useState<string>("free");
+  const router = useRouter();
+
 
   useEffect(() => {
     async function fetchUser() {
@@ -42,11 +46,12 @@ export default function PlansPage() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert(data.message || "Something went wrong. Are you logged in?");
+        toast.error("Please login to continue.");
+        router.push("/signin");
       }
     } catch (err) {
       console.error("Checkout error:", err);
-      alert("Network error. Please try again.");
+      toast.error("Network error. Please try again.");
     } finally {
       setLoading("");
     }
