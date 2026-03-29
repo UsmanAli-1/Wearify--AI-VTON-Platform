@@ -125,7 +125,7 @@ export default function UploadTryOnSection() {
                   src={g.imagePath}
                   alt={g.name}
                   onClick={() => setSelectedGarment(g)}
-                  className={`w-[90px] h-[135px] md:h-[110px] 2xl:min-h-[150px] rounded-xl object-cover cursor-pointer
+                  className={`w-[80px] h-[135px] md:h-[115px] 2xl:min-h-[150px] rounded-xl object-cover cursor-pointer
                     transition hover:scale-110 duration-300
                     ${selectedGarment?._id === g._id ? "ring-4 ring-[#FFFFFF]" : ""}
                   `}
