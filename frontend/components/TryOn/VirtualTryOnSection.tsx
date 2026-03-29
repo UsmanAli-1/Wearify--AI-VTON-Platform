@@ -116,7 +116,7 @@ export default function UploadTryOnSection() {
        max-w-[1600px] 2xl:max-w-[1800px] w-full mx-auto gap-6 flex-1"
       >
         {/* LEFT */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-5">
           <Card className="rounded-2xl 2xl:min-h-[170px] p-3 max-w-xxl hover:scale-105 duration-300 transition shadow-xl bg-white/5 backdrop-blur-md border border-white/10">
             <CardContent className="flex gap-3 overflow-x-scroll no-scrollbar">
               {garments.map((g) => (

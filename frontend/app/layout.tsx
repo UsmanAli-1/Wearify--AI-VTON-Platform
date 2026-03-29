@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden md:overflow-hidden`}
       >
         <div className="bg-blob-top-right"></div>
         <div className="bg-blob-bottom-left"></div>
@@ -30,7 +30,7 @@ export default function RootLayout({
         <Header />
 
         {/* Main wrapper handles spacing */}
-        <main className="pt-[95px] md:pt-5 ">{children}</main>
+        <main className="pt-[95px] md:pt-0 ">{children}</main>
         <Toaster
           containerStyle={{ top: 10 }}
           position="top-center"

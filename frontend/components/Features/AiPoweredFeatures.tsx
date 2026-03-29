@@ -40,17 +40,7 @@ export default function AiPoweredFeatures() {
     ];
 
     return (
-        <section className="w-full px-6 md:px-20 ">
-            {/* <Motion variant={fadeUp}>
-                <h2 className="text-center md:text-4xl text-3xl font-bold mb-3 text-[#1C1C1C]">
-                    AI-Powered Features
-                </h2>
-            </Motion>
-            <Motion variant={fadeIn}>
-                <p className="text-center text-gray-500 mb-12">
-                    Experience cutting-edge technology that revolutionizes how you shop for clothes online
-                </p>
-            </Motion> */}
+        <section className="w-full px-6 md:px-20 pt-5">
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 {features.map((feat, i) => (

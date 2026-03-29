@@ -58,7 +58,7 @@ export default function PlansPage() {
   }
 
   return (
-    <section className="pb-5 w-full min-h-[calc(100vh-100px)] px-6 md:px-12 xl:px-20 flex flex-col items-center justify-center">
+    <section className="pb-5 pt-5 w-full min-h-[calc(100vh-100px)] px-6 md:px-12 xl:px-20 flex flex-col items-center justify-center">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full items-stretch">
 
         {/* BASIC */}
