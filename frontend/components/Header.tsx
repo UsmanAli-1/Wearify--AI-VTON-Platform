@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import toast from "react-hot-toast";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Button } from "@/ui/button";
@@ -86,7 +87,6 @@ export default function Header() {
     if (user) setUser({ ...user, hasAgreed: true });
   };
 
-  
   const links = [
     { href: "/", label: "Try On", icon: faShirt },
     { href: "/about", label: "About", icon: faCircleQuestion },
@@ -133,7 +133,13 @@ export default function Header() {
               {links.map((link) => (
                 <a
                   key={link.href}
-                  href={link.href}
+                  href={pathname === link.href ? "#" : link.href}
+                  onClick={(e) => {
+                    if (pathname === link.href) {
+                      e.preventDefault();
+                      toast("You're already on this page", { icon: "📍" });
+                    }
+                  }}
                   className={`${linkClass(link.href)} flex items-center gap-2`}
                 >
                   <FontAwesomeIcon icon={link.icon} className="text-sm" />
@@ -172,9 +178,17 @@ export default function Header() {
               ) : (
                 <Button
                   variant="secondary"
+                  onClick={(e) => {
+                    if (pathname === "/signup") {
+                      e.preventDefault();
+                      toast("You're already on the Sign up page", {
+                        icon: "📍",
+                      });
+                    }
+                  }}
                   className="hidden shadow-md md:block rounded-full bg-gradient-to-r from-purple-400/50 to-blue-600/90 hover:from-[#4287f5] hover:to-[#6a339e] text-white hover:scale-105 duration-300"
                 >
-                  <a href="/signin">Sign In / Sign Up</a>
+                  <a href={pathname === "/signup" ? "#" : "/signup"}>Sign Up</a>
                 </Button>
               )}
 
@@ -201,8 +215,15 @@ export default function Header() {
             {links.map((link) => (
               <a
                 key={link.href}
-                href={link.href}
-                onClick={toggleMenu}
+                href={pathname === link.href ? "#" : link.href}
+                onClick={(e) => {
+                  if (pathname === link.href) {
+                    e.preventDefault();
+                    toast("You're already on this page", { icon: "📍" });
+                    return;
+                  }
+                  toggleMenu();
+                }}
                 className={`${mobileLinkClass(link.href)} flex items-center gap-2`}
               >
                 <FontAwesomeIcon icon={link.icon} className="text-sm" />
@@ -218,8 +239,18 @@ export default function Header() {
                 Sign Out
               </Button>
             ) : (
-              <Button className="rounded-full shadow-lg bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-white mt-2">
-                <a href="/signin">Sign In / Sign Up</a>
+              <Button
+                onClick={(e) => {
+                  if (pathname === "/signup") {
+                    e.preventDefault();
+                    toast("You're already on the Sign up page", {
+                      icon: "📍",
+                    });
+                  }
+                }}
+                className="rounded-full shadow-lg bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-white mt-2"
+              >
+                <a href={pathname === "/signup" ? "#" : "/signup"}>Sign Up</a>
               </Button>
             )}
           </div>
@@ -227,9 +258,7 @@ export default function Header() {
       </div>
 
       {/* Agreement Modal */}
-      {showAgreement && (
-        <AgreementModal onAgree={handleAgree} />
-      )}
+      {showAgreement && <AgreementModal onAgree={handleAgree} />}
     </>
   );
 }
