@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 import { Users, Sparkles, GraduationCap, UserCheck } from "lucide-react";
 import Motion from "@/components/Motion";
 import { fadeIn } from "@/lib/motion";
-import { popUp } from "@/lib/motion";
 import { popUpslow } from "@/lib/motion";
 import { motion } from "framer-motion";
 

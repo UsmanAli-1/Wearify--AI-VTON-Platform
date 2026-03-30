@@ -4,15 +4,10 @@ import { Card, CardContent } from "@/ui/card";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faCube,
-    faRulerCombined,
     faWandMagicSparkles,
-    faLayerGroup,
     faShareNodes,
 } from "@fortawesome/free-solid-svg-icons";
 import Motion from "@/components/Motion";
-import { fadeUp } from "@/lib/motion";
-import { fadeIn } from "@/lib/motion";
-import { popUp } from "@/lib/motion";
 import { popUpslow } from "@/lib/motion";
 
 export default function AiPoweredFeatures() {
@@ -27,11 +22,6 @@ export default function AiPoweredFeatures() {
             title: "Style Recommendations",
             desc: "Get personalized outfit suggestions based on your preferences, body type, and skin tone.",
         },
-        // {
-        //     icon: faLayerGroup,
-        //     title: "Mix & Match Outfits",
-        //     desc: "Combine different pieces virtually to create complete looks. See how  tops, bottoms work together.",
-        // },
         {
             icon: faShareNodes,
             title: "Social Sharing",
