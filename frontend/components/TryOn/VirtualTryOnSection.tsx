@@ -124,7 +124,7 @@ export default function UploadTryOnSection() {
                   key={g._id}
                   src={g.imagePath}
                   alt={g.name}
-                  onClick={() => setSelectedGarment(g)}
+                  onClick={() => !generating && setSelectedGarment(g)}
                   className={`w-[80px] h-[135px] md:h-[115px] 2xl:min-h-[150px] rounded-xl object-cover cursor-pointer
                     transition hover:scale-110 duration-300
                     ${selectedGarment?._id === g._id ? "ring-4 ring-[#FFFFFF]" : ""}
@@ -147,15 +147,19 @@ export default function UploadTryOnSection() {
                         alt=""
                         className="absolute inset-0 w-full h-full object-cover rounded-xl"
                       />
-                      <button
-                        onClick={() => {
-                          setUploadedImage(null);
-                          setSelectedFile(null);
-                        }}
-                        className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-red-500 flex items-center justify-center transition duration-200 cursor-pointer"
-                      >
-                        <X className="w-4 h-4 text-white" />
-                      </button>
+                      {generating ? (
+                        " "
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setUploadedImage(null);
+                            setSelectedFile(null);
+                          }}
+                          className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-red-500 flex items-center justify-center transition duration-200 cursor-pointer"
+                        >
+                          <X className="w-4 h-4 text-white" />
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <>
@@ -177,9 +181,15 @@ export default function UploadTryOnSection() {
                         Select Image
                       </label>
                       {!isLoggedIn && (
-                        <p className="text-xs text-red-500 mt-2">
-                          Login required
-                        </p>
+                        // <p className="text-xs text-red-500 mt-2">
+                        //   Login required
+                        // </p>
+                          <a
+                            href="/signin"
+                            className="text-xs text-[#A06CE3] underline"
+                          >
+                            Sign in to upload
+                          </a>
                       )}
                     </>
                   )}
@@ -196,12 +206,17 @@ export default function UploadTryOnSection() {
                         alt={selectedGarment.name}
                         className="absolute inset-0 w-full h-full object-cover rounded-xl"
                       />
-                      <button
-                        onClick={() => setSelectedGarment(null)}
-                        className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-red-500 flex items-center justify-center transition duration-200 cursor-pointer"
-                      >
-                        <X className="w-4 h-4 text-white" />
-                      </button>
+
+                      {generating ? (
+                        " "
+                      ) : (
+                        <button
+                          onClick={() => setSelectedGarment(null)}
+                          className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-red-500 flex items-center justify-center transition duration-200 cursor-pointer"
+                        >
+                          <X className="w-4 h-4 text-white" />
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <>
@@ -274,7 +289,32 @@ export default function UploadTryOnSection() {
             }`}
             onClick={handleImageCheck}
           >
-            {generating ? "Generating..." : "Try On"}
+            {generating ? (
+              <>
+                <svg
+                  className="animate-spin w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8z"
+                  />
+                </svg>
+                Generating...
+              </>
+            ) : (
+              "✨ Try On"
+            )}
           </Button>
         </div>
       </div>
