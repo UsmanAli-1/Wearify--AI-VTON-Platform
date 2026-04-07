@@ -23,27 +23,48 @@ export default function SignIn() {
     });
   };
 
+  // const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+
+  //   const response = await fetch(`${BASE_URL}/api/users/login`, {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     credentials: "include",
+  //     body: JSON.stringify(formloginData),
+  //   });
+
+  //   const data = await response.json();
+
+  //   if (response.ok) {
+  //     window.dispatchEvent(new Event("auth-changed"));
+  //     router.push("/");
+  //   } else {
+  //     console.log(data.message);
+  //   }
+  // };
+
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const response = await fetch(`${BASE_URL}/api/users/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(formloginData),
-    });
+  const response = await fetch(`${BASE_URL}/api/users/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    // ✅ Remove credentials: "include" — no longer needed
+    body: JSON.stringify(formloginData),
+  });
 
-    const data = await response.json();
+  const data = await response.json();
 
-    if (response.ok) {
-      window.dispatchEvent(new Event("auth-changed"));
-      router.push("/");
-    } else {
-      console.log(data.message);
-    }
-  };
+  if (response.ok) {
+    localStorage.setItem("token", data.token); // ✅ store token
+    window.dispatchEvent(new Event("auth-changed"));
+    router.push("/");
+  } else {
+    console.log(data.message);
+  }
+};
   return (
     <>
       <section className="min-h-[calc(100vh-100px)] flex items-center justify-center ">

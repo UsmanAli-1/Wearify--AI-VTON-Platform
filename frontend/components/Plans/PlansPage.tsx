@@ -4,7 +4,7 @@ import { Card } from "@/ui/card";
 import { Button } from "@/ui/button";
 import { Sparkles, Zap, Crown } from "lucide-react";
 import { useState, useEffect } from "react";
-import BASE_URL from "@/config/api";
+import BASE_URL, { authHeaders } from "@/config/api";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
@@ -20,7 +20,8 @@ export default function PlansPage() {
     async function fetchUser() {
       try {
         const res = await fetch(`${BASE_URL}/api/users/me`, {
-          credentials: "include",
+          headers: authHeaders(),
+          // credentials: "include",
         });
         if (res.ok) {
           const data = await res.json();

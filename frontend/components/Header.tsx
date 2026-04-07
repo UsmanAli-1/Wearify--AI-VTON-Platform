@@ -16,7 +16,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { faCircleQuestion } from "@fortawesome/free-regular-svg-icons";
 import { useRouter } from "next/navigation";
-import BASE_URL from "@/config/api";
+import BASE_URL, { authHeaders } from "@/config/api";
 import AgreementModal from "@/components/AgreementModal"; // ← import
 
 export default function Header() {
@@ -42,7 +42,8 @@ export default function Header() {
     const fetchUser = async () => {
       try {
         const res = await fetch(`${BASE_URL}/api/users/me`, {
-          credentials: "include",
+          headers: authHeaders(),
+          // credentials: "include",
         });
 
         if (!res.ok) {
@@ -68,18 +69,24 @@ export default function Header() {
     return () => window.removeEventListener("auth-changed", fetchUser);
   }, []);
 
-  const handleSignOut = async () => {
-    try {
-      await fetch(`${BASE_URL}/api/users/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
-      setUser(null);
-      window.dispatchEvent(new Event("auth-changed"));
-    } catch (err) {
-      console.error("Logout failed", err);
-    }
-  };
+  // const handleSignOut = async () => {
+  //   try {
+  //     await fetch(`${BASE_URL}/api/users/logout`, {
+  //       method: "POST",
+  //       credentials: "include",
+  //     });
+  //     setUser(null);
+  //     window.dispatchEvent(new Event("auth-changed"));
+  //   } catch (err) {
+  //     console.error("Logout failed", err);
+  //   }
+  // };
+
+const handleSignOut = () => {
+  localStorage.removeItem("token");
+  window.dispatchEvent(new Event("auth-changed"));
+  router.push("/signin");
+};
 
   //  called when user clicks "I Agree" in modal
   const handleAgree = () => {

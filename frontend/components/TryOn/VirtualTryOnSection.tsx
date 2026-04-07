@@ -5,7 +5,7 @@ import { Button } from "@/ui/button";
 import { Card, CardContent } from "@/ui/card";
 import { Input } from "@/ui/input";
 import toast from "react-hot-toast";
-import BASE_URL from "@/config/api";
+import BASE_URL, { authHeaders } from "@/config/api";
 import Loader from "../Loader";
 import { X } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -30,7 +30,10 @@ export default function UploadTryOnSection() {
 
   useEffect(() => {
     const checkLogin = () => {
-      fetch(`${BASE_URL}/api/users/me`, { credentials: "include" })
+      fetch(`${BASE_URL}/api/users/me`, {
+        headers: authHeaders(),
+        // credentials: "include",
+      })
         .then((res) => {
           if (res.ok) setIsLoggedIn(true);
           else setIsLoggedIn(false);
@@ -73,9 +76,18 @@ export default function UploadTryOnSection() {
 
     console.log(selectedFile.size / 1024 / 1024, "MB");
 
+    // const res = await fetch(`${BASE_URL}/api/users/generate`, {
+    //   method: "POST",
+    //   credentials: "include",
+    //   body: formData,
+    // });
+
+    const token = localStorage.getItem("token");
     const res = await fetch(`${BASE_URL}/api/users/generate`, {
       method: "POST",
-      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
       body: formData,
     });
 
@@ -181,13 +193,12 @@ export default function UploadTryOnSection() {
                         Select Image
                       </label>
                       {!isLoggedIn && (
-                        
-                          <a
-                            href="/signin"
-                            className="text-xs text-[#A06CE3] underline"
-                          >
-                            Sign in to upload
-                          </a>
+                        <a
+                          href="/signin"
+                          className="text-xs text-[#A06CE3] underline"
+                        >
+                          Sign in to upload
+                        </a>
                       )}
                     </>
                   )}

@@ -5,3 +5,12 @@ const BASE_URL =
     : "http://localhost:4000";
 
 export default BASE_URL;
+
+
+export function authHeaders() {
+  const token = localStorage.getItem("token");
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
