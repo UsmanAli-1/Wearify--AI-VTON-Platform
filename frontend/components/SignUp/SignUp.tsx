@@ -49,7 +49,7 @@ export default function SignUp() {
       router.push("/signin");
     } else {
       const data = await response.json();
-      toast.error(data.error || "Something went wrong");
+      toast.error(data.message || "Something went wrong");
     }
   };
   return (

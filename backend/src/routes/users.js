@@ -3,7 +3,7 @@ const User = require("../models/User");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const auth = require("../middleware/auth")
+const auth = require("../middleware/auth");
 const upload = require("../middleware/upload");
 const Image = require("../models/Image");
 
@@ -12,7 +12,8 @@ const checkPoints = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
-    if (user.points < 40) return res.status(400).json({ message: "Not enough points" });
+    if (user.points < 40)
+      return res.status(400).json({ message: "Not enough points" });
     req.userDoc = user; // ← attach user to request so route doesn't fetch again
     next();
   } catch (err) {
@@ -20,47 +21,53 @@ const checkPoints = async (req, res, next) => {
   }
 };
 
-
 router.post("/", async (req, res) => {
   const { name, email, phone, password } = req.body;
-  const hashPassword = await bcrypt.hash(password, 10)
+  const hashPassword = await bcrypt.hash(password, 10);
 
   try {
-    console.log("Request body:", req.body);
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(400).json({ message: "User already has an account" });
+    }
+
     const user = await User.create({
       name,
       email,
       phone,
       password: hashPassword,
     });
+
     res.status(201).json(user);
   } catch (err) {
-    console.error("Error creating user:", err);
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ message: "Server error" });
   }
 });
-
 
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User Not Found" });
-
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ message: "Invalid Credentials" });
+    if (!isMatch) {
+      return res.status(401).json({ message: "Incorrect password" });
+    }
 
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     // ✅ Return token in body instead of cookie
     res.status(200).json({
       message: "Login Successful",
-      token,               // <-- send token here
+      token, // <-- send token here
       user: {
         id: user._id,
         name: user.name,
@@ -89,10 +96,10 @@ router.get("/me", auth, async (req, res) => {
   }
 });
 
-
-router.post("/generate",
-  auth,                  // 1. check if logged in
-  checkPoints,           // 2. check points ← BEFORE Cloudinary
+router.post(
+  "/generate",
+  auth, // 1. check if logged in
+  checkPoints, // 2. check points ← BEFORE Cloudinary
   upload.single("image"), // 3. upload to Cloudinary ← only if points ok
   async (req, res) => {
     try {
@@ -130,14 +137,12 @@ router.post("/generate",
         message: "Image & garment uploaded",
         points: user.points,
       });
-
     } catch (err) {
       console.error("🔥 GENERATE ERROR:", err);
       res.status(500).json({ message: "Server error" });
     }
-  }
+  },
 );
-
 
 router.patch("/agree", auth, async (req, res) => {
   try {
@@ -147,7 +152,6 @@ router.patch("/agree", auth, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 router.post("/logout", (req, res) => {
   res.clearCookie("token", {

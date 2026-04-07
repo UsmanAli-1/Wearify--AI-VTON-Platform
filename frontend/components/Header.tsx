@@ -72,7 +72,8 @@ export default function Header() {
   const handleSignOut = () => {
     localStorage.removeItem("token");
     window.dispatchEvent(new Event("auth-changed"));
-    router.push("/signin");
+    toast.success("Signed out successfully");
+    // router.push("/signin");
   };
 
   //  called when user clicks "I Agree" in modal

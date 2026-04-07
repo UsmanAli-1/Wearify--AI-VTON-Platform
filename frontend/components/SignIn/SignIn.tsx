@@ -7,10 +7,13 @@ import { Button } from "@/ui/button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import BASE_URL from "@/config/api";
+import toast from "react-hot-toast";
 
 export default function SignIn() {
-  const router = useRouter();
 
+  const router = useRouter();
+  
+  const [loading, setLoading] = useState(false);
   const [formloginData, setFormloginData] = useState({
     email: "",
     password: "",
@@ -23,48 +26,32 @@ export default function SignIn() {
     });
   };
 
-  // const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-
-  //   const response = await fetch(`${BASE_URL}/api/users/login`, {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     credentials: "include",
-  //     body: JSON.stringify(formloginData),
-  //   });
-
-  //   const data = await response.json();
-
-  //   if (response.ok) {
-  //     window.dispatchEvent(new Event("auth-changed"));
-  //     router.push("/");
-  //   } else {
-  //     console.log(data.message);
-  //   }
-  // };
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const response = await fetch(`${BASE_URL}/api/users/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    // ✅ Remove credentials: "include" — no longer needed
-    body: JSON.stringify(formloginData),
-  });
+    try {
+      const response = await fetch(`${BASE_URL}/api/users/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formloginData),
+      });
 
-  const data = await response.json();
+      const data = await response.json();
 
-  if (response.ok) {
-    localStorage.setItem("token", data.token); // ✅ store token
-    window.dispatchEvent(new Event("auth-changed"));
-    router.push("/");
-  } else {
-    console.log(data.message);
-  }
-};
+      if (response.ok) {
+        localStorage.setItem("token", data.token);
+        toast.success("Login successful "); 
+        window.dispatchEvent(new Event("auth-changed"));
+        router.push("/");
+      } else {
+        toast.error(data.message); 
+      }
+    } catch (err) {
+      toast.error("Something went wrong ❌");
+    }
+  };
+
   return (
     <>
       <section className="min-h-[calc(100vh-100px)] flex items-center justify-center ">
@@ -144,10 +131,11 @@ export default function SignIn() {
 
                   {/* Login Button */}
                   <Button
+                  disabled={loading}
                     className="w-full py-2 shadow-md mb-2 rounded-lg text-white font-semibold bg-gradient-to-r from-purple-400/50 to-blue-600/90"
                     type="submit"
                   >
-                    Sign In
+                    {loading ? "Signing in..." : "Sign In"}
                   </Button>
                 </form>
 
