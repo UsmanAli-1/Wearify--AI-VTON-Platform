@@ -11,7 +11,6 @@ const Image = require("../models/Image");
 const checkPoints = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
     if (user.points < 40)
       return res.status(400).json({ message: "Not enough points" });
     req.userDoc = user; // ← attach user to request so route doesn't fetch again

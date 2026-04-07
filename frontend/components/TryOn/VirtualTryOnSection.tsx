@@ -10,6 +10,8 @@ import Loader from "../Loader";
 import { X } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload, faXmark } from "@fortawesome/free-solid-svg-icons";
+import UpgradeModal from "../Modals/UpgradeModal";
+import { log } from "console";
 
 type Garment = {
   _id: string;
@@ -26,7 +28,31 @@ export default function UploadTryOnSection() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [generating, setGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>();
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [points, setPoints] = useState(0);
   // "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400" // ← hardcoded for now, remove later
+
+  useEffect(() => {
+    const fetchUserPoints = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/api/users/me`, {
+          headers: authHeaders(),
+        });
+        if (!res.ok) throw new Error("Failed to fetch points");
+        const data = await res.json();
+        setPoints(data.points);
+
+        // Show upgrade modal if points are 0
+        if (data.points <= 0) {
+          setShowUpgrade(true);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchUserPoints();
+  }, []);
 
   useEffect(() => {
     const checkLogin = () => {
@@ -75,12 +101,6 @@ export default function UploadTryOnSection() {
     formData.append("garmentId", selectedGarment._id);
 
     console.log(selectedFile.size / 1024 / 1024, "MB");
-
-    // const res = await fetch(`${BASE_URL}/api/users/generate`, {
-    //   method: "POST",
-    //   credentials: "include",
-    //   body: formData,
-    // });
 
     const token = localStorage.getItem("token");
     const res = await fetch(`${BASE_URL}/api/users/generate`, {
@@ -327,6 +347,10 @@ export default function UploadTryOnSection() {
           </Button>
         </div>
       </div>
+      <UpgradeModal
+        isOpen={showUpgrade}
+        onClose={() => setShowUpgrade(false)}
+      />
     </section>
   );
 }

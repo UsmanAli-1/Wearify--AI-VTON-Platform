@@ -17,7 +17,7 @@ import {
 import { faCircleQuestion } from "@fortawesome/free-regular-svg-icons";
 import { useRouter } from "next/navigation";
 import BASE_URL, { authHeaders } from "@/config/api";
-import AgreementModal from "@/components/AgreementModal"; // ← import
+import AgreementModal from "@/components/Modals/AgreementModal"; // ← import
 
 export default function Header() {
   const router = useRouter();
