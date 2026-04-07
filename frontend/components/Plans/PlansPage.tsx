@@ -34,29 +34,33 @@ export default function PlansPage() {
     fetchUser();
   }, []);
 
-  async function handleCheckout(plan: Plan): Promise<void> {
-    setLoading(plan);
-    try {
-      const res = await fetch(`${BASE_URL}/api/payment/create-checkout`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ plan }),
-      });
-      const data: { url?: string; message?: string } = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        toast.error("Please login to continue.");
-        router.push("/signin");
-      }
-    } catch (err) {
-      console.error("Checkout error:", err);
-      toast.error("Network error. Please try again.");
-    } finally {
-      setLoading("");
+async function handleCheckout(plan: Plan): Promise<void> {
+  setLoading(plan);
+  try {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${BASE_URL}/api/payment/create-checkout`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,   // ← add this
+      },
+      // credentials: "include",            // ← remove this
+      body: JSON.stringify({ plan }),
+    });
+    const data: { url?: string; message?: string } = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      toast.error("Please login to continue.");
+      router.push("/signin");
     }
+  } catch (err) {
+    console.error("Checkout error:", err);
+    toast.error("Network error. Please try again.");
+  } finally {
+    setLoading("");
   }
+}
 
   return (
     <section className="pb-5 pt-5 w-full min-h-[calc(100vh-100px)] px-6 md:px-12 xl:px-20 flex flex-col items-center justify-center">
