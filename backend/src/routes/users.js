@@ -41,49 +41,6 @@ router.post("/", async (req, res) => {
 });
 
 
-// router.post("/login", async (req, res) => {
-//   try {
-//     const { email, password } = req.body;
-
-//     const user = await User.findOne({ email });
-//     if (!user) {
-//       return res.status(404).json({ message: "User Not Found" });
-//     }
-
-//     const isMatch = await bcrypt.compare(password, user.password);
-//     if (!isMatch) {
-//       return res.status(401).json({ message: "Invalid Credentials" });
-//     }
-
-//     const token = jwt.sign(
-//       { userId: user._id },
-//       process.env.JWT_SECRET,
-//       { expiresIn: "1h" }
-//     )
-
-//     res.cookie("token", token, {
-//       httpOnly: true,
-//       secure: true,
-//       sameSite: "none",
-//       path: "/",
-//       maxAge: 1000 * 60 * 60 * 24 * 7,
-//     });
-
-//     res.status(200).json({
-//       message: "Login Successful",
-//       user: {
-//         id: user._id,
-//         name: user.name,
-//         email: user.email,
-//         points: user.points,
-//       },
-//     });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// });
-
-
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -119,6 +76,13 @@ router.post("/login", async (req, res) => {
 router.get("/me", auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
+
+    // ← Auto-reset plan when points run out
+    if (user.points <= 120 && user.plan !== "free") {
+      user.plan = "free";
+      await user.save();
+    }
+
     res.json(user);
   } catch (error) {
     return res.status(500).json({ message: "server error" });

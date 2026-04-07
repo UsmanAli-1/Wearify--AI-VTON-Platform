@@ -69,24 +69,11 @@ export default function Header() {
     return () => window.removeEventListener("auth-changed", fetchUser);
   }, []);
 
-  // const handleSignOut = async () => {
-  //   try {
-  //     await fetch(`${BASE_URL}/api/users/logout`, {
-  //       method: "POST",
-  //       credentials: "include",
-  //     });
-  //     setUser(null);
-  //     window.dispatchEvent(new Event("auth-changed"));
-  //   } catch (err) {
-  //     console.error("Logout failed", err);
-  //   }
-  // };
-
-const handleSignOut = () => {
-  localStorage.removeItem("token");
-  window.dispatchEvent(new Event("auth-changed"));
-  router.push("/signin");
-};
+  const handleSignOut = () => {
+    localStorage.removeItem("token");
+    window.dispatchEvent(new Event("auth-changed"));
+    router.push("/signin");
+  };
 
   //  called when user clicks "I Agree" in modal
   const handleAgree = () => {
