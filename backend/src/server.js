@@ -22,6 +22,7 @@ app.use(cors({
   origin: [
     "http://localhost:3000",
     "https://wearify-mu.vercel.app",
+    "https://wearify-vton.vercel.app",
   ],
   credentials: true,
 }));
