@@ -13,9 +13,12 @@ export default function AgreementModal({ onAgree }: Props) {
 
   const handleAgree = async () => {
     try {
+      const token = localStorage.getItem("token");
       const res = await fetch(`${BASE_URL}/api/users/agree`, {
         method: "PATCH",
-        credentials: "include",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
       if (res.ok) {
         onAgree();
@@ -27,16 +30,10 @@ export default function AgreementModal({ onAgree }: Props) {
     }
   };
 
-  const handleDecline = async () => {
-    try {
-      await fetch(`${BASE_URL}/api/users/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
-      window.location.reload(); // ← back to logged out state
-    } catch (err) {
-      toast.error("Something went wrong.");
-    }
+  const handleDecline = () => {
+    localStorage.removeItem("token");
+    window.dispatchEvent(new Event("auth-changed"));
+    window.location.reload();
   };
 
   // ── WARNING SCREEN (after decline) ──
