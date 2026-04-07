@@ -181,9 +181,7 @@ export default function UploadTryOnSection() {
                         Select Image
                       </label>
                       {!isLoggedIn && (
-                        // <p className="text-xs text-red-500 mt-2">
-                        //   Login required
-                        // </p>
+                        
                           <a
                             href="/signin"
                             className="text-xs text-[#A06CE3] underline"
