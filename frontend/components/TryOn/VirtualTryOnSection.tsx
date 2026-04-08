@@ -11,7 +11,6 @@ import { X } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload, faXmark } from "@fortawesome/free-solid-svg-icons";
 import UpgradeModal from "../Modals/UpgradeModal";
-import { log } from "console";
 
 type Garment = {
   _id: string;
@@ -29,30 +28,8 @@ export default function UploadTryOnSection() {
   const [generating, setGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>();
   const [showUpgrade, setShowUpgrade] = useState(false);
-  const [points, setPoints] = useState(0);
+  const [upgradeShownThisSession, setUpgradeShownThisSession] = useState(false);
   // "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400" // ← hardcoded for now, remove later
-
-  useEffect(() => {
-    const fetchUserPoints = async () => {
-      try {
-        const res = await fetch(`${BASE_URL}/api/users/me`, {
-          headers: authHeaders(),
-        });
-        if (!res.ok) throw new Error("Failed to fetch points");
-        const data = await res.json();
-        setPoints(data.points);
-
-        // Show upgrade modal if points are 0
-        if (data.points <= 0) {
-          setShowUpgrade(true);
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchUserPoints();
-  }, []);
 
   useEffect(() => {
     const checkLogin = () => {
@@ -100,31 +77,41 @@ export default function UploadTryOnSection() {
     formData.append("image", selectedFile);
     formData.append("garmentId", selectedGarment._id);
 
-    console.log(selectedFile.size / 1024 / 1024, "MB");
-
     const token = localStorage.getItem("token");
     const res = await fetch(`${BASE_URL}/api/users/generate`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
       body: formData,
     });
 
     const data = await res.json();
 
+    // Scenario 2: already out of points
     if (!res.ok) {
-      toast.error(data.message);
+      if (data.message === "Not enough points") {
+        if (!upgradeShownThisSession) {
+          setUpgradeShownThisSession(true);
+          setShowUpgrade(true);
+        }
+      } else {
+        toast.error(data.message);
+      }
       setGenerating(false);
       return;
     }
 
+    // Scenario 1: just used last points
     setSelectedGarment(null);
     setGenerating(false);
-
     toast.success("Image & garment submitted successfully");
-
     window.dispatchEvent(new Event("auth-changed"));
+
+    if (data.pointsExhausted) {
+      if (!upgradeShownThisSession) {
+        setUpgradeShownThisSession(true);
+        setShowUpgrade(true);
+      }
+    }
   };
 
   useEffect(() => {
@@ -349,7 +336,10 @@ export default function UploadTryOnSection() {
       </div>
       <UpgradeModal
         isOpen={showUpgrade}
-        onClose={() => setShowUpgrade(false)}
+        onClose={() => {
+          setShowUpgrade(false);
+          setUpgradeShownThisSession(false); // ← reset so scenario 2 can show it again
+        }}
       />
     </section>
   );

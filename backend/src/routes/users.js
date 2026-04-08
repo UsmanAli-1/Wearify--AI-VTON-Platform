@@ -58,6 +58,7 @@ router.post("/login", async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Incorrect password" });
     }
+    
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
@@ -135,6 +136,7 @@ router.post(
       res.json({
         message: "Image & garment uploaded",
         points: user.points,
+        pointsExhausted: user.points < 40,
       });
     } catch (err) {
       console.error("🔥 GENERATE ERROR:", err);
