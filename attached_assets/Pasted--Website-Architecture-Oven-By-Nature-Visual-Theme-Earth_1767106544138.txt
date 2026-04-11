@@ -1,0 +1,145 @@
+🌿 Website Architecture: Oven By Nature
+Visual Theme: Earthy tones (sage green, warm beige, terracotta), clean typography, and high-quality imagery of nature, coffee, and community interactions.
+
+1. Header (Navigation Bar)
+Design: Minimalist and sticky (stays at the top as you scroll).
+
+Logo (Left): "Oven By Nature" (Styled with a leaf icon integrated into the 'O').
+
+Navigation Links (Center): Home | Our Menu | The Vibe | Sustainability | The Team
+
+CTA Button (Right): "Find Us" or "Order Online" (Green button with white text).
+
+2. Hero Section (The First Impression)
+Visual: A full-width, high-quality background video or image showing sunlight hitting a wooden table, a steaming cup of Rose Latte, and lush plants in the background.
+
+Content:
+
+Headline: Making Your Mornings Greener, One Cup at a Time! 🌿
+
+Sub-headline: Welcome to Oven By Nature. Where fresh coffee meets sustainable living.
+
+Tagline: “Freshly brewed with love 💚”
+
+Call to Action (Buttons):
+
+[Explore Our Menu]
+
+[Our Story]
+
+3. Introduction: The Concept
+Visual: A split layout. Text on the left, an image on the right showing the "Eco-friendly" and "Garden" interior theme.
+
+Content:
+
+Heading: More Than Coffee—It’s an Experience.
+
+Copy: We aren't just a café; we are a movement. Oven By Nature is a sanctuary designed for those who seek peace, creativity, and connection. Whether you are here to study, heal, or catch up with friends, our space is built to bring you closer to nature.
+
+Key Features (Icons):
+
+📚 Book Nook: Read while you sip.
+
+🌿 Garden Vibe: Surrounded by real greenery.
+
+✨ Good Vibes: A space to think and relax.
+
+4. The Menu (Signature & Limited)
+Visual: A clean grid showcasing high-res photos of the drinks and bakery items.
+
+Content:
+
+Heading: Curated for the Soul.
+
+Sub-text: A limited menu means everything is premium, fresh, and made with purpose.
+
+Signature Sips:
+
+🌹 Rose Latte: A floral embrace in a cup.
+
+🍯 Cardamom Honey Coffee: Warm, spicy, and sweet.
+
+🦋 Butterfly Pea Tea: Watch the magic unfold as colors shift from blue to purple.
+
+🥤 Date Shake: Nature’s energy booster.
+
+From the Oven:
+
+Freshly baked pastries & 2–3 Healthy/Organic snacks.
+
+5. The Vibe: Community & Connection
+Visual: Collage style images showing the "Emotional Wall," the neon photo corners, and an acoustic guitar leaning against a chair.
+
+Content:
+
+Heading: Connect, Create, Capture.
+
+The Emotional Wall: “Today I feel…” — Leave a note for a stranger, or write a wish for your future self. Our sticky-note wall is where our community speaks.
+
+Events: Join us for our monthly Open Mic Nights 🎤, Poetry Sessions ✍️, and Student Study Hours 📖.
+
+Instagram Corners: Snap a photo at our neon "Green Vibes Only" wall. Don't forget to tag us!
+
+6. Our Commitment: Sustainability & SDGs
+Visual: A dedicated section with a light green background. Use official SDG color icons.
+
+Content:
+
+Heading: Brewing a Better Future 🌍
+
+Copy: We believe in responsible luxury. Here is how we align with the United Nations Sustainable Development Goals:
+
+♻️ SDG 12: Responsible Consumption & Production
+
+We say no to plastic. Our cups are biodegradable, our stirrers are wooden, and we encourage reusable glass jars.
+
+🌤️ SDG 13: Climate Action
+
+Reducing our carbon footprint through sustainable sourcing and energy-efficient practices. Every cup helps the planet.
+
+❤️ SDG 3: Good Health & Well-Being
+
+We prioritize your health by serving organic beverages and nutritious snacks free from harmful preservatives.
+
+7. Loyalty & Love
+Visual: Graphic of a stamp card or a cute "Thank You" note.
+
+Content:
+
+Heading: Little Things, Big Love.
+
+Offer: Get a Free Biscuit with your first order!
+
+Loyalty Program: Collect 5 stamps, and the 6th coffee is on us. Because we appreciate you.
+
+8. The Team (Project Members)
+Visual: Professional yet friendly portraits of the team members (or avatars).
+
+Content:
+
+Heading: The Minds Behind the Brew
+
+Team List:
+
+Syed Rohan Shah (IU02-0122-0358)
+
+Zainab Rubab (IU02-0225-1112)
+
+Abeer Ahmed (20157)
+
+Mohid (IU02-0124-0151)
+
+9. Footer
+Visual: Dark earthy green background with white text.
+
+Content:
+
+Social Media Icons: Instagram | TikTok | Facebook (Links to pages).
+
+Location: [University/City Address Goes Here].
+
+Contact: [Email Address] | [Phone Number].
+
+Copyright: © 2024 Oven By Nature. All Rights Reserved.
+
+Small Quote at bottom: "Sip. Relax. Repeat."

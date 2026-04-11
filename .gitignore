@@ -1,3 +1,4 @@
+HEAD
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -52,3 +53,11 @@ backend/node_modules/
 .next/
 
 
+
+node_modules
+dist
+.DS_Store
+server/public
+vite.config.ts.*
+*.tar.gz
+7709cc0c3d3014deff38730a253a4bc65406a6b7
