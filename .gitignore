@@ -43,7 +43,7 @@ next-env.d.ts
 
 
 # Node modules
-frontend/node_modules/
+web/node_modules/
 backend/node_modules/
 
 # Logs
