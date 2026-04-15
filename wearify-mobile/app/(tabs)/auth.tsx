@@ -1,7 +1,9 @@
+import axios from "axios";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -15,6 +17,63 @@ import {
 export default function AuthScreen() {
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
+
+  // Form State
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState(""); // Added for your backend requirement!
+  const [password, setPassword] = useState("");
+
+  // YOUR Express Backend URL
+  const API_URL = "http://192.168.0.105:4000/api/users";
+
+  const handleAuth = async () => {
+    try {
+      if (isLogin) {
+        // ---------------- REAL LOGIN ----------------
+        console.log("Attempting to login...");
+        const response = await axios.post(`${API_URL}/login`, {
+          email: email.toLowerCase(), // Good practice to lowercase emails
+          password: password,
+        });
+
+        console.log("Login Success:", response.data);
+
+        // In the future, we will save response.data.token to the phone securely here
+
+        Alert.alert("Success", "Welcome back!");
+        router.replace("/dashboard");
+      } else {
+        // ---------------- REAL SIGNUP ----------------
+        console.log("Attempting to register...");
+        const response = await axios.post(`${API_URL}/`, {
+          name: name,
+          email: email.toLowerCase(),
+          phone: phone,
+          password: password,
+        });
+
+        console.log("Signup Success:", response.data);
+        Alert.alert(
+          "Account Created!",
+          "You can now log in with your credentials.",
+        );
+        setIsLogin(true); // Automatically flip them over to the login view
+      }
+    } catch (error) {
+      console.log("🚨 RAW NETWORK ERROR:", error);
+
+      let errorMessage = "Cannot connect to server.";
+
+      if (axios.isAxiosError(error)) {
+        errorMessage = error.response?.data?.message || error.message;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      Alert.alert("Connection Error", errorMessage);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -34,15 +93,32 @@ export default function AuthScreen() {
         </View>
 
         <View style={styles.card}>
+          {/* Only show Name and Phone if they are Signing Up */}
           {!isLogin && (
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Full Name</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="John Doe"
-                placeholderTextColor="#4A5568"
-              />
-            </View>
+            <>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Full Name</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="John Doe"
+                  placeholderTextColor="#4A5568"
+                  value={name}
+                  onChangeText={setName}
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Phone Number</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="0300 1234567"
+                  placeholderTextColor="#4A5568"
+                  keyboardType="phone-pad"
+                  value={phone}
+                  onChangeText={setPhone}
+                />
+              </View>
+            </>
           )}
 
           <View style={styles.inputContainer}>
@@ -53,6 +129,8 @@ export default function AuthScreen() {
               placeholderTextColor="#4A5568"
               keyboardType="email-address"
               autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
             />
           </View>
 
@@ -63,14 +141,12 @@ export default function AuthScreen() {
               placeholder="••••••••"
               placeholderTextColor="#4A5568"
               secureTextEntry
+              value={password}
+              onChangeText={setPassword}
             />
           </View>
 
-          {/* Login/Signup Button */}
-          <TouchableOpacity
-            style={styles.buttonContainer}
-            onPress={() => console.log("/dashboard")}
-          >
+          <TouchableOpacity style={styles.buttonContainer} onPress={handleAuth}>
             <LinearGradient
               colors={["#8b5cf6", "#3b82f6"]}
               start={{ x: 0, y: 0 }}
@@ -83,7 +159,6 @@ export default function AuthScreen() {
             </LinearGradient>
           </TouchableOpacity>
 
-          {/* Toggle between Login and Signup */}
           <TouchableOpacity
             style={styles.toggleContainer}
             onPress={() => setIsLogin(!isLogin)}
@@ -104,29 +179,16 @@ export default function AuthScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0A0F1C",
-  },
-  keyboardView: {
-    flex: 1,
-    justifyContent: "center",
-    padding: 24,
-  },
-  headerContainer: {
-    marginBottom: 32,
-  },
+  container: { flex: 1, backgroundColor: "#0A0F1C" },
+  keyboardView: { flex: 1, justifyContent: "center", padding: 24 },
+  headerContainer: { marginBottom: 32 },
   title: {
     fontSize: 32,
     fontWeight: "bold",
     color: "#FFFFFF",
     marginBottom: 8,
   },
-  subtitle: {
-    fontSize: 16,
-    color: "#A0AEC0",
-    lineHeight: 24,
-  },
+  subtitle: { fontSize: 16, color: "#A0AEC0", lineHeight: 24 },
   card: {
     backgroundColor: "rgba(255, 255, 255, 0.03)",
     borderRadius: 24,
@@ -134,15 +196,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.05)",
   },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    color: "#E2E8F0",
-    fontSize: 14,
-    fontWeight: "500",
-    marginBottom: 8,
-  },
+  inputContainer: { marginBottom: 20 },
+  label: { color: "#E2E8F0", fontSize: 14, fontWeight: "500", marginBottom: 8 },
   input: {
     backgroundColor: "rgba(0, 0, 0, 0.2)",
     borderWidth: 1,
@@ -163,21 +218,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  buttonText: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  toggleContainer: {
-    marginTop: 24,
-    alignItems: "center",
-  },
-  toggleText: {
-    color: "#A0AEC0",
-    fontSize: 14,
-  },
-  toggleHighlight: {
-    color: "#8b5cf6",
-    fontWeight: "600",
-  },
+  buttonText: { color: "#FFFFFF", fontSize: 18, fontWeight: "600" },
+  toggleContainer: { marginTop: 24, alignItems: "center" },
+  toggleText: { color: "#A0AEC0", fontSize: 14 },
+  toggleHighlight: { color: "#8b5cf6", fontWeight: "600" },
 });

@@ -2,6 +2,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
+  Image,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -16,8 +17,12 @@ export default function WelcomeScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         {/* Placeholder for your actual Logo */}
-        <View style={styles.logoPlaceholder}>
-          <Text style={styles.logoText}>W</Text>
+        <View style={styles.logoContainer}>
+          <Image
+            source={require("../../assets/images/logo.png")}
+            style={styles.logoImage}
+            resizeMode="contain" // This ensures your logo doesn't get stretched or cut off
+          />
         </View>
 
         <Text style={styles.title}>Welcome to Wearify</Text>
@@ -98,5 +103,13 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 18,
     fontWeight: "600",
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 40,
+  },
+  logoImage: {
+    width: 120, // Adjust this to make it wider or narrower
+    height: 120, // Adjust this to make it taller or shorter
   },
 });
