@@ -1,7 +1,5 @@
 from fastapi import FastAPI, UploadFile, File
 import cv2
-from matplotlib import image
-from matplotlib.pyplot import gray
 import numpy as np
 import mediapipe as mp
 
@@ -21,8 +19,14 @@ def is_full_body(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, 1.1, 4)
 
-    # ---------- MULTIPLE PEOPLE ----------
-    if len(faces) != 1:
+    # ---------- FACE DETECTION ----------
+    if len(faces) == 0:
+        return {
+            "isFullBody": False,
+            "reason": "no_person_detected"
+        }
+
+    if len(faces) > 1:
         return {
             "isFullBody": False,
             "reason": "multiple_people"

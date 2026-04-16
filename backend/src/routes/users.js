@@ -49,16 +49,15 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Incorrect password" });
     }
-    
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
@@ -145,7 +144,6 @@ router.get("/me", auth, async (req, res) => {
 //   },
 // );
 
-
 router.post(
   "/generate",
   auth,
@@ -183,9 +181,7 @@ router.post(
         req.file.mimetype === "image/avif" ||
         req.file.mimetype === "image/webp"
       ) {
-        imageBuffer = await sharp(req.file.buffer)
-          .jpeg()
-          .toBuffer();
+        imageBuffer = await sharp(req.file.buffer).jpeg().toBuffer();
       }
 
       // ✅ OPTIONAL: RESIZE (performance boost)
@@ -201,9 +197,9 @@ router.post(
       });
 
       const aiResponse = await axios.post(
-        "http://127.0.0.1:8000/check-full-body",
+        "http://127.0.0.1:10000/check-full-body",
         formData,
-        { headers: formData.getHeaders() }
+        { headers: formData.getHeaders(), timeout: 20000 },
       );
 
       const aiData = aiResponse.data;
@@ -217,13 +213,12 @@ router.post(
 
       // ✅ STEP 4: UPLOAD TO CLOUDINARY
       const uploadResult = await new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream(
-          { folder: "wearify" },
-          (error, result) => {
+        cloudinary.uploader
+          .upload_stream({ folder: "wearify" }, (error, result) => {
             if (error) reject(error);
             else resolve(result);
-          }
-        ).end(imageBuffer);
+          })
+          .end(imageBuffer);
       });
 
       // ✅ STEP 5: SAVE TO DB
@@ -242,15 +237,12 @@ router.post(
         points: user.points,
         pointsExhausted: user.points < COST,
       });
-
     } catch (err) {
       console.error("🔥 GENERATE ERROR:", err);
       res.status(500).json({ message: "Server error" });
     }
-  }
+  },
 );
-
-
 
 router.patch("/agree", auth, async (req, res) => {
   try {

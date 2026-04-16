@@ -7,7 +7,7 @@ router.post("/check-full-body", upload.single("image"), async (req, res) => {
     });
 
     const response = await axios.post(
-      "http://127.0.0.1:8000/check-full-body",
+      "http://127.0.0.1:10000/check-full-body",
       formData,
       {
         headers: formData.getHeaders(),

@@ -112,7 +112,7 @@ export default function UploadTryOnSection() {
             break;
 
           case "not_full_body":
-            toast.error("Full body not visible");
+            toast.error("Please Upload Full body Image");
             break;
 
           case "no_person_detected":
