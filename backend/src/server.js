@@ -42,7 +42,16 @@ app.use("/api/users", require("./routes/users"));
 
 /* ERROR HANDLER */
 app.use((err, req, res, next) => {
-  console.error("🔥 EXPRESS ERROR:", err);
+  console.error("🔥 EXPRESS ERROR:", err.message);
+
+  if (err.message.includes("Unsupported image format")) {
+    return res.status(400).json({ message: err.message });
+  }
+
+  if (err.code === "LIMIT_FILE_SIZE") {
+    return res.status(400).json({ message: "File too large (max 5MB)" });
+  }
+
   res.status(500).json({ message: "Internal server error" });
 });
 

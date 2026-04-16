@@ -29,7 +29,7 @@ export default function UploadTryOnSection() {
   const [generatedImage, setGeneratedImage] = useState<string | null>();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeShownThisSession, setUpgradeShownThisSession] = useState(false);
-  // "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400" // ← hardcoded for now, remove later
+  "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400" // ← hardcoded for now, remove later
 
   useEffect(() => {
     const checkLogin = () => {
@@ -87,8 +87,42 @@ export default function UploadTryOnSection() {
     const data = await res.json();
 
     // Scenario 2: already out of points
+    // if (!res.ok) {
+    //   if (data.message === "Not enough points") {
+    //     if (!upgradeShownThisSession) {
+    //       setUpgradeShownThisSession(true);
+    //       setShowUpgrade(true);
+    //     }
+    //   } else {
+    //     toast.error(data.message);
+    //   }
+    //   setGenerating(false);
+    //   return;
+    // }
+
     if (!res.ok) {
-      if (data.message === "Not enough points") {
+      if (data.reason) {
+        switch (data.reason) {
+          case "multiple_people":
+            toast.error("Only one person allowed");
+            break;
+
+          case "selfie":
+            toast.error("Image too close. Upload full body");
+            break;
+
+          case "not_full_body":
+            toast.error("Full body not visible");
+            break;
+
+          case "no_person_detected":
+            toast.error("No person detected");
+            break;
+
+          default:
+            toast.error("Invalid image");
+        }
+      } else if (data.message === "Not enough points") {
         if (!upgradeShownThisSession) {
           setUpgradeShownThisSession(true);
           setShowUpgrade(true);
@@ -96,6 +130,7 @@ export default function UploadTryOnSection() {
       } else {
         toast.error(data.message);
       }
+
       setGenerating(false);
       return;
     }

@@ -96,16 +96,66 @@ router.get("/me", auth, async (req, res) => {
   }
 });
 
+// router.post(
+//   "/generate",
+//   auth, // 1. check if logged in
+//   checkPoints, // 2. check points ← BEFORE Cloudinary
+//   upload.single("image"), // 3. upload to Cloudinary ← only if points ok
+//   async (req, res) => {
+//     try {
+//       console.log("📥 GENERATE HIT");
+//       console.log("📦 Body:", req.body);
+//       console.log("📸 File:", req.file);
+
+//       const COST = 40;
+//       const { garmentId } = req.body;
+
+//       if (!req.file) {
+//         return res.status(400).json({ message: "No image uploaded" });
+//       }
+
+//       if (!garmentId) {
+//         return res.status(400).json({ message: "No garment selected" });
+//       }
+
+//       // ← reuse user from checkPoints middleware (no extra DB call)
+//       const user = req.userDoc;
+
+//       const imageDoc = await Image.create({
+//         user: user._id,
+//         imagePath: req.file.path, // CLOUDINARY URL
+//         garment: garmentId,
+//         pointsUsed: COST,
+//       });
+
+//       user.points -= COST;
+//       await user.save();
+
+//       console.log("✅ IMAGE SAVED:", imageDoc);
+
+//       res.json({
+//         message: "Image & garment uploaded",
+//         points: user.points,
+//         pointsExhausted: user.points < 40,
+//       });
+//     } catch (err) {
+//       console.error("🔥 GENERATE ERROR:", err);
+//       res.status(500).json({ message: "Server error" });
+//     }
+//   },
+// );
+
+
 router.post(
   "/generate",
-  auth, // 1. check if logged in
-  checkPoints, // 2. check points ← BEFORE Cloudinary
-  upload.single("image"), // 3. upload to Cloudinary ← only if points ok
+  auth,
+  upload.single("image"), // ✅ memory upload
   async (req, res) => {
     try {
-      console.log("📥 GENERATE HIT");
-      console.log("📦 Body:", req.body);
-      console.log("📸 File:", req.file);
+      const axios = require("axios");
+      const FormData = require("form-data");
+      const sharp = require("sharp");
+      const cloudinary = require("../config/cloudinary");
 
       const COST = 40;
       const { garmentId } = req.body;
@@ -118,12 +168,68 @@ router.post(
         return res.status(400).json({ message: "No garment selected" });
       }
 
-      // ← reuse user from checkPoints middleware (no extra DB call)
-      const user = req.userDoc;
+      // ✅ STEP 1: CHECK POINTS FIRST
+      const user = await User.findById(req.user.id);
+      if (user.points < COST) {
+        return res.status(400).json({ message: "Not enough points" });
+      }
 
+      // ✅ STEP 2: CONVERT IMAGE (HEIC/AVIF → JPG)
+      let imageBuffer = req.file.buffer;
+
+      if (
+        req.file.mimetype === "image/heic" ||
+        req.file.mimetype === "image/heif" ||
+        req.file.mimetype === "image/avif" ||
+        req.file.mimetype === "image/webp"
+      ) {
+        imageBuffer = await sharp(req.file.buffer)
+          .jpeg()
+          .toBuffer();
+      }
+
+      // ✅ OPTIONAL: RESIZE (performance boost)
+      imageBuffer = await sharp(imageBuffer)
+        .resize({ width: 1024 })
+        .jpeg({ quality: 80 })
+        .toBuffer();
+
+      // ✅ STEP 3: SEND TO AI
+      const formData = new FormData();
+      formData.append("file", imageBuffer, {
+        filename: "image.jpg",
+      });
+
+      const aiResponse = await axios.post(
+        "http://127.0.0.1:8000/check-full-body",
+        formData,
+        { headers: formData.getHeaders() }
+      );
+
+      const aiData = aiResponse.data;
+
+      if (!aiData.isFullBody) {
+        return res.status(400).json({
+          message: "Invalid image",
+          reason: aiData.reason,
+        });
+      }
+
+      // ✅ STEP 4: UPLOAD TO CLOUDINARY
+      const uploadResult = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: "wearify" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        ).end(imageBuffer);
+      });
+
+      // ✅ STEP 5: SAVE TO DB
       const imageDoc = await Image.create({
         user: user._id,
-        imagePath: req.file.path, // CLOUDINARY URL
+        imagePath: uploadResult.secure_url,
         garment: garmentId,
         pointsUsed: COST,
       });
@@ -131,19 +237,20 @@ router.post(
       user.points -= COST;
       await user.save();
 
-      console.log("✅ IMAGE SAVED:", imageDoc);
-
-      res.json({
-        message: "Image & garment uploaded",
+      return res.json({
+        message: "Success",
         points: user.points,
-        pointsExhausted: user.points < 40,
+        pointsExhausted: user.points < COST,
       });
+
     } catch (err) {
       console.error("🔥 GENERATE ERROR:", err);
       res.status(500).json({ message: "Server error" });
     }
-  },
+  }
 );
+
+
 
 router.patch("/agree", auth, async (req, res) => {
   try {
