@@ -6,6 +6,10 @@ const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
 const upload = require("../middleware/upload");
 const Image = require("../models/Image");
+const axios = require("axios");
+const FormData = require("form-data");
+const sharp = require("sharp");
+const cloudinary = require("../config/cloudinary");
 
 // ← Points check middleware (runs BEFORE Cloudinary upload)
 // const checkPoints = async (req, res, next) => {
@@ -150,11 +154,6 @@ router.post(
   upload.single("image"), // ✅ memory upload
   async (req, res) => {
     try {
-      const axios = require("axios");
-      const FormData = require("form-data");
-      const sharp = require("sharp");
-      const cloudinary = require("../config/cloudinary");
-
       const COST = 40;
       const { garmentId } = req.body;
 
@@ -184,17 +183,36 @@ router.post(
         imageBuffer = await sharp(req.file.buffer).jpeg().toBuffer();
       }
 
-      // ✅ OPTIONAL: RESIZE (performance boost)
+      //  RESIZE (performance boost)
       imageBuffer = await sharp(imageBuffer)
         .resize({ width: 1024 })
         .jpeg({ quality: 80 })
         .toBuffer();
 
-      // ✅ STEP 3: SEND TO AI
+      // ✅ STEP 3: WAKE UP AI SERVICE + SEND TO AI
+      const waitForAiService = async (retries = 3, delay = 20000) => {
+        for (let i = 0; i < retries; i++) {
+          try {
+            const res = await axios.get(`${process.env.AI_VALIDATION_URL}/`, {
+              timeout: 30000,
+            });
+            if (res.status === 200) return true;
+          } catch (e) {
+            if (i < retries - 1) await new Promise((r) => setTimeout(r, delay));
+          }
+        }
+        return false;
+      };
+
+      const isReady = await waitForAiService();
+      if (!isReady) {
+        return res.status(503).json({
+          message: "AI service is waking up, please try again in a moment",
+        });
+      }
+
       const formData = new FormData();
-      formData.append("file", imageBuffer, {
-        filename: "image.jpg",
-      });
+      formData.append("file", imageBuffer, { filename: "image.jpg" });
 
       const aiResponse = await axios.post(
         `${process.env.AI_VALIDATION_URL}/check-full-body`,
@@ -204,11 +222,11 @@ router.post(
 
       const aiData = aiResponse.data;
 
-      if (!aiData.isFullBody) {
-        return res.status(400).json({
-          message: "Invalid image",
-          reason: aiData.reason,
-        });
+      // Guard against HTML response (Render spin-up page)
+      if (typeof aiData !== "object") {
+        return res
+          .status(503)
+          .json({ message: "AI service is waking up, please try again" });
       }
 
       // ✅ STEP 4: UPLOAD TO CLOUDINARY
