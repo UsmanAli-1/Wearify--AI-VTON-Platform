@@ -197,7 +197,7 @@ router.post(
       });
 
       const aiResponse = await axios.post(
-        "http://127.0.0.1:10000/check-full-body",
+        `${process.env.AI_VALIDATION_URL}/check-full-body`,
         formData,
         { headers: formData.getHeaders(), timeout: 20000 },
       );
