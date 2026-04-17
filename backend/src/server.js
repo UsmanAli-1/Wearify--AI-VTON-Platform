@@ -14,6 +14,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const axios = require("axios");
 
 const app = express();
 
@@ -54,6 +55,14 @@ app.use((err, req, res, next) => {
 
   res.status(500).json({ message: "Internal server error" });
 });
+
+// In your server.js/index.js
+setInterval(async () => {
+  try {
+    await axios.get(process.env.AI_VALIDATION_URL);
+    console.log("AI service pinged");
+  } catch (e) {}
+}, 10 * 60 * 1000); // every 10 mins
 
 async function start() {
   try {
