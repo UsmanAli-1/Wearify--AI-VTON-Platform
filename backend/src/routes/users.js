@@ -8,17 +8,17 @@ const upload = require("../middleware/upload");
 const Image = require("../models/Image");
 
 // ← Points check middleware (runs BEFORE Cloudinary upload)
-const checkPoints = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.user.id);
-    if (user.points < 40)
-      return res.status(400).json({ message: "Not enough points" });
-    req.userDoc = user; // ← attach user to request so route doesn't fetch again
-    next();
-  } catch (err) {
-    res.status(500).json({ message: "Server error" });
-  }
-};
+// const checkPoints = async (req, res, next) => {
+//   try {
+//     const user = await User.findById(req.user.id);
+//     if (user.points < 40)
+//       return res.status(400).json({ message: "Not enough points" });
+//     req.userDoc = user; // ← attach user to request so route doesn't fetch again
+//     next();
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
 
 router.post("/", async (req, res) => {
   const { name, email, phone, password } = req.body;
@@ -199,7 +199,7 @@ router.post(
       const aiResponse = await axios.post(
         `${process.env.AI_VALIDATION_URL}/check-full-body`,
         formData,
-        { headers: formData.getHeaders(), timeout: 20000 },
+        { headers: formData.getHeaders(), timeout: 60000 },
       );
 
       const aiData = aiResponse.data;
