@@ -205,10 +205,9 @@ router.post(
       };
 
       const isReady = await waitForAiService();
+      console.log("AI Service Ready:", isReady);
       if (!isReady) {
-        return res.status(503).json({
-          message: "AI service is waking up, please try again in a moment",
-        });
+        return res.status(503).json({ message: "AI service unavailable" });
       }
 
       const formData = new FormData();
