@@ -11,18 +11,20 @@ const FormData = require("form-data");
 const sharp = require("sharp");
 const cloudinary = require("../config/cloudinary");
 
-// ← Points check middleware (runs BEFORE Cloudinary upload)
-// const checkPoints = async (req, res, next) => {
-//   try {
-//     const user = await User.findById(req.user.id);
-//     if (user.points < 40)
-//       return res.status(400).json({ message: "Not enough points" });
-//     req.userDoc = user; // ← attach user to request so route doesn't fetch again
-//     next();
-//   } catch (err) {
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
+// ✅ Defined once at top, not inside route
+const waitForAiService = async (retries = 5, delay = 15000) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const response = await axios.get(`${process.env.AI_VALIDATION_URL}/`, {
+        timeout: 15000,
+      });
+      if (response.status === 200) return true;
+    } catch (e) {
+      if (i < retries - 1) await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+  return false;
+};
 
 router.post("/", async (req, res) => {
   const { name, email, phone, password } = req.body;
@@ -67,10 +69,9 @@ router.post("/login", async (req, res) => {
       expiresIn: "7d",
     });
 
-    // ✅ Return token in body instead of cookie
     res.status(200).json({
       message: "Login Successful",
-      token, // <-- send token here
+      token,
       user: {
         id: user._id,
         name: user.name,
@@ -87,7 +88,6 @@ router.get("/me", auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
 
-    // ← Auto-reset plan when points run out
     if (user.points <= 120 && user.plan !== "free") {
       user.plan = "free";
       await user.save();
@@ -99,59 +99,10 @@ router.get("/me", auth, async (req, res) => {
   }
 });
 
-// router.post(
-//   "/generate",
-//   auth, // 1. check if logged in
-//   checkPoints, // 2. check points ← BEFORE Cloudinary
-//   upload.single("image"), // 3. upload to Cloudinary ← only if points ok
-//   async (req, res) => {
-//     try {
-//       console.log("📥 GENERATE HIT");
-//       console.log("📦 Body:", req.body);
-//       console.log("📸 File:", req.file);
-
-//       const COST = 40;
-//       const { garmentId } = req.body;
-
-//       if (!req.file) {
-//         return res.status(400).json({ message: "No image uploaded" });
-//       }
-
-//       if (!garmentId) {
-//         return res.status(400).json({ message: "No garment selected" });
-//       }
-
-//       // ← reuse user from checkPoints middleware (no extra DB call)
-//       const user = req.userDoc;
-
-//       const imageDoc = await Image.create({
-//         user: user._id,
-//         imagePath: req.file.path, // CLOUDINARY URL
-//         garment: garmentId,
-//         pointsUsed: COST,
-//       });
-
-//       user.points -= COST;
-//       await user.save();
-
-//       console.log("✅ IMAGE SAVED:", imageDoc);
-
-//       res.json({
-//         message: "Image & garment uploaded",
-//         points: user.points,
-//         pointsExhausted: user.points < 40,
-//       });
-//     } catch (err) {
-//       console.error("🔥 GENERATE ERROR:", err);
-//       res.status(500).json({ message: "Server error" });
-//     }
-//   },
-// );
-
 router.post(
   "/generate",
   auth,
-  upload.single("image"), // ✅ memory upload
+  upload.single("image"),
   async (req, res) => {
     try {
       const COST = 40;
@@ -165,13 +116,13 @@ router.post(
         return res.status(400).json({ message: "No garment selected" });
       }
 
-      // ✅ STEP 1: CHECK POINTS FIRST
+      // ✅ STEP 1: CHECK POINTS
       const user = await User.findById(req.user.id);
       if (user.points < COST) {
         return res.status(400).json({ message: "Not enough points" });
       }
 
-      // ✅ STEP 2: CONVERT IMAGE (HEIC/AVIF → JPG)
+      // ✅ STEP 2: CONVERT & RESIZE IMAGE
       let imageBuffer = req.file.buffer;
 
       if (
@@ -183,31 +134,16 @@ router.post(
         imageBuffer = await sharp(req.file.buffer).jpeg().toBuffer();
       }
 
-      //  RESIZE (performance boost)
       imageBuffer = await sharp(imageBuffer)
         .resize({ width: 1024 })
         .jpeg({ quality: 80 })
         .toBuffer();
 
-      // ✅ STEP 3: WAKE UP AI SERVICE + SEND TO AI
-      const waitForAiService = async (retries = 3, delay = 20000) => {
-        for (let i = 0; i < retries; i++) {
-          try {
-            const res = await axios.get(`${process.env.AI_VALIDATION_URL}/`, {
-              timeout: 30000,
-            });
-            if (res.status === 200) return true;
-          } catch (e) {
-            if (i < retries - 1) await new Promise((r) => setTimeout(r, delay));
-          }
-        }
-        return false;
-      };
-
+      // ✅ STEP 3: WAKE UP AI + VALIDATE
       const isReady = await waitForAiService();
       console.log("AI Service Ready:", isReady);
       if (!isReady) {
-        return res.status(503).json({ message: "AI service unavailable" });
+        return res.status(503).json({ message: "AI service unavailable, please try again" });
       }
 
       const formData = new FormData();
@@ -221,14 +157,10 @@ router.post(
 
       const aiData = aiResponse.data;
 
-      // Guard against HTML response (Render spin-up page)
       if (typeof aiData !== "object") {
-        return res
-          .status(503)
-          .json({ message: "AI service is waking up, please try again" });
+        return res.status(503).json({ message: "AI service is waking up, please try again" });
       }
 
-      // ✅ THIS IS MISSING — ADD THIS
       if (!aiData.isFullBody) {
         return res.status(400).json({
           message: "Invalid image",
@@ -246,8 +178,8 @@ router.post(
           .end(imageBuffer);
       });
 
-      // ✅ STEP 5: SAVE TO DB
-      const imageDoc = await Image.create({
+      // ✅ STEP 5: SAVE TO DB & DEDUCT POINTS
+      await Image.create({
         user: user._id,
         imagePath: uploadResult.secure_url,
         garment: garmentId,
