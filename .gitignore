@@ -45,6 +45,7 @@ next-env.d.ts
 # Node modules
 web/node_modules/
 backend/node_modules/
+hf-validation/
 
 # Logs
 *.log
