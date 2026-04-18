@@ -228,6 +228,14 @@ router.post(
           .json({ message: "AI service is waking up, please try again" });
       }
 
+      // ✅ THIS IS MISSING — ADD THIS
+      if (!aiData.isFullBody) {
+        return res.status(400).json({
+          message: "Invalid image",
+          reason: aiData.reason,
+        });
+      }
+
       // ✅ STEP 4: UPLOAD TO CLOUDINARY
       const uploadResult = await new Promise((resolve, reject) => {
         cloudinary.uploader
