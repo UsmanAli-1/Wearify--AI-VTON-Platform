@@ -73,7 +73,6 @@ export default function Header() {
     localStorage.removeItem("token");
     window.dispatchEvent(new Event("auth-changed"));
     toast.success("Signed out successfully");
-    // router.push("/signin");
   };
 
   //  called when user clicks "I Agree" in modal
@@ -84,8 +83,8 @@ export default function Header() {
 
   const links = [
     { href: "/", label: "Try On", icon: faShirt },
+    { href: "/ai-suggestion", label: "Ai Suggestion", icon: faWandSparkles },
     { href: "/about", label: "About", icon: faCircleQuestion },
-    { href: "/features", label: "Features", icon: faWandSparkles },
     { href: "/plans", label: "Plans", icon: faCrown },
   ];
 
