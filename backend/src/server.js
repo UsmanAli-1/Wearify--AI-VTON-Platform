@@ -15,24 +15,31 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const axios = require("axios");
+const imageRoutes = require("./routes/images");
 
 const app = express();
 
 /* CORS */
-app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://wearify-mu.vercel.app",
-    "https://wearify-vton.vercel.app",
-  ],
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://wearify-mu.vercel.app",
+      "https://wearify-vton.vercel.app",
+    ],
+    credentials: true,
+  }),
+);
 
 app.use(cookieParser());
 
 // ⚠️ Webhook MUST be before express.json() — needs raw body
 const { router: paymentRouter, webhook } = require("./routes/payment");
-app.use("/api/payment/webhook", express.raw({ type: "application/json" }), webhook);
+app.use(
+  "/api/payment/webhook",
+  express.raw({ type: "application/json" }),
+  webhook,
+);
 
 app.use(express.json());
 
@@ -40,6 +47,7 @@ app.use(express.json());
 app.use("/api/payment", paymentRouter);
 app.use("/api/garments", require("./routes/garments"));
 app.use("/api/users", require("./routes/users"));
+app.use("/api/images", imageRoutes);
 
 /* ERROR HANDLER */
 app.use((err, req, res, next) => {
@@ -57,12 +65,15 @@ app.use((err, req, res, next) => {
 });
 
 // In your server.js/index.js
-setInterval(async () => {
-  try {
-    await axios.get(process.env.AI_VALIDATION_URL);
-    console.log("AI service pinged");
-  } catch (e) {}
-}, 10 * 60 * 1000); // every 10 mins
+setInterval(
+  async () => {
+    try {
+      await axios.get(process.env.AI_VALIDATION_URL);
+      console.log("AI service pinged");
+    } catch (e) {}
+  },
+  10 * 60 * 1000,
+); // every 10 mins
 
 async function start() {
   try {
@@ -76,7 +87,6 @@ async function start() {
     app.listen(port, "0.0.0.0", () => {
       console.log(`🚀 Server running on port ${port}`);
     });
-
   } catch (err) {
     console.error("❌ startup error", err);
     process.exit(1);

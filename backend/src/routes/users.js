@@ -220,4 +220,18 @@ router.post("/logout", (req, res) => {
   res.json({ message: "Logged out successfully" });
 });
 
+
+
+router.get("/my", auth, async (req, res) => {
+  const images = await Image.find({ user: req.user.id })
+    .populate("garment", "name imagePath")
+    .sort({ createdAt: -1 });
+  res.json(images);
+});
+
+router.delete("/:id", auth, async (req, res) => {
+  await Image.findOneAndDelete({ _id: req.params.id, user: req.user.id });
+  res.json({ message: "Deleted" });
+});
+
 module.exports = router;
