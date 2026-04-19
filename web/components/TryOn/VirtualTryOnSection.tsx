@@ -237,7 +237,7 @@ export default function UploadTryOnSection() {
                       {!isLoggedIn && (
                         <a
                           href="/signin"
-                          className="text-xs text-[#A06CE3] underline"
+                          className="text-xs text-[#A06CE3] "
                         >
                           Sign in to upload
                         </a>

@@ -171,20 +171,40 @@ export default function Header() {
                   Sign Out
                 </Button>
               ) : (
-                <Button
-                  variant="secondary"
-                  onClick={(e) => {
-                    if (pathname === "/signup") {
-                      e.preventDefault();
-                      toast("You're already on the Sign up page", {
-                        icon: "📍",
-                      });
-                    }
-                  }}
-                  className="hidden shadow-md md:block rounded-full bg-gradient-to-r from-purple-400/50 to-blue-600/90 hover:from-[#4287f5] hover:to-[#6a339e] text-white hover:scale-105 duration-300"
-                >
-                  <a href={pathname === "/signup" ? "#" : "/signup"}>Sign Up</a>
-                </Button>
+                <>
+                  <Button
+                    variant="secondary"
+                    onClick={(e) => {
+                      if (pathname === "/signin") {
+                        e.preventDefault();
+                        toast("You're already on the Sign In page", {
+                          icon: "📍",
+                        });
+                      }
+                    }}
+                    className="hidden shadow-md md:block rounded-full bg-gradient-to-r from-purple-400/50 to-blue-600/90 hover:from-[#4287f5] hover:to-[#6a339e] text-white hover:scale-105 duration-300"
+                  >
+                    <a href={pathname === "/signin" ? "#" : "/signin"}>
+                      Sign In
+                    </a>
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={(e) => {
+                      if (pathname === "/signup") {
+                        e.preventDefault();
+                        toast("You're already on the Sign up page", {
+                          icon: "📍",
+                        });
+                      }
+                    }}
+                    className="hidden shadow-md md:block rounded-full bg-gradient-to-r from-purple-400/50 to-blue-600/90 hover:from-[#4287f5] hover:to-[#6a339e] text-white hover:scale-105 duration-300"
+                  >
+                    <a href={pathname === "/signup" ? "#" : "/signup"}>
+                      Sign Up
+                    </a>
+                  </Button>
+                </>
               )}
 
               <div className="md:hidden">
@@ -234,19 +254,34 @@ export default function Header() {
                 Sign Out
               </Button>
             ) : (
-              <Button
-                onClick={(e) => {
-                  if (pathname === "/signup") {
-                    e.preventDefault();
-                    toast("You're already on the Sign up page", {
-                      icon: "📍",
-                    });
-                  }
-                }}
-                className="rounded-full shadow-lg bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-white mt-2"
-              >
-                <a href={pathname === "/signup" ? "#" : "/signup"}>Sign Up</a>
-              </Button>
+              <div className="flex flex-row gap-2 mt-2">
+                <Button
+                  onClick={(e) => {
+                    if (pathname === "/signin") {
+                      e.preventDefault();
+                      toast("You're already on the Sign In page", {
+                        icon: "📍",
+                      });
+                    }
+                  }}
+                  className="flex-1 rounded-full shadow-lg bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-white"
+                >
+                  <a href={pathname === "/signin" ? "#" : "/signin"}>Sign In</a>
+                </Button>
+                <Button
+                  onClick={(e) => {
+                    if (pathname === "/signup") {
+                      e.preventDefault();
+                      toast("You're already on the Sign up page", {
+                        icon: "📍",
+                      });
+                    }
+                  }}
+                  className="flex-1 rounded-full shadow-lg bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-white"
+                >
+                  <a href={pathname === "/signup" ? "#" : "/signup"}>Sign Up</a>
+                </Button>
+              </div>
             )}
           </div>
         </div>

@@ -66,7 +66,7 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
+      expiresIn: "1h",
     });
 
     res.status(200).json({
@@ -116,13 +116,13 @@ router.post(
         return res.status(400).json({ message: "No garment selected" });
       }
 
-      // ✅ STEP 1: CHECK POINTS
+      //  STEP 1: CHECK POINTS
       const user = await User.findById(req.user.id);
       if (user.points < COST) {
         return res.status(400).json({ message: "Not enough points" });
       }
 
-      // ✅ STEP 2: CONVERT & RESIZE IMAGE
+      //  STEP 2: CONVERT & RESIZE IMAGE
       let imageBuffer = req.file.buffer;
 
       if (
@@ -139,7 +139,7 @@ router.post(
         .jpeg({ quality: 80 })
         .toBuffer();
 
-      // ✅ STEP 3: WAKE UP AI + VALIDATE
+      //  STEP 3: WAKE UP AI + VALIDATE
       const isReady = await waitForAiService();
       console.log("AI Service Ready:", isReady);
       if (!isReady) {
@@ -168,7 +168,7 @@ router.post(
         });
       }
 
-      // ✅ STEP 4: UPLOAD TO CLOUDINARY
+      //  STEP 4: UPLOAD TO CLOUDINARY
       const uploadResult = await new Promise((resolve, reject) => {
         cloudinary.uploader
           .upload_stream({ folder: "wearify" }, (error, result) => {
@@ -178,7 +178,7 @@ router.post(
           .end(imageBuffer);
       });
 
-      // ✅ STEP 5: SAVE TO DB & DEDUCT POINTS
+      //  STEP 5: SAVE TO DB & DEDUCT POINTS
       await Image.create({
         user: user._id,
         imagePath: uploadResult.secure_url,
