@@ -104,6 +104,9 @@ router.post(
   auth,
   upload.single("image"),
   async (req, res) => {
+
+    console.log("AI URL:", process.env.AI_VALIDATION_URL);
+    
     try {
       const COST = 40;
       const { garmentId } = req.body;
