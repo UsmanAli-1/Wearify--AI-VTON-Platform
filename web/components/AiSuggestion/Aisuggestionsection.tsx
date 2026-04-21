@@ -108,12 +108,9 @@ export default function AiSuggestionSection() {
   return (
     <section className="w-full px-6 md:px-12 xl:px-20 flex flex-col gap-4 min-h-[calc(100vh-120px)]">
 
-      {/* ── Heading + Description ── */}
+      {/* ── Heading ── */}
       <div className="text-center">
         <h1 className="text-2xl md:text-3xl font-bold text-white">AI Outfit Suggestions</h1>
-        {/* <p className="text-white/40 text-sm mt-1">
-          Upload your photo and let our AI recommend garments that suit your style.
-        </p> */}
       </div>
 
       {/* ── Main Layout ── */}
@@ -123,14 +120,12 @@ export default function AiSuggestionSection() {
         <div className="flex flex-col gap-4 w-full md:w-[220px] lg:w-[260px] xl:w-[300px] flex-shrink-0">
 
           {/* Upload card */}
-          <Card
-            className="flex-1 hover:scale-105 duration-300 transition shadow-xl bg-white/5 backdrop-blur-md border border-white/10 py-0"
-          >
+          <Card className="flex-1 hover:scale-105 duration-300 transition shadow-xl bg-white/5 backdrop-blur-md border border-white/10 py-0">
             <CardContent className="h-full p-4 flex flex-col">
               <div
                 onDrop={handleDrop}
                 onDragOver={(e) => e.preventDefault()}
-                className="relative flex-1 rounded-2xl border-2 border-dashed border-white/10 overflow-hidden flex flex-col items-center justify-center transition hover:border-purple-400/30 duration-300 md:min-h-[380px] min-h-[440px]  "
+                className="relative flex-1 rounded-2xl border-2 border-dashed border-white/10 overflow-hidden flex flex-col items-center justify-center transition hover:border-purple-400/30 duration-300 min-h-[410px] md:min-h-0"
               >
                 {uploadedImage ? (
                   <>
@@ -207,14 +202,16 @@ export default function AiSuggestionSection() {
           </Button>
         </div>
 
-        {/* ── RIGHT: 4 garments in a row on desktop, 2×2 on mobile ── */}
-        <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* ── RIGHT: garment slots ── */}
+        {/* Desktop: 4 in a row | Mobile: 2×2 grid, each card tall enough */}
+        <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 pb-6 md:pb-0">
           {slots.map((i) => {
             const garment = suggestions[i];
             return (
               <Card
                 key={i}
-                className="group relative  hover:scale-[1.02] duration-300 transition shadow-xl bg-white/5 backdrop-blur-md border border-white/10"
+                className="group relative overflow-hidden hover:scale-[1.02] duration-300 transition shadow-xl bg-white/5 backdrop-blur-md border border-white/10
+                  min-h-[280px] sm:min-h-[320px] md:min-h-0"
               >
                 {garment ? (
                   <>
@@ -251,11 +248,11 @@ export default function AiSuggestionSection() {
                     <div className="absolute bottom-2 left-2 right-2 md:hidden">
                       <Button
                         onClick={() => handleTryOn(garment)}
-                        className="w-full py-1.5 rounded-full text-[10px] font-medium text-white
+                        className="w-full py-2 rounded-full text-xs font-medium text-white
                           bg-gradient-to-r from-purple-400/80 to-blue-600/90
-                          flex items-center justify-center gap-1 cursor-pointer"
+                          flex items-center justify-center gap-1.5 cursor-pointer"
                       >
-                        <FontAwesomeIcon icon={faShirt} className="text-[8px]" />
+                        <FontAwesomeIcon icon={faShirt} className="text-[10px]" />
                         Try On
                       </Button>
                     </div>
