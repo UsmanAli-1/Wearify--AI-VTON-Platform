@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/ui/card";
 import { Input } from "@/ui/input";
 import { X, Sparkles } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faWandMagicSparkles, faShirt } from "@fortawesome/free-solid-svg-icons";
+import { faWandMagicSparkles, faShirt, faMars, faVenus } from "@fortawesome/free-solid-svg-icons";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import BASE_URL, { authHeaders } from "@/config/api";
@@ -22,9 +22,9 @@ export default function AiSuggestionSection() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [gender, setGender] = useState<"male" | "female">("male");
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<SuggestedGarment[]>([]);
-  const [hasSearched, setHasSearched] = useState(false);
 
   useEffect(() => {
     const checkLogin = () => {
@@ -43,7 +43,6 @@ export default function AiSuggestionSection() {
     setSelectedFile(file);
     setUploadedImage(URL.createObjectURL(file));
     setSuggestions([]);
-    setHasSearched(false);
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -53,7 +52,6 @@ export default function AiSuggestionSection() {
     setSelectedFile(file);
     setUploadedImage(URL.createObjectURL(file));
     setSuggestions([]);
-    setHasSearched(false);
   };
 
   const handleSuggest = async () => {
@@ -62,10 +60,11 @@ export default function AiSuggestionSection() {
       return;
     }
     setLoading(true);
-    setHasSearched(true);
+    setSuggestions([]);
     try {
       const formData = new FormData();
       formData.append("image", selectedFile);
+      formData.append("gender", gender);
       const token = localStorage.getItem("token");
       const res = await fetch(`${BASE_URL}/api/suggestions/suggest`, {
         method: "POST",
@@ -89,6 +88,7 @@ export default function AiSuggestionSection() {
     }
   };
 
+  // Pass garment directly via localStorage — no extra storage needed
   const handleTryOn = (garment: SuggestedGarment) => {
     if (!selectedFile) return;
     const reader = new FileReader();
@@ -108,24 +108,26 @@ export default function AiSuggestionSection() {
   return (
     <section className="w-full px-6 md:px-12 xl:px-20 flex flex-col gap-4 min-h-[calc(100vh-120px)]">
 
-      {/* ── Heading ── */}
+      {/* Heading */}
       <div className="text-center">
         <h1 className="text-2xl md:text-3xl font-bold text-white">AI Outfit Suggestions</h1>
       </div>
 
-      {/* ── Main Layout ── */}
+      {/* Main Layout */}
       <div className="flex flex-col md:flex-row gap-5 flex-1">
 
-        {/* ── LEFT: Upload + Button ── */}
-        <div className="flex flex-col gap-4 w-full md:w-[220px] lg:w-[260px] xl:w-[300px] flex-shrink-0">
+        {/* LEFT: Upload + Gender Toggle + Button */}
+        <div className="flex flex-col gap-4 w-full md:w-[220px] lg:w-[260px] xl:w-[250px] 2xl:w-[350px] flex-shrink-0 ">
 
           {/* Upload card */}
           <Card className="flex-1 hover:scale-105 duration-300 transition shadow-xl bg-white/5 backdrop-blur-md border border-white/10 py-0">
-            <CardContent className="h-full p-4 flex flex-col">
+            <CardContent className="h-full min-h-[500px] md:min-h-0 p-3 flex flex-col gap-2">
+
+              {/* Drop zone */}
               <div
                 onDrop={handleDrop}
                 onDragOver={(e) => e.preventDefault()}
-                className="relative flex-1 rounded-2xl border-2 border-dashed border-white/10 overflow-hidden flex flex-col items-center justify-center transition hover:border-purple-400/30 duration-300 min-h-[410px] md:min-h-0"
+                className="relative flex-1 rounded-2xl border-2 border-dashed border-white/10 overflow-hidden flex flex-col items-center justify-center transition hover:border-purple-400/30 duration-300 min-h-[340px] md:min-h-0"
               >
                 {uploadedImage ? (
                   <>
@@ -139,7 +141,6 @@ export default function AiSuggestionSection() {
                         setUploadedImage(null);
                         setSelectedFile(null);
                         setSuggestions([]);
-                        setHasSearched(false);
                       }}
                       className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-red-500 flex items-center justify-center transition duration-200 cursor-pointer"
                     >
@@ -172,6 +173,33 @@ export default function AiSuggestionSection() {
                   </div>
                 )}
               </div>
+
+               {/* Gender Toggle */}
+              <div className="flex rounded-xl overflow-hidden border border-white/10 flex-shrink-0">
+                <button
+                  onClick={() => setGender("male")}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition duration-200 cursor-pointer
+                    ${gender === "male"
+                      ? "bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-white"
+                      : "text-white/40 hover:text-white/70 bg-transparent"
+                    }`}
+                >
+                  <FontAwesomeIcon icon={faMars} className="text-[11px]" />
+                  Male
+                </button>
+                <div className="w-px bg-white/10" />
+                <button
+                  onClick={() => setGender("female")}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition duration-200 cursor-pointer
+                    ${gender === "female"
+                      ? "bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-white"
+                      : "text-white/40 hover:text-white/70 bg-transparent"
+                    }`}
+                >
+                  <FontAwesomeIcon icon={faVenus} className="text-[11px]" />
+                  Female
+                </button>
+              </div>
             </CardContent>
           </Card>
 
@@ -202,8 +230,7 @@ export default function AiSuggestionSection() {
           </Button>
         </div>
 
-        {/* ── RIGHT: garment slots ── */}
-        {/* Desktop: 4 in a row | Mobile: 2×2 grid, each card tall enough */}
+        {/* RIGHT: 4 garment slots — reduced height */}
         <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 pb-6 md:pb-0">
           {slots.map((i) => {
             const garment = suggestions[i];
@@ -211,7 +238,7 @@ export default function AiSuggestionSection() {
               <Card
                 key={i}
                 className="group relative overflow-hidden hover:scale-[1.02] duration-300 transition shadow-xl bg-white/5 backdrop-blur-md border border-white/10
-                  min-h-[280px] sm:min-h-[320px] md:min-h-0"
+                  min-h-[240px] sm:min-h-[420px] md:min-h-0"
               >
                 {garment ? (
                   <>
@@ -244,7 +271,7 @@ export default function AiSuggestionSection() {
                       </Button>
                     </div>
 
-                    {/* Mobile Try On — always visible */}
+                    {/* Mobile Try On */}
                     <div className="absolute bottom-2 left-2 right-2 md:hidden">
                       <Button
                         onClick={() => handleTryOn(garment)}
@@ -258,7 +285,6 @@ export default function AiSuggestionSection() {
                     </div>
                   </>
                 ) : (
-                  /* Empty slot */
                   <div className="absolute inset-0 m-3 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-white/10 rounded-2xl">
                     {loading ? (
                       <>
