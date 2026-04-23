@@ -6,7 +6,12 @@ import { Card, CardContent } from "@/ui/card";
 import { Input } from "@/ui/input";
 import { X, Sparkles } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faWandMagicSparkles, faShirt, faMars, faVenus } from "@fortawesome/free-solid-svg-icons";
+import {
+  faWandMagicSparkles,
+  faShirt,
+  faMars,
+  faVenus,
+} from "@fortawesome/free-solid-svg-icons";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import BASE_URL, { authHeaders } from "@/config/api";
@@ -88,7 +93,6 @@ export default function AiSuggestionSection() {
     }
   };
 
-  // Pass garment directly via localStorage — no extra storage needed
   const handleTryOn = (garment: SuggestedGarment) => {
     if (!selectedFile) return;
     const reader = new FileReader();
@@ -107,103 +111,202 @@ export default function AiSuggestionSection() {
 
   return (
     <section className="w-full px-6 md:px-12 xl:px-20 flex flex-col gap-4 min-h-[calc(100vh-120px)]">
-
       {/* Heading */}
       <div className="text-center">
-        <h1 className="text-2xl md:text-3xl font-bold text-white">AI Outfit Suggestions</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-white">
+          AI Outfit Suggestions
+        </h1>
       </div>
 
-      {/* Main Layout */}
-      <div className="flex flex-col md:flex-row gap-5 flex-1">
-
-        {/* LEFT: Upload + Gender Toggle + Button */}
-        <div className="flex flex-col gap-4 w-full md:w-[220px] lg:w-[260px] xl:w-[250px] 2xl:w-[350px] flex-shrink-0 ">
-
-          {/* Upload card */}
-          <Card className="flex-1 hover:scale-105 duration-300 transition shadow-xl bg-white/5 backdrop-blur-md border border-white/10 py-0">
-            <CardContent className="h-full min-h-[500px] md:min-h-0 p-3 flex flex-col gap-2">
-
-              {/* Drop zone */}
-              <div
-                onDrop={handleDrop}
-                onDragOver={(e) => e.preventDefault()}
-                className="relative flex-1 rounded-2xl border-2 border-dashed border-white/10 overflow-hidden flex flex-col items-center justify-center transition hover:border-purple-400/30 duration-300 min-h-[340px] md:min-h-0"
-              >
-                {uploadedImage ? (
-                  <>
-                    <img
-                      src={uploadedImage}
-                      alt="Uploaded"
-                      className="absolute inset-0 w-full h-full object-cover rounded-xl"
-                    />
-                    <button
-                      onClick={() => {
-                        setUploadedImage(null);
-                        setSelectedFile(null);
-                        setSuggestions([]);
-                      }}
-                      className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-red-500 flex items-center justify-center transition duration-200 cursor-pointer"
-                    >
-                      <X className="w-4 h-4 text-white" />
-                    </button>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center gap-1 text-center px-3">
-                    <h3 className="font-semibold text-white text-sm">Upload Person</h3>
-                    <p className="text-gray-500 text-xs mb-4">png , jpg , jpeg</p>
-                    <label
-                      className={`font-semibold text-sm ${
-                        isLoggedIn ? "text-[#A06CE3] cursor-pointer" : "text-gray-400 cursor-not-allowed"
-                      }`}
-                    >
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        disabled={!isLoggedIn}
-                        onChange={handleUpload}
+      {/* Outer wrapper — stacks on mobile, row on sm+ */}
+      <div className="flex flex-col gap-4 flex-1">
+        {/* Card row + Garment grid */}
+        <div className="flex flex-col sm:flex-row gap-5 flex-1">
+          {/* ── LEFT: Upload card ── */}
+          <div className="flex-shrink-0 w-full sm:w-[280px] md:w-[300px] lg:w-[340px] xl:w-[260px] 2xl:w-[320px] flex flex-col">
+            <Card className="flex-1 hover:scale-[1.02] duration-300 transition shadow-xl bg-white/5 backdrop-blur-md border border-white/10 py-0">
+              <CardContent className="h-full p-3 flex flex-col gap-2">
+                {/* Drop zone — vh-based height on mobile so it scales with screen */}
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={(e) => e.preventDefault()}
+                  style={{ minHeight: "55svh" }}
+                  className="relative flex-1 rounded-2xl border-2 border-dashed border-white/10 overflow-hidden flex flex-col items-center justify-center transition hover:border-purple-400/30 duration-300 sm:min-h-0"
+                  // svh = small viewport height — accounts for mobile browser chrome
+                  // resets to auto (flex-1) on sm+ so desktop layout takes over
+                >
+                  {uploadedImage ? (
+                    <>
+                      <img
+                        src={uploadedImage}
+                        alt="Uploaded"
+                        className="absolute inset-0 w-full h-full object-cover rounded-xl"
                       />
-                      Select Image
-                    </label>
-                    {!isLoggedIn && (
-                      <a href="/signin" className="text-xs text-[#A06CE3] mt-1">
-                        Sign in to upload
-                      </a>
-                    )}
-                  </div>
-                )}
-              </div>
+                      <button
+                        onClick={() => {
+                          setUploadedImage(null);
+                          setSelectedFile(null);
+                          setSuggestions([]);
+                        }}
+                        className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-red-500 flex items-center justify-center transition duration-200 cursor-pointer"
+                      >
+                        <X className="w-4 h-4 text-white" />
+                      </button>
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center gap-1 text-center px-3">
+                      <h3 className="font-semibold text-white text-sm">
+                        Upload Person
+                      </h3>
+                      <p className="text-gray-500 text-xs mb-4">
+                        png , jpg , jpeg
+                      </p>
+                      <label
+                        className={`font-semibold text-sm ${
+                          isLoggedIn
+                            ? "text-[#A06CE3] cursor-pointer"
+                            : "text-gray-400 cursor-not-allowed"
+                        }`}
+                      >
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          disabled={!isLoggedIn}
+                          onChange={handleUpload}
+                        />
+                        Select Image
+                      </label>
+                      {!isLoggedIn && (
+                        <a
+                          href="/signin"
+                          className="text-xs text-[#A06CE3] mt-1"
+                        >
+                          Sign in to upload
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
 
-               {/* Gender Toggle */}
-              <div className="flex rounded-xl overflow-hidden border border-white/10 flex-shrink-0">
-                <button
-                  onClick={() => setGender("male")}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition duration-200 cursor-pointer
-                    ${gender === "male"
-                      ? "bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-white"
-                      : "text-white/40 hover:text-white/70 bg-transparent"
+                {/* Gender Toggle */}
+                <div className="flex rounded-xl overflow-hidden border border-white/10 flex-shrink-0">
+                  <button
+                    onClick={() => setGender("male")}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition duration-200 cursor-pointer ${
+                      gender === "male"
+                        ? "bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-white"
+                        : "text-white/40 hover:text-white/70 bg-transparent"
                     }`}
-                >
-                  <FontAwesomeIcon icon={faMars} className="text-[11px]" />
-                  Male
-                </button>
-                <div className="w-px bg-white/10" />
-                <button
-                  onClick={() => setGender("female")}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition duration-200 cursor-pointer
-                    ${gender === "female"
-                      ? "bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-white"
-                      : "text-white/40 hover:text-white/70 bg-transparent"
+                  >
+                    <FontAwesomeIcon icon={faMars} className="text-[11px]" />
+                    Male
+                  </button>
+                  <div className="w-px bg-white/10" />
+                  <button
+                    onClick={() => setGender("female")}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition duration-200 cursor-pointer ${
+                      gender === "female"
+                        ? "bg-gradient-to-r from-purple-400/50 to-blue-600/90 text-white"
+                        : "text-white/40 hover:text-white/70 bg-transparent"
                     }`}
-                >
-                  <FontAwesomeIcon icon={faVenus} className="text-[11px]" />
-                  Female
-                </button>
-              </div>
-            </CardContent>
-          </Card>
+                  >
+                    <FontAwesomeIcon icon={faVenus} className="text-[11px]" />
+                    Female
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-          {/* Suggest Me button */}
+          {/* ── RIGHT: Garment grid — 2 cols on mobile/mid, 4 cols on xl+ ── */}
+          <div className="flex-1 grid grid-cols-2 xl:grid-cols-4 gap-4">
+            {slots.map((i) => {
+              const garment = suggestions[i];
+              return (
+                <Card
+                  key={i}
+                  className="group relative overflow-hidden hover:scale-[1.02] duration-300 transition shadow-xl bg-white/5 backdrop-blur-md border border-white/10 min-h-[44svh] sm:min-h-0"
+                  // same svh trick — garment cards scale with screen on mobile
+                >
+                  {garment ? (
+                    <>
+                      <img
+                        src={garment.imagePath}
+                        alt={garment.name}
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                      />
+
+                      {/* Number badge */}
+                      <div className="absolute top-2 left-2">
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-bold text-white bg-gradient-to-r from-purple-400/70 to-blue-600/90 shadow">
+                          {i + 1}
+                        </span>
+                      </div>
+
+                      {/* Desktop hover overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex flex-col justify-end p-3 gap-2">
+                        <p className="text-white text-xs font-medium truncate">
+                          {garment.name}
+                        </p>
+                        <Button
+                          onClick={() => handleTryOn(garment)}
+                          className="w-full py-2 rounded-full text-xs font-medium text-white bg-gradient-to-r from-purple-400/80 to-blue-600/90 hover:from-[#4287f5] hover:to-[#6a339e] hover:scale-105 duration-200 transition flex items-center justify-center gap-1.5 shadow-lg cursor-pointer"
+                        >
+                          <FontAwesomeIcon
+                            icon={faShirt}
+                            className="text-[10px]"
+                          />
+                          Try On
+                        </Button>
+                      </div>
+
+                      {/* Mobile Try On button */}
+                      <div className="absolute bottom-2 left-2 right-2 md:hidden">
+                        <Button
+                          onClick={() => handleTryOn(garment)}
+                          className="w-full py-2 rounded-full text-xs font-medium text-white bg-gradient-to-r from-purple-400/80 to-blue-600/90 flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <FontAwesomeIcon
+                            icon={faShirt}
+                            className="text-[10px]"
+                          />
+                          Try On
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 m-3 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-white/10 rounded-2xl">
+                      {loading ? (
+                        <>
+                          <Sparkles className="w-5 h-5 text-purple-400/40 animate-pulse" />
+                          <p className="text-white/20 text-[10px]">
+                            Finding {i + 1}...
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center">
+                            <FontAwesomeIcon
+                              icon={faShirt}
+                              className="text-white/15"
+                            />
+                          </div>
+                          <p className="text-white/20 text-[10px]">
+                            Outfit {i + 1}
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── Suggest Me button — below card, matches left col width on sm+ ── */}
+        <div className="w-full sm:w-[280px] md:w-[300px] lg:w-[340px] xl:w-[260px] 2xl:w-[320px] pb-6 sm:pb-0">
           <Button
             disabled={!isLoggedIn || !uploadedImage || loading}
             onClick={handleSuggest}
@@ -215,9 +318,24 @@ export default function AiSuggestionSection() {
           >
             {loading ? (
               <>
-                <svg className="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                <svg
+                  className="animate-spin w-4 h-4 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8z"
+                  />
                 </svg>
                 Analyzing...
               </>
@@ -228,82 +346,6 @@ export default function AiSuggestionSection() {
               </>
             )}
           </Button>
-        </div>
-
-        {/* RIGHT: 4 garment slots — reduced height */}
-        <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 pb-6 md:pb-0">
-          {slots.map((i) => {
-            const garment = suggestions[i];
-            return (
-              <Card
-                key={i}
-                className="group relative overflow-hidden hover:scale-[1.02] duration-300 transition shadow-xl bg-white/5 backdrop-blur-md border border-white/10
-                  min-h-[240px] sm:min-h-[420px] md:min-h-0"
-              >
-                {garment ? (
-                  <>
-                    <img
-                      src={garment.imagePath}
-                      alt={garment.name}
-                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                    />
-
-                    {/* Number badge */}
-                    <div className="absolute top-2 left-2">
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-bold text-white bg-gradient-to-r from-purple-400/70 to-blue-600/90 shadow">
-                        {i + 1}
-                      </span>
-                    </div>
-
-                    {/* Desktop hover overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex flex-col justify-end p-3 gap-2">
-                      <p className="text-white text-xs font-medium truncate">{garment.name}</p>
-                      <Button
-                        onClick={() => handleTryOn(garment)}
-                        className="w-full py-2 rounded-full text-xs font-medium text-white
-                          bg-gradient-to-r from-purple-400/80 to-blue-600/90
-                          hover:from-[#4287f5] hover:to-[#6a339e]
-                          hover:scale-105 duration-200 transition
-                          flex items-center justify-center gap-1.5 shadow-lg cursor-pointer"
-                      >
-                        <FontAwesomeIcon icon={faShirt} className="text-[10px]" />
-                        Try On
-                      </Button>
-                    </div>
-
-                    {/* Mobile Try On */}
-                    <div className="absolute bottom-2 left-2 right-2 md:hidden">
-                      <Button
-                        onClick={() => handleTryOn(garment)}
-                        className="w-full py-2 rounded-full text-xs font-medium text-white
-                          bg-gradient-to-r from-purple-400/80 to-blue-600/90
-                          flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <FontAwesomeIcon icon={faShirt} className="text-[10px]" />
-                        Try On
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <div className="absolute inset-0 m-3 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-white/10 rounded-2xl">
-                    {loading ? (
-                      <>
-                        <Sparkles className="w-5 h-5 text-purple-400/40 animate-pulse" />
-                        <p className="text-white/20 text-[10px]">Finding {i + 1}...</p>
-                      </>
-                    ) : (
-                      <>
-                        <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center">
-                          <FontAwesomeIcon icon={faShirt} className="text-white/15" />
-                        </div>
-                        <p className="text-white/20 text-[10px]">Outfit {i + 1}</p>
-                      </>
-                    )}
-                  </div>
-                )}
-              </Card>
-            );
-          })}
         </div>
       </div>
     </section>
