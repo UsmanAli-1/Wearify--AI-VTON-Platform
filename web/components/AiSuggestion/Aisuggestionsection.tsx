@@ -135,6 +135,7 @@ export default function AiSuggestionSection() {
                   // svh = small viewport height — accounts for mobile browser chrome
                   // resets to auto (flex-1) on sm+ so desktop layout takes over
                 >
+                
                   {uploadedImage ? (
                     <>
                       <img
