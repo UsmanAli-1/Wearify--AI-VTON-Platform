@@ -123,7 +123,7 @@ export default function AiSuggestionSection() {
         {/* Card row + Garment grid */}
         <div className="flex flex-col sm:flex-row gap-5 flex-1">
           {/* ── LEFT: Upload card ── */}
-          <div className="flex-shrink-0 w-full sm:w-[280px] md:w-[300px] lg:w-[340px] xl:w-[260px] 2xl:w-[320px] flex flex-col">
+          <div className="flex-shrink-0 w-full sm:w-[280px] md:w-[300px] lg:w-[300px] xl:w-[260px] 2xl:w-[320px] flex flex-col">
             <Card className="flex-1 hover:scale-[1.02] duration-300 transition shadow-xl bg-white/5 backdrop-blur-md border border-white/10 py-0">
               <CardContent className="h-full p-3 flex flex-col gap-2">
                 {/* Drop zone — vh-based height on mobile so it scales with screen */}
@@ -221,7 +221,7 @@ export default function AiSuggestionSection() {
           </div>
 
           {/* ── RIGHT: Garment grid — 2 cols on mobile/mid, 4 cols on xl+ ── */}
-          <div className="flex-1 grid grid-cols-2 xl:grid-cols-4 gap-4">
+          <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-4">
             {slots.map((i) => {
               const garment = suggestions[i];
               return (
@@ -244,12 +244,13 @@ export default function AiSuggestionSection() {
                           {i + 1}
                         </span>
                       </div>
+                      
 
                       {/* Desktop hover overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex flex-col justify-end p-3 gap-2">
-                        <p className="text-white text-xs font-medium truncate">
+                        {/* <p className="text-white text-xs font-medium truncate">
                           {garment.name}
-                        </p>
+                        </p> */}
                         <Button
                           onClick={() => handleTryOn(garment)}
                           className="w-full py-2 rounded-full text-xs font-medium text-white bg-gradient-to-r from-purple-400/80 to-blue-600/90 hover:from-[#4287f5] hover:to-[#6a339e] hover:scale-105 duration-200 transition flex items-center justify-center gap-1.5 shadow-lg cursor-pointer"
@@ -307,7 +308,7 @@ export default function AiSuggestionSection() {
         </div>
 
         {/* ── Suggest Me button — below card, matches left col width on sm+ ── */}
-        <div className="w-full sm:w-[280px] md:w-[300px] lg:w-[340px] xl:w-[260px] 2xl:w-[320px] pb-6 sm:pb-0">
+        <div className="w-full sm:w-[280px] md:w-[300px] lg:w-[300px] xl:w-[260px] 2xl:w-[320px] pb-6 sm:pb-0">
           <Button
             disabled={!isLoggedIn || !uploadedImage || loading}
             onClick={handleSuggest}

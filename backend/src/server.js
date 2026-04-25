@@ -16,6 +16,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const axios = require("axios");
 const imageRoutes = require("./routes/images");
+const suggestionsRouter = require("./routes/suggestions");
 
 const app = express();
 
@@ -48,6 +49,7 @@ app.use("/api/payment", paymentRouter);
 app.use("/api/garments", require("./routes/garments"));
 app.use("/api/users", require("./routes/users"));
 app.use("/api/images", imageRoutes);
+app.use("/api/suggestions", suggestionsRouter);
 
 /* ERROR HANDLER */
 app.use((err, req, res, next) => {
