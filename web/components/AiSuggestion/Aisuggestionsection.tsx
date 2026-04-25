@@ -80,7 +80,6 @@ export default function AiSuggestionSection() {
       const data = await res.json();
 
       if (!res.ok) {
-        // ── Same toast logic as UploadTryOn ──
         if (data.reason) {
           switch (data.reason) {
             case "multiple_people":
@@ -106,15 +105,13 @@ export default function AiSuggestionSection() {
         return;
       }
 
-      // ── Update points in header without reload ──
       window.dispatchEvent(new Event("auth-changed"));
-
       setSuggestions(data.suggestions || []);
 
       if ((data.suggestions || []).length === 0) {
         toast("No suggestions found. Try a different photo.", { icon: "🤔" });
       } else {
-        toast.success("Outfits suggested !");
+        toast.success("Outfits suggested!");
       }
     } catch {
       toast.error("Something went wrong. Please try again.");
@@ -139,6 +136,49 @@ export default function AiSuggestionSection() {
 
   const slots = [0, 1, 2, 3];
 
+  // ── Suggest Me button — reused in both positions ──
+  const SuggestButton = (
+    <Button
+      disabled={!isLoggedIn || !uploadedImage || loading}
+      onClick={handleSuggest}
+      className={`w-full py-6 rounded-full text-[#F5F5DC] shadow-xl
+        hover:scale-105 duration-300 transition hover:from-[#4287f5] hover:to-[#6a339e]
+        disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-auto
+        bg-gradient-to-r from-purple-400/50 to-blue-600/90
+        ${isLoggedIn && uploadedImage ? "cursor-pointer" : ""}`}
+    >
+      {loading ? (
+        <>
+          <svg
+            className="animate-spin w-4 h-4 mr-2"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v8z"
+            />
+          </svg>
+          Analyzing...
+        </>
+      ) : (
+        <>
+          <FontAwesomeIcon icon={faWandMagicSparkles} className="mr-2" />
+          Suggest Me
+        </>
+      )}
+    </Button>
+  );
+
   return (
     <section className="w-full px-6 md:px-12 xl:px-20 flex flex-col gap-4 min-h-[calc(100vh-120px)]">
       {/* Heading */}
@@ -148,22 +188,18 @@ export default function AiSuggestionSection() {
         </h1>
       </div>
 
-      {/* Outer wrapper — stacks on mobile, row on sm+ */}
       <div className="flex flex-col gap-4 flex-1">
-        {/* Card row + Garment grid */}
-        <div className="flex flex-col sm:flex-row gap-5 flex-1">
-          {/* ── LEFT: Upload card ── */}
-          <div className="flex-shrink-0 w-full sm:w-[280px] md:w-[300px] lg:w-[300px] xl:w-[260px] 2xl:w-[320px] flex flex-col">
+        <div className="flex flex-col sm:flex-row gap-3 flex-1">
+          {/* ── LEFT: Upload card + button below on mobile ── */}
+          <div className="flex-shrink-0 w-full sm:w-[280px] md:w-[300px] lg:w-[300px] xl:w-[260px] 2xl:w-[320px] flex flex-col gap-3">
             <Card className="flex-1 hover:scale-[1.02] duration-300 transition shadow-xl bg-white/5 backdrop-blur-md border border-white/10 py-0">
               <CardContent className="h-full p-3 flex flex-col gap-2">
-                {/* Drop zone — vh-based height on mobile so it scales with screen */}
+                {/* Drop zone */}
                 <div
                   onDrop={handleDrop}
                   onDragOver={(e) => e.preventDefault()}
                   style={{ minHeight: "55svh" }}
                   className="relative flex-1 rounded-2xl border-2 border-dashed border-white/10 overflow-hidden flex flex-col items-center justify-center transition hover:border-purple-400/30 duration-300 sm:min-h-0"
-                  // svh = small viewport height — accounts for mobile browser chrome
-                  // resets to auto (flex-1) on sm+ so desktop layout takes over
                 >
                   {uploadedImage ? (
                     <>
@@ -172,9 +208,7 @@ export default function AiSuggestionSection() {
                         alt="Uploaded"
                         className="absolute inset-0 w-full h-full object-cover rounded-xl"
                       />
-                      {loading ? (
-                        " "
-                      ) : (
+                      {!loading && (
                         <button
                           onClick={() => {
                             setUploadedImage(null);
@@ -251,17 +285,19 @@ export default function AiSuggestionSection() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Button — visible only on mobile (below card) */}
+            <div className="sm:hidden pb-2">{SuggestButton}</div>
           </div>
 
-          {/* ── RIGHT: Garment grid — 2 cols on mobile/mid, 4 cols on xl+ ── */}
-          <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* ── RIGHT: Garment grid ── */}
+          <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5 sm:mb-0">
             {slots.map((i) => {
               const garment = suggestions[i];
               return (
                 <Card
                   key={i}
                   className="group relative overflow-hidden hover:scale-[1.02] duration-300 transition shadow-xl bg-white/5 backdrop-blur-md border border-white/10 min-h-[44svh] sm:min-h-0"
-                  // same svh trick — garment cards scale with screen on mobile
                 >
                   {garment ? (
                     <>
@@ -270,19 +306,12 @@ export default function AiSuggestionSection() {
                         alt={garment.name}
                         className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500"
                       />
-
-                      {/* Number badge */}
                       <div className="absolute top-2 left-2">
                         <span className="inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-bold text-white bg-gradient-to-r from-purple-400/70 to-blue-600/90 shadow">
                           {i + 1}
                         </span>
                       </div>
-
-                      {/* Desktop hover overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex flex-col justify-end p-3 gap-2">
-                        {/* <p className="text-white text-xs font-medium truncate">
-                          {garment.name}
-                        </p> */}
                         <Button
                           onClick={() => handleTryOn(garment)}
                           className="w-full py-2 rounded-full text-xs font-medium text-white bg-gradient-to-r from-purple-400/80 to-blue-600/90 hover:from-[#4287f5] hover:to-[#6a339e] hover:scale-105 duration-200 transition flex items-center justify-center gap-1.5 shadow-lg cursor-pointer"
@@ -294,8 +323,6 @@ export default function AiSuggestionSection() {
                           Try On
                         </Button>
                       </div>
-
-                      {/* Mobile Try On button */}
                       <div className="absolute bottom-2 left-2 right-2 md:hidden">
                         <Button
                           onClick={() => handleTryOn(garment)}
@@ -339,47 +366,9 @@ export default function AiSuggestionSection() {
           </div>
         </div>
 
-        {/* ── Suggest Me button — below card, matches left col width on sm+ ── */}
-        <div className="w-full sm:w-[280px] md:w-[300px] lg:w-[300px] xl:w-[260px] 2xl:w-[320px] pb-6 sm:pb-0">
-          <Button
-            disabled={!isLoggedIn || !uploadedImage || loading}
-            onClick={handleSuggest}
-            className={`w-full py-6 rounded-full text-[#F5F5DC] shadow-xl
-              hover:scale-105 duration-300 transition hover:from-[#4287f5] hover:to-[#6a339e]
-              disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-auto
-              bg-gradient-to-r from-purple-400/50 to-blue-600/90
-              ${isLoggedIn && uploadedImage ? "cursor-pointer" : ""}`}
-          >
-            {loading ? (
-              <>
-                <svg
-                  className="animate-spin w-4 h-4 mr-2"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8z"
-                  />
-                </svg>
-                Analyzing...
-              </>
-            ) : (
-              <>
-                <FontAwesomeIcon icon={faWandMagicSparkles} className="mr-2" />
-                Suggest Me
-              </>
-            )}
-          </Button>
+        {/* Button — visible only on desktop (below left col) */}
+        <div className="hidden sm:block w-full sm:w-[280px] md:w-[300px] lg:w-[300px] xl:w-[260px] 2xl:w-[320px] pb-6 sm:pb-0">
+          {SuggestButton}
         </div>
       </div>
     </section>
