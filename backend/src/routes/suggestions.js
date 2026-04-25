@@ -5,8 +5,8 @@ const upload = require("../middleware/upload");
 const axios = require("axios");
 const FormData = require("form-data");
 const mongoose = require("mongoose");
+const User = require("../models/User"); // ← add this
 
-// AIGarment model
 const aiGarmentSchema = new mongoose.Schema({
   filename: String,
   gender: String,
@@ -14,11 +14,12 @@ const aiGarmentSchema = new mongoose.Schema({
   imagePath: String,
 }, { collection: "aigarments" });
 
-const AIGarment = mongoose.models.AIGarment || 
+const AIGarment = mongoose.models.AIGarment ||
   mongoose.model("AIGarment", aiGarmentSchema);
 
 router.post("/suggest", auth, upload.single("image"), async (req, res) => {
   try {
+    const COST = 40;
     const { gender } = req.body;
 
     if (!req.file) {
@@ -29,7 +30,13 @@ router.post("/suggest", auth, upload.single("image"), async (req, res) => {
       return res.status(400).json({ message: "Invalid gender" });
     }
 
-    // ── Step 1: Validate full body via ai-validation ──
+    // ── Step 1: Check points ──
+    const user = await User.findById(req.user.id);
+    if (user.points < COST) {
+      return res.status(400).json({ message: "Not enough points" });
+    }
+
+    // ── Step 2: Validate full body ──
     const validationForm = new FormData();
     validationForm.append("file", req.file.buffer, {
       filename: "image.jpg",
@@ -41,14 +48,10 @@ router.post("/suggest", auth, upload.single("image"), async (req, res) => {
       const validationRes = await axios.post(
         `${process.env.AI_VALIDATION_URL}/check-full-body`,
         validationForm,
-        {
-          headers: validationForm.getHeaders(),
-          timeout: 30000,
-        }
+        { headers: validationForm.getHeaders(), timeout: 30000 }
       );
       validationResult = validationRes.data;
     } catch (err) {
-      // If validation service is down, skip validation
       console.warn("Validation service unavailable — skipping");
       validationResult = { isFullBody: true };
     }
@@ -60,7 +63,7 @@ router.post("/suggest", auth, upload.single("image"), async (req, res) => {
       });
     }
 
-    // ── Step 2: Get skin tone from suggestion-model FastAPI ──
+    // ── Step 3: Get skin tone ──
     const skinForm = new FormData();
     skinForm.append("file", req.file.buffer, {
       filename: "image.jpg",
@@ -75,10 +78,7 @@ router.post("/suggest", auth, upload.single("image"), async (req, res) => {
       const skinRes = await axios.post(
         `${process.env.SUGGESTION_MODEL_URL}/suggest-outfits`,
         skinForm,
-        {
-          headers: skinForm.getHeaders(),
-          timeout: 15000,
-        }
+        { headers: skinForm.getHeaders(), timeout: 15000 }
       );
       skinTone = skinRes.data.skin_tone;
       suggestedColors = skinRes.data.suggested_colors;
@@ -86,18 +86,16 @@ router.post("/suggest", auth, upload.single("image"), async (req, res) => {
       console.warn("Suggestion model unavailable — using default colors");
     }
 
-    // ── Step 3: Query MongoDB aigarments ──
+    // ── Step 4: Query MongoDB ──
     const garments = await AIGarment.aggregate([
-      {
-        $match: {
-          gender: gender,
-          color: { $in: suggestedColors },
-        },
-      },
+      { $match: { gender, color: { $in: suggestedColors } } },
       { $sample: { size: 4 } },
     ]);
 
-    // ── Step 4: Return results ──
+    // ── Step 5: Deduct points ──
+    user.points -= COST;
+    await user.save();
+
     return res.json({
       skin_tone: skinTone,
       suggested_colors: suggestedColors,
@@ -107,6 +105,8 @@ router.post("/suggest", auth, upload.single("image"), async (req, res) => {
         imagePath: g.imagePath,
         color: g.color,
       })),
+      points: user.points,                        // ← return updated points
+      pointsExhausted: user.points < COST,        // ← flag for upgrade modal
     });
 
   } catch (err) {

@@ -76,15 +76,45 @@ export default function AiSuggestionSection() {
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
+
+      const data = await res.json();
+
       if (!res.ok) {
-        const data = await res.json();
-        toast.error(data.message || "Failed to get suggestions");
+        // ── Same toast logic as UploadTryOn ──
+        if (data.reason) {
+          switch (data.reason) {
+            case "multiple_people":
+              toast.error("Only one person allowed");
+              break;
+            case "selfie":
+              toast.error("Image too close. Upload full body");
+              break;
+            case "not_full_body":
+              toast.error("Please upload a full body image");
+              break;
+            case "no_person_detected":
+              toast.error("No person detected");
+              break;
+            default:
+              toast.error("Invalid image");
+          }
+        } else if (data.message === "Not enough points") {
+          toast.error("Not enough points to get suggestions");
+        } else {
+          toast.error(data.message || "Failed to get suggestions");
+        }
         return;
       }
-      const data = await res.json();
+
+      // ── Update points in header without reload ──
+      window.dispatchEvent(new Event("auth-changed"));
+
       setSuggestions(data.suggestions || []);
+
       if ((data.suggestions || []).length === 0) {
         toast("No suggestions found. Try a different photo.", { icon: "🤔" });
+      } else {
+        toast.success("Outfits suggested !");
       }
     } catch {
       toast.error("Something went wrong. Please try again.");
@@ -135,7 +165,6 @@ export default function AiSuggestionSection() {
                   // svh = small viewport height — accounts for mobile browser chrome
                   // resets to auto (flex-1) on sm+ so desktop layout takes over
                 >
-                
                   {uploadedImage ? (
                     <>
                       <img
@@ -143,16 +172,20 @@ export default function AiSuggestionSection() {
                         alt="Uploaded"
                         className="absolute inset-0 w-full h-full object-cover rounded-xl"
                       />
-                      <button
-                        onClick={() => {
-                          setUploadedImage(null);
-                          setSelectedFile(null);
-                          setSuggestions([]);
-                        }}
-                        className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-red-500 flex items-center justify-center transition duration-200 cursor-pointer"
-                      >
-                        <X className="w-4 h-4 text-white" />
-                      </button>
+                      {loading ? (
+                        " "
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setUploadedImage(null);
+                            setSelectedFile(null);
+                            setSuggestions([]);
+                          }}
+                          className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-red-500 flex items-center justify-center transition duration-200 cursor-pointer"
+                        >
+                          <X className="w-4 h-4 text-white" />
+                        </button>
+                      )}
                     </>
                   ) : (
                     <div className="flex flex-col items-center gap-1 text-center px-3">
@@ -244,7 +277,6 @@ export default function AiSuggestionSection() {
                           {i + 1}
                         </span>
                       </div>
-                      
 
                       {/* Desktop hover overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex flex-col justify-end p-3 gap-2">
