@@ -77,9 +77,17 @@ export default function UploadTryOnSection() {
 
     setGenerating(true);
 
+
     const formData = new FormData();
     formData.append("image", selectedFile);
     formData.append("garmentId", selectedGarment._id);
+
+    // If garment came from AI suggestion, send its image URL as fallback
+    const isAiGarment = localStorage.getItem("prefill_is_ai_garment");
+    if (isAiGarment === "true") {
+      formData.append("garmentImagePath", selectedGarment.imagePath);
+      localStorage.removeItem("prefill_is_ai_garment");
+    }
 
     const token = localStorage.getItem("token");
     const res = await fetch(`${BASE_URL}/api/users/generate`, {
