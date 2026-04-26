@@ -5,7 +5,7 @@ const upload = require("../middleware/upload");
 const axios = require("axios");
 const FormData = require("form-data");
 const mongoose = require("mongoose");
-const User = require("../models/User"); // ← add this
+const User = require("../models/User");
 
 const aiGarmentSchema = new mongoose.Schema({
   filename: String,
@@ -51,8 +51,9 @@ router.post("/suggest", auth, upload.single("image"), async (req, res) => {
         { headers: validationForm.getHeaders(), timeout: 30000 }
       );
       validationResult = validationRes.data;
+      console.log("✅ Validation result:", validationResult);
     } catch (err) {
-      console.warn("Validation service unavailable — skipping");
+      console.warn("⚠️ Validation service unavailable — skipping");
       validationResult = { isFullBody: true };
     }
 
@@ -71,8 +72,10 @@ router.post("/suggest", auth, upload.single("image"), async (req, res) => {
     });
     skinForm.append("gender", gender);
 
-    let skinTone = "medium";
-    let suggestedColors = ["blue", "dark-blue", "green", "dark-green"];
+    console.log("🎨 Calling suggestion model at:", process.env.SUGGESTION_MODEL_URL);
+
+    let skinTone;
+    let suggestedColors;
 
     try {
       const skinRes = await axios.post(
@@ -82,19 +85,30 @@ router.post("/suggest", auth, upload.single("image"), async (req, res) => {
       );
       skinTone = skinRes.data.skin_tone;
       suggestedColors = skinRes.data.suggested_colors;
+      console.log("✅ Skin tone detected:", skinTone);
+      console.log("✅ Suggested colors:", suggestedColors);
     } catch (err) {
-      console.warn("Suggestion model unavailable — using default colors");
+      console.error("❌ Suggestion model failed:", err.message);
+      return res.status(503).json({
+        message: "Skin tone analysis unavailable. Please try again.",
+      });
     }
 
     // ── Step 4: Query MongoDB ──
+    console.log("🔍 Querying aigarments — gender:", gender, "colors:", suggestedColors);
+
     const garments = await AIGarment.aggregate([
       { $match: { gender, color: { $in: suggestedColors } } },
       { $sample: { size: 4 } },
     ]);
 
+    console.log(`👗 Found ${garments.length} garments`);
+    garments.forEach(g => console.log(`   → ${g.filename} (${g.color})`));
+
     // ── Step 5: Deduct points ──
     user.points -= COST;
     await user.save();
+    console.log(`💎 Points deducted. Remaining: ${user.points}`);
 
     return res.json({
       skin_tone: skinTone,
@@ -105,12 +119,12 @@ router.post("/suggest", auth, upload.single("image"), async (req, res) => {
         imagePath: g.imagePath,
         color: g.color,
       })),
-      points: user.points,                        // ← return updated points
-      pointsExhausted: user.points < COST,        // ← flag for upgrade modal
+      points: user.points,
+      pointsExhausted: user.points < COST,
     });
 
   } catch (err) {
-    console.error("Suggestion error:", err);
+    console.error("🔥 Suggestion error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
