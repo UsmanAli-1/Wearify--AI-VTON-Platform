@@ -1,209 +1,119 @@
-import { CameraView, useCameraPermissions } from "expo-camera";
-import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  Dimensions,
-} from "react-native";
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { Camera, useCameraDevice, useFrameProcessor } from 'react-native-vision-camera';
+import { scanPoses } from 'react-native-vision-camera-v3-pose-detection';
+import { runOnJS } from 'react-native-worklets-core';
 
-const { width, height } = Dimensions.get("window");
+export default function SmartCamera({ onCapture }: { onCapture: (uri: string) => void }) {
+  const device = useCameraDevice('front');
+  const [isAligned, setIsAligned] = useState(false);
+  const [cameraRef, setCameraRef] = useState<Camera | null>(null);
 
-// Define the boundaries of our visual guide
-const BOX_WIDTH = width * 0.8;
-const BOX_HEIGHT = height * 0.7;
+  // 1. Safely bridge the AI thread back to the React UI thread
+  const updateUI = (aligned: boolean) => {
+    setIsAligned(aligned);
+  };
 
-export default function SmartCamera({
-  onCapture,
-}: {
-  onCapture: (uri: string) => void;
-}) {
-  const [permission, requestPermission] = useCameraPermissions();
-  const [cameraRef, setCameraRef] = useState<any>(null);
-  const [facing, setFacing] = useState<"front" | "back">("front");
+  // 🧠 2. THE REAL-TIME AI ENGINE
+  // This runs continuously on the native GPU
+  const frameProcessor = useFrameProcessor((frame) => {
+    'worklet';
+    
+    // Pass the raw camera frame to Google MLKit
+    const poses = scanPoses(frame);
 
-  // ✨ The Demo Hack States
-  const [isScanning, setIsScanning] = useState(true);
+    if (poses.length > 0) {
+      const pose = poses[0]; // Isolate the primary person
 
-  // 🧠 Fake the "AI Scan" for the demo
-  useEffect(() => {
-    // Start scanning (Orange)
-    setIsScanning(true);
+      // Grab the Y-coordinates of the top and bottom of the body
+      const nose = pose.nose;
+      const leftAnkle = pose.leftAnkle;
+      const rightAnkle = pose.rightAnkle;
 
-    // After 3.5 seconds, pretend the AI found the body and turn Green!
-    const timer = setTimeout(() => {
-      setIsScanning(false);
-    }, 3500);
+      if (nose && leftAnkle && rightAnkle) {
+        // Ensure the nose is safely below the top edge of the frame
+        const headInFrame = nose.y > 50 && nose.y < 350; 
+        
+        // Ensure the ankles are safely above the bottom edge of the frame
+        const feetInFrame = leftAnkle.y < frame.height - 50 || rightAnkle.y < frame.height - 50;
 
-    return () => clearTimeout(timer);
-  }, [facing]); // Re-run the scan if they flip the camera
-
-  if (!permission) return <View />;
-  if (!permission.granted) {
-    return (
-      <View style={styles.permissionContainer}>
-        <Text style={styles.permissionText}>
-          We need camera access for the fitting room.
-        </Text>
-        <TouchableOpacity
-          style={styles.permissionBtn}
-          onPress={requestPermission}
-        >
-          <Text style={styles.permissionBtnText}>Grant Permission</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+        if (headInFrame && feetInFrame) {
+          runOnJS(updateUI)(true); // Perfect alignment!
+        } else {
+          runOnJS(updateUI)(false); // Stepped too close or chopped off frame
+        }
+      }
+    } else {
+      runOnJS(updateUI)(false); // Nobody is in the frame
+    }
+  }, []);
 
   const takePicture = async () => {
-    if (cameraRef && !isScanning) {
-      const photo = await cameraRef.takePictureAsync({ quality: 0.8 });
-      onCapture(photo.uri);
+    if (cameraRef && isAligned) {
+      const photo = await cameraRef.takePhoto({ qualityPrioritization: 'speed' });
+      onCapture(`file://${photo.path}`); 
     }
   };
 
-  const toggleCameraFacing = () => {
-    setFacing((current) => (current === "back" ? "front" : "back"));
-  };
+  if (device == null) return <View style={styles.container}><Text style={{color: 'white'}}>Initializing Hardware...</Text></View>;
 
   return (
     <View style={styles.container}>
-      <CameraView
-        style={styles.camera}
-        facing={facing}
+      <Camera
         ref={(ref) => setCameraRef(ref)}
-      >
-        <View style={styles.overlay}>
-          {/* Top Controls */}
-          <View style={[styles.darkArea, styles.topControls]}>
-            <TouchableOpacity
-              style={styles.flipBtn}
-              onPress={toggleCameraFacing}
-            >
-              <Text style={styles.flipBtnText}>🔄 Flip</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.middleRow}>
-            <View style={styles.darkArea} />
-
-            {/* THE TARGET BOX */}
-            <View
-              style={[
-                styles.targetBox,
-                { borderColor: isScanning ? "#f59e0b" : "#10b981" }, // Orange -> Green
-              ]}
-            >
-              <Text
-                style={[
-                  styles.guideText,
-                  { color: isScanning ? "#f59e0b" : "#10b981" },
-                ]}
-              >
-                {isScanning
-                  ? "Align full body in frame..."
-                  : "Ready to capture ✅"}
-              </Text>
-            </View>
-
-            <View style={styles.darkArea} />
-          </View>
-
-          <View style={styles.darkArea}>
-            <TouchableOpacity
-              style={[
-                styles.captureBtn,
-                isScanning && styles.captureBtnDisabled,
-              ]}
-              disabled={isScanning}
-              onPress={takePicture}
-            >
-              <View
-                style={[
-                  styles.innerCaptureBtn,
-                  !isScanning && { backgroundColor: "#10b981" },
-                ]}
-              />
-            </TouchableOpacity>
-          </View>
+        style={StyleSheet.absoluteFill}
+        device={device}
+        isActive={true}
+        photo={true}
+        frameProcessor={frameProcessor} // Attach the AI brain
+      />
+      
+      <View style={styles.overlay}>
+        <View style={[styles.targetBox, { borderColor: isAligned ? '#10b981' : '#ef4444' }]}>
+          <Text style={[styles.guideText, { color: isAligned ? '#10b981' : '#ef4444' }]}>
+            {isAligned ? "Perfect Alignment! ✅" : "Step back to fit full body"}
+          </Text>
         </View>
-      </CameraView>
+
+        <TouchableOpacity
+          style={[styles.captureBtn, !isAligned && styles.captureBtnDisabled]}
+          disabled={!isAligned}
+          onPress={takePicture}
+        >
+          <View style={[styles.innerCaptureBtn, isAligned && { backgroundColor: '#10b981' }]} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  camera: { flex: 1 },
-  overlay: { flex: 1, backgroundColor: "transparent" },
-  darkArea: { flex: 1, backgroundColor: "rgba(10, 15, 28, 0.7)" },
-
-  topControls: {
-    alignItems: "flex-end",
-    paddingTop: 50,
-    paddingRight: 20,
-  },
-  flipBtn: {
-    backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  flipBtnText: {
-    color: "#FFF",
-    fontWeight: "bold",
-    fontSize: 14,
-  },
-
-  middleRow: { flexDirection: "row", height: BOX_HEIGHT },
-
+  container: { flex: 1, backgroundColor: '#000' },
+  overlay: { flex: 1, justifyContent: 'space-between', paddingVertical: 60, alignItems: 'center' },
   targetBox: {
-    width: BOX_WIDTH,
-    height: BOX_HEIGHT,
+    width: '85%',
+    height: '75%',
     borderWidth: 4,
     borderRadius: 24,
-    backgroundColor: "transparent",
-    alignItems: "center",
+    alignItems: 'center',
     paddingTop: 20,
+    backgroundColor: 'rgba(0,0,0,0.1)',
   },
   guideText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
-    backgroundColor: "rgba(0,0,0,0.8)",
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    backgroundColor: 'rgba(0,0,0,0.8)',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 16,
-    overflow: "hidden",
-    marginTop: 10,
+    overflow: 'hidden',
   },
-
   captureBtn: {
-    alignSelf: "center",
-    marginTop: 40,
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "rgba(255,255,255,0.3)",
-    justifyContent: "center",
-    alignItems: "center",
+    width: 80, height: 80, borderRadius: 40,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    justifyContent: 'center', alignItems: 'center',
   },
   captureBtnDisabled: { opacity: 0.5 },
-  innerCaptureBtn: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#FFFFFF",
-  },
-
-  permissionContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#080d1a",
-  },
-  permissionText: { color: "#FFF", fontSize: 16, marginBottom: 20 },
-  permissionBtn: { backgroundColor: "#8b5cf6", padding: 12, borderRadius: 8 },
-  permissionBtnText: { color: "#FFF", fontWeight: "bold" },
+  innerCaptureBtn: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#FFFFFF' },
 });
