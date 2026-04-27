@@ -81,7 +81,7 @@ router.post("/suggest", auth, upload.single("image"), async (req, res) => {
       const skinRes = await axios.post(
         `${process.env.SUGGESTION_MODEL_URL}/suggest-outfits`,
         skinForm,
-        { headers: skinForm.getHeaders(), timeout: 15000 }
+        { headers: skinForm.getHeaders(), timeout: 60000 }
       );
       skinTone = skinRes.data.skin_tone;
       suggestedColors = skinRes.data.suggested_colors;
