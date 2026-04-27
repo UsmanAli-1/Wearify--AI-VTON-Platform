@@ -9,49 +9,56 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Starfield from "../../components/Starfield"; // (Adjust the path if you put it in a components folder)
 
 export default function WelcomeScreen() {
   const router = useRouter();
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        {/* Placeholder for your actual Logo */}
-        <View style={styles.logoContainer}>
-          <Image
-            source={require("../../assets/images/logo.png")}
-            style={styles.logoImage}
-            resizeMode="contain" // This ensures your logo doesn't get stretched or cut off
-          />
+    <LinearGradient
+      colors={["#1c103f", "#080d1a", "#080d1a", "#2d1445"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.backgroundGradient}
+    >
+      <Starfield />
+      <SafeAreaView style={styles.container}>
+        <View style={styles.content}>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("../../assets/images/logo1.png")}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+          </View>
         </View>
 
-        <Text style={styles.title}>Welcome to Wearify</Text>
-        <Text style={styles.subtitle}>
-          Your AI-powered virtual fitting room. Discover what truly suits you.
-        </Text>
-      </View>
-
-      <TouchableOpacity
-        style={styles.buttonContainer}
-        onPress={() => router.push("/auth")} // This preps us for the next step!
-      >
-        <LinearGradient
-          colors={["#8b5cf6", "#3b82f6"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.gradient}
+        <TouchableOpacity
+          style={styles.buttonContainer}
+          onPress={() => router.push("/auth")}
         >
-          <Text style={styles.buttonText}>Let's get started</Text>
-        </LinearGradient>
-      </TouchableOpacity>
-    </SafeAreaView>
+          {/* 2. Restored the visual button inside the TouchableOpacity */}
+          <LinearGradient
+            colors={["#8b5cf6", "#3b82f6"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.gradient}
+          >
+            <Text style={styles.buttonText}>Get Started ✨</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  backgroundGradient: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: "#0A0F1C",
+    backgroundColor: "transparent", // 3. Made transparent to reveal the gradient
     justifyContent: "space-between",
     padding: 24,
   },
@@ -60,33 +67,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  logoPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    justifyContent: "center",
+  logoContainer: {
     alignItems: "center",
-    marginBottom: 32,
+    marginBottom: 40,
   },
-  logoText: {
-    fontSize: 48,
-    fontWeight: "bold",
-    color: "#8b5cf6",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#FFFFFF",
-    marginBottom: 12,
-    textAlign: "center",
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#A0AEC0",
-    textAlign: "center",
-    lineHeight: 24,
-    paddingHorizontal: 20,
+  logoImage: {
+    width: 200,
+    height: 200,
   },
   buttonContainer: {
     width: "100%",
@@ -103,13 +90,5 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 18,
     fontWeight: "600",
-  },
-  logoContainer: {
-    alignItems: "center",
-    marginBottom: 40,
-  },
-  logoImage: {
-    width: 120, // Adjust this to make it wider or narrower
-    height: 120, // Adjust this to make it taller or shorter
   },
 });
