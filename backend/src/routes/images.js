@@ -7,6 +7,8 @@ const cloudinary = require("../config/cloudinary");
 // Helper: extract Cloudinary public_id from a secure_url
 // e.g. "https://res.cloudinary.com/xxx/image/upload/v123/wearify/abc123.jpg"
 // → "wearify/abc123"
+
+
 const getPublicId = (url) => {
   try {
     const parts = url.split("/");
@@ -24,17 +26,32 @@ const getPublicId = (url) => {
   }
 };
 
+
 // GET /api/images/my — fetch logged-in user's try-on history
 router.get("/my", auth, async (req, res) => {
   try {
     const images = await Image.find({ user: req.user.id })
       .populate("garment", "name imagePath")
       .sort({ createdAt: -1 });
-    res.json(images);
+
+    const result = images.map((img) => {
+      const obj = img.toObject();
+      if (!obj.garment && obj.garmentImagePath) {
+        obj.garment = {
+          _id: null,
+          name: "AI Suggestion",
+          imagePath: obj.garmentImagePath,
+        };
+      }
+      return obj;
+    });
+
+    res.json(result);
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 // DELETE /api/images/:id
 router.delete("/:id", auth, async (req, res) => {

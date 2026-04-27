@@ -11,7 +11,7 @@ const FormData = require("form-data");
 const sharp = require("sharp");
 const cloudinary = require("../config/cloudinary");
 
-// ✅ Defined once at top, not inside route
+//  Defined once at top, not inside route
 const waitForAiService = async (retries = 5, delay = 15000) => {
   for (let i = 0; i < retries; i++) {
     try {
@@ -99,110 +99,111 @@ router.get("/me", auth, async (req, res) => {
   }
 });
 
-router.post(
-  "/generate",
-  auth,
-  upload.single("image"),
-  async (req, res) => {
+router.post("/generate", auth, upload.single("image"), async (req, res) => {
+  console.log("AI URL:", process.env.AI_VALIDATION_URL);
 
-    console.log("AI URL:", process.env.AI_VALIDATION_URL);
-    
-    try {
-      const COST = 40;
-      const { garmentId } = req.body;
+  try {
+    const COST = 40;
 
-      if (!req.file) {
-        return res.status(400).json({ message: "No image uploaded" });
-      }
+    const { garmentId } = req.body;
+    const isAiGarment = req.body.garmentImagePath ? true : false;
 
-      if (!garmentId) {
-        return res.status(400).json({ message: "No garment selected" });
-      }
-
-      //  STEP 1: CHECK POINTS
-      const user = await User.findById(req.user.id);
-      if (user.points < COST) {
-        return res.status(400).json({ message: "Not enough points" });
-      }
-
-      //  STEP 2: CONVERT & RESIZE IMAGE
-      let imageBuffer = req.file.buffer;
-
-      if (
-        req.file.mimetype === "image/heic" ||
-        req.file.mimetype === "image/heif" ||
-        req.file.mimetype === "image/avif" ||
-        req.file.mimetype === "image/webp"
-      ) {
-        imageBuffer = await sharp(req.file.buffer).jpeg().toBuffer();
-      }
-
-      imageBuffer = await sharp(imageBuffer)
-        .resize({ width: 1024 })
-        .jpeg({ quality: 80 })
-        .toBuffer();
-
-      //  STEP 3: WAKE UP AI + VALIDATE
-      const isReady = await waitForAiService();
-      console.log("AI Service Ready:", isReady);
-      if (!isReady) {
-        return res.status(503).json({ message: "AI service unavailable, please try again" });
-      }
-
-      const formData = new FormData();
-      formData.append("file", imageBuffer, { filename: "image.jpg" });
-
-      const aiResponse = await axios.post(
-        `${process.env.AI_VALIDATION_URL}/check-full-body`,
-        formData,
-        { headers: formData.getHeaders(), timeout: 60000 },
-      );
-
-      const aiData = aiResponse.data;
-
-      if (typeof aiData !== "object") {
-        return res.status(503).json({ message: "AI service is waking up, please try again" });
-      }
-
-      if (!aiData.isFullBody) {
-        return res.status(400).json({
-          message: "Invalid image",
-          reason: aiData.reason,
-        });
-      }
-
-      //  STEP 4: UPLOAD TO CLOUDINARY
-      const uploadResult = await new Promise((resolve, reject) => {
-        cloudinary.uploader
-          .upload_stream({ folder: "wearify" }, (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          })
-          .end(imageBuffer);
-      });
-
-      //  STEP 5: SAVE TO DB & DEDUCT POINTS
-      await Image.create({
-        user: user._id,
-        imagePath: uploadResult.secure_url,
-        garment: garmentId,
-        pointsUsed: COST,
-      });
-
-      user.points -= COST;
-      await user.save();
-
-      return res.json({
-        message: "Success",
-        points: user.points,
-        pointsExhausted: user.points < COST,
-      });
-    } catch (err) {
-      console.error("🔥 GENERATE ERROR:", err);
-      res.status(500).json({ message: "Server error" });
+    if (!req.file) {
+      return res.status(400).json({ message: "No image uploaded" });
     }
-  },
-);
+
+    if (!garmentId && !isAiGarment) {
+      return res.status(400).json({ message: "No garment selected" });
+    }
+
+    //  STEP 1: CHECK POINTS
+    const user = await User.findById(req.user.id);
+    if (user.points < COST) {
+      return res.status(400).json({ message: "Not enough points" });
+    }
+
+    //  STEP 2: CONVERT & RESIZE IMAGE
+    let imageBuffer = req.file.buffer;
+
+    if (
+      req.file.mimetype === "image/heic" ||
+      req.file.mimetype === "image/heif" ||
+      req.file.mimetype === "image/avif" ||
+      req.file.mimetype === "image/webp"
+    ) {
+      imageBuffer = await sharp(req.file.buffer).jpeg().toBuffer();
+    }
+
+    imageBuffer = await sharp(imageBuffer)
+      .resize({ width: 1024 })
+      .jpeg({ quality: 80 })
+      .toBuffer();
+
+    //  STEP 3: WAKE UP AI + VALIDATE
+    const isReady = await waitForAiService();
+    console.log("AI Service Ready:", isReady);
+    if (!isReady) {
+      return res
+        .status(503)
+        .json({ message: "AI service unavailable, please try again" });
+    }
+
+    const formData = new FormData();
+    formData.append("file", imageBuffer, { filename: "image.jpg" });
+
+    const aiResponse = await axios.post(
+      `${process.env.AI_VALIDATION_URL}/check-full-body`,
+      formData,
+      { headers: formData.getHeaders(), timeout: 60000 },
+    );
+
+    const aiData = aiResponse.data;
+
+    if (typeof aiData !== "object") {
+      return res
+        .status(503)
+        .json({ message: "AI service is waking up, please try again" });
+    }
+
+    if (!aiData.isFullBody) {
+      return res.status(400).json({
+        message: "Invalid image",
+        reason: aiData.reason,
+      });
+    }
+
+    //  STEP 4: UPLOAD TO CLOUDINARY
+    const uploadResult = await new Promise((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream({ folder: "wearify" }, (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        })
+        .end(imageBuffer);
+    });
+
+    // STEP 5: SAVE TO DB & DEDUCT POINTS
+    await Image.create({
+      user: user._id,
+      imagePath: uploadResult.secure_url,
+      garment: isAiGarment ? null : garmentId,
+      garmentImagePath: req.body.garmentImagePath || "",
+      pointsUsed: COST,
+    });
+
+    user.points -= COST;
+    await user.save();
+
+    return res.json({
+      message: "Success",
+      points: user.points,
+      pointsExhausted: user.points < COST,
+    });
+  } catch (err) {
+    console.error("🔥 GENERATE ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 router.patch("/agree", auth, async (req, res) => {
   try {
@@ -221,20 +222,6 @@ router.post("/logout", (req, res) => {
     path: "/",
   });
   res.json({ message: "Logged out successfully" });
-});
-
-
-
-router.get("/my", auth, async (req, res) => {
-  const images = await Image.find({ user: req.user.id })
-    .populate("garment", "name imagePath")
-    .sort({ createdAt: -1 });
-  res.json(images);
-});
-
-router.delete("/:id", auth, async (req, res) => {
-  await Image.findOneAndDelete({ _id: req.params.id, user: req.user.id });
-  res.json({ message: "Deleted" });
 });
 
 module.exports = router;

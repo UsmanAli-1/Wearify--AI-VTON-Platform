@@ -16,6 +16,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const axios = require("axios");
 const imageRoutes = require("./routes/images");
+const suggestionsRouter = require("./routes/suggestions");
 
 const app = express();
 
@@ -33,7 +34,7 @@ app.use(
 
 app.use(cookieParser());
 
-// ⚠️ Webhook MUST be before express.json() — needs raw body
+//  Webhook MUST be before express.json() — needs raw body
 const { router: paymentRouter, webhook } = require("./routes/payment");
 app.use(
   "/api/payment/webhook",
@@ -48,6 +49,7 @@ app.use("/api/payment", paymentRouter);
 app.use("/api/garments", require("./routes/garments"));
 app.use("/api/users", require("./routes/users"));
 app.use("/api/images", imageRoutes);
+app.use("/api/suggestions", suggestionsRouter);
 
 /* ERROR HANDLER */
 app.use((err, req, res, next) => {
@@ -64,16 +66,30 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Internal server error" });
 });
 
-// In your server.js/index.js
+// Ping Ai-validation every 10 minutes to prevent cold start
 setInterval(
   async () => {
     try {
       await axios.get(process.env.AI_VALIDATION_URL);
       console.log("AI service pinged");
-    } catch (e) {}
+    } catch (e) {
+      console.warn("AI validation ping failed");
+    }
   },
   10 * 60 * 1000,
 ); // every 10 mins
+
+// Ping suggestion-model every 10 minutes to prevent cold start
+if (process.env.SUGGESTION_MODEL_URL) {
+  setInterval(async () => {
+    try {
+      await axios.get(`${process.env.SUGGESTION_MODEL_URL}/health`);
+      console.log("Suggestion model pinged");
+    } catch (e) {
+      console.warn("Suggestion model ping failed");
+    }
+  }, 10 * 60 * 1000); // every 10 minutes
+}
 
 async function start() {
   try {

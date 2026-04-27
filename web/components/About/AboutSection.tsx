@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 
 export default function AboutSection() {
   return (
-    <section className="w-full px-6 md:px-20 pt-3">
+    <section className="w-full px-6 md:px-20 pt-3 pb-3">
       <div className="max-w-6xl mx-auto text-center mb-5 pt-0">
         <Motion variant={fadeIn}>
           <p className="text-gray-100/50 max-w-4xl 2xl:max-w-5xl mx-auto leading-relaxed">
