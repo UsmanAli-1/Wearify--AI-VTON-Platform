@@ -120,7 +120,6 @@ export default function AiSuggestionSection() {
     }
   };
 
-
   const handleTryOn = (garment: SuggestedGarment) => {
     if (!selectedFile) return;
     const reader = new FileReader();
@@ -185,7 +184,8 @@ export default function AiSuggestionSection() {
     <section className="w-full pt-22 md:pt-0 px-6 md:px-12 xl:px-20 flex flex-col gap-4 min-h-[calc(100vh-120px)]">
       {/* Heading */}
       <div className="text-center">
-        <h1 className="text-2xl md:text-3xl font-bold text-white">
+        {/* <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-600 bg-clip-text text-transparent"> */}
+        <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-500/65 to-blue-600/85 bg-clip-text text-transparent">
           AI Outfit Suggestions
         </h1>
       </div>

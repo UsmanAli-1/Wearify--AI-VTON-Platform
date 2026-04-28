@@ -258,7 +258,7 @@ export default function UploadTryOnSection() {
   return (
     <section className="w-full pt-22 md:h-[calc(100vh-65px)] overflow-y-auto flex flex-col overflow-hidden px-5 md:px-12 xl:px-20  md:py-0">
       <div className="text-center mb-3">
-        <h1 className="text-2xl md:text-3xl font-bold text-white">
+        <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-500/65 to-blue-600/85 bg-clip-text text-transparent">
           Virtual Try On
         </h1>
       </div>
@@ -657,9 +657,6 @@ export default function UploadTryOnSection() {
     </section>
   );
 }
-
-
-
 
 // "use client";
 
