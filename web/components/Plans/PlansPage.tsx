@@ -62,7 +62,7 @@ export default function PlansPage() {
   }
 
   return (
-    <section className="pb-5 pt-5 w-full min-h-[calc(100vh-100px)] px-6 md:px-12 xl:px-20 flex flex-col items-center justify-center">
+    <section className="pb-5 pt-22 md:pt-0 w-full min-h-[calc(100vh-100px)] px-6 md:px-12 xl:px-20 flex flex-col items-center justify-center">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full items-stretch">
         {/* BASIC */}
         <Card className="flex flex-col justify-between rounded-2xl p-6 bg-white/5 backdrop-blur-md border border-white/10 shadow-xl hover:scale-105 transition duration-300">

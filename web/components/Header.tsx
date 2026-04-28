@@ -86,6 +86,7 @@ export default function Header() {
     { href: "/ai-suggestion", label: "Ai Suggestion", icon: faWandSparkles },
     { href: "/about", label: "About", icon: faCircleQuestion },
     { href: "/plans", label: "Plans", icon: faCrown },
+    
   ];
 
   const linkClass = (href: string) =>

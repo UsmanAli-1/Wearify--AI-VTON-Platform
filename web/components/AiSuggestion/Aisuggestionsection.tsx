@@ -182,7 +182,7 @@ export default function AiSuggestionSection() {
   );
 
   return (
-    <section className="w-full px-6 md:px-12 xl:px-20 flex flex-col gap-4 min-h-[calc(100vh-120px)]">
+    <section className="w-full pt-22 md:pt-0 px-6 md:px-12 xl:px-20 flex flex-col gap-4 min-h-[calc(100vh-120px)]">
       {/* Heading */}
       <div className="text-center">
         <h1 className="text-2xl md:text-3xl font-bold text-white">
