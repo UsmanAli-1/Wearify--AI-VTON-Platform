@@ -185,7 +185,7 @@ export default function AiSuggestionSection() {
       {/* Heading */}
       <div className="text-center">
         {/* <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-600 bg-clip-text text-transparent"> */}
-        <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-500/65 to-blue-600/85 bg-clip-text text-transparent">
+        <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-500/55 to-blue-600/95 bg-clip-text text-transparent">
           AI Outfit Suggestions
         </h1>
       </div>

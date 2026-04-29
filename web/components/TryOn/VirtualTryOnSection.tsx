@@ -250,10 +250,10 @@ export default function UploadTryOnSection() {
           MOBILE  (< sm, below 640px)
           visible only when < sm
       ══════════════════════════════ */}
-      <div className="flex flex-col gap-3 pt-20 pb-5 sm:hidden overflow-y-auto">
+      <div className="flex flex-col gap-3 pt-22 pb-5 sm:hidden overflow-y-auto">
 
         <div className="text-center">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-500/65 to-blue-600/85 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-500/55 to-blue-600/95 bg-clip-text text-transparent">
             Virtual Try On
           </h1>
         </div>
@@ -298,8 +298,8 @@ export default function UploadTryOnSection() {
       
       <div className="hidden sm:flex flex-col gap-3 h-full  md:pb-10">
 
-        <div className="text-center flex-shrink-0">
-          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-500/65 to-blue-600/85 bg-clip-text text-transparent">
+        <div className="text-center flex-shrink-0 ">
+          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-500/55 to-blue-600/95 bg-clip-text text-transparent">
             Virtual Try On
           </h1>
         </div>
