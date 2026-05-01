@@ -19,7 +19,7 @@ router.post("/create-checkout", auth, async (req, res) => {
 
     const selected = plans[plan];
     if (!selected) return res.status(400).json({ message: "Invalid plan" });
-
+ 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",

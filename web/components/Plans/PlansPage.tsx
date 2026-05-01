@@ -43,7 +43,6 @@ export default function PlansPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`, // ← add this
         },
-        // credentials: "include",            // ← remove this
         body: JSON.stringify({ plan }),
       });
       const data: { url?: string; message?: string } = await res.json();
@@ -60,7 +59,7 @@ export default function PlansPage() {
       setLoading("");
     }
   }
-
+ 
   return (
     <section className="pb-5 pt-22 md:pt-8 w-full min-h-[calc(100vh-100px)] px-6 md:px-12 xl:px-20 flex flex-col items-center justify-center">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full items-stretch">
