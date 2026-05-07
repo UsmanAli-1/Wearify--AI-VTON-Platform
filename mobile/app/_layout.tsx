@@ -1,3 +1,4 @@
+import 'react-native-reanimated';
 import { Stack } from "expo-router";
 
 export default function RootLayout() {
@@ -6,4 +7,4 @@ export default function RootLayout() {
       <Stack.Screen name="index" />
     </Stack>
   );
-}
+} 
