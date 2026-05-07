@@ -1,5 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import 'react-native-reanimated';
 import React from "react";
 import {
   Image,

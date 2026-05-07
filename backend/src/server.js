@@ -18,16 +18,34 @@ const axios = require("axios");
 const imageRoutes = require("./routes/images");
 const suggestionsRouter = require("./routes/suggestions");
 
+const dns = require("dns");
+dns.setServers(["1.1.1.1", "8.8.8.8"]);
+
+
 const app = express();
 
 /* CORS */
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "https://wearify-mu.vercel.app",
-      "https://wearify-vton.vercel.app",
-    ],
+    origin: function(origin, callback) {
+      // Allow requests with no origin (mobile apps, curl, Postman)
+      if (!origin) return callback(null, true);
+      
+      const allowed = [
+        "http://localhost:3000",
+        "https://wearify-mu.vercel.app",
+        "https://wearify-vton.vercel.app",
+      ];
+      
+      if (allowed.includes(origin)) return callback(null, true);
+      
+      // Allow local network IPs (mobile dev)
+      if (origin.startsWith("http://192.168.") || origin.startsWith("http://10.")) {
+        return callback(null, true);
+      }
+
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   }),
 );
@@ -48,8 +66,10 @@ app.use(express.json());
 app.use("/api/payment", paymentRouter);
 app.use("/api/garments", require("./routes/garments"));
 app.use("/api/users", require("./routes/users"));
+// Add this with your other routes (around line 40)
 app.use("/api/images", imageRoutes);
 app.use("/api/suggestions", suggestionsRouter);
+app.use('/api/pose', require('./routes/pose'));
 
 /* ERROR HANDLER */
 app.use((err, req, res, next) => {

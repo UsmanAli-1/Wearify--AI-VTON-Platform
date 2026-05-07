@@ -1,7 +1,7 @@
+import { API_URL } from '@/constants/config';
 import axios from "axios";
 import * as ImagePicker from "expo-image-picker"; // Brought this back!
 import { LinearGradient } from "expo-linear-gradient";
-import { API_URL } from "../config"; // (Adjust path if needed)
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -11,11 +11,11 @@ import {
   Image,
   Modal,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  ScrollView,
 } from "react-native";
 
 import SmartCamera from "../../components/SmartCamera";

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { API_URL1 } from "../config"; // (Adjust path if needed)
+import { API_URL1 } from '@/constants/config';
 import React, { useState } from "react";
 import {
   Alert,
