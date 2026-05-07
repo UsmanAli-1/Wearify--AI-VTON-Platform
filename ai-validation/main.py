@@ -91,3 +91,8 @@ async def check_full_body(file: UploadFile = File(...)):
 @app.get("/")
 def home():
     return {"message": "AI Service Running"}
+
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}

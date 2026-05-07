@@ -66,11 +66,26 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Internal server error" });
 });
 
+
+// Ping backend every 9 minutes to prevent cold start
+setInterval(
+  async () => {
+    try {
+      await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/health`);
+      console.log("Backend service pinged");
+    } catch (e) {
+      console.warn("Backend service ping failed");
+    }
+  },
+  9 * 60 * 1000,
+); // every 9 mins
+
+
 // Ping Ai-validation every 10 minutes to prevent cold start
 setInterval(
   async () => {
     try {
-      await axios.get(process.env.AI_VALIDATION_URL);
+      await axios.get(`${process.env.AI_VALIDATION_URL}/health`);
       console.log("AI service pinged");
     } catch (e) {
       console.warn("AI validation ping failed");
@@ -108,5 +123,10 @@ async function start() {
     process.exit(1);
   }
 }
+
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
 
 start();
