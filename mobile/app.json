@@ -8,11 +8,11 @@
     "scheme": "wearifymobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.wearifymobile",
+      "merchantIdentifier": "merchant.com.anonymous.wearifymobile"
     },
-
     "android": {
       "package": "com.anonymous.wearifymobile",
       "edgeToEdgeEnabled": true,
@@ -24,12 +24,10 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       }
     },
-
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-
     "plugins": [
       "expo-router",
       [
@@ -44,14 +42,19 @@
           }
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.anonymous.wearifymobile",
+          "enableGooglePay": false
+        }
+      ]
     ],
-
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
     },
-
     "extra": {
       "router": {},
       "eas": {

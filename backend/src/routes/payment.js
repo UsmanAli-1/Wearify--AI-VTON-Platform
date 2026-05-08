@@ -6,8 +6,8 @@ const User = require("../models/User");
 const auth = require("../middleware/auth");
 
 const plans = {
-  basic:   { name: "Basic Plan",   amount: 120000, points: 400  },
-  pro:     { name: "Pro Plan",     amount: 300000, points: 1000 },
+  basic: { name: "Basic Plan", amount: 120000, points: 400 },
+  pro: { name: "Pro Plan", amount: 300000, points: 1000 },
   premium: { name: "Premium Plan", amount: 600000, points: 2000 },
 };
 
@@ -19,7 +19,7 @@ router.post("/create-checkout", auth, async (req, res) => {
 
     const selected = plans[plan];
     if (!selected) return res.status(400).json({ message: "Invalid plan" });
- 
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
@@ -33,7 +33,7 @@ router.post("/create-checkout", auth, async (req, res) => {
       }],
       metadata: { userId: userId.toString(), plan },
       success_url: `${process.env.CLIENT_URL}/plans?plan=${plan}`,
-      cancel_url:  `${process.env.CLIENT_URL}/plans`,
+      cancel_url: `${process.env.CLIENT_URL}/plans`,
     });
 
     res.json({ url: session.url });
@@ -79,7 +79,7 @@ const webhook = async (req, res) => {
       const currentPoints = parseInt(user.points) || 0;
 
       await User.findByIdAndUpdate(userId, {
-        $set: { 
+        $set: {
           plan,
           points: currentPoints + pointsToAdd  // ← manual add instead of $inc
         },
@@ -90,8 +90,51 @@ const webhook = async (req, res) => {
       console.error("❌ DB update error:", err);
     }
   }
+  if (event.type === "payment_intent.succeeded") {
+    const intent = event.data.object;
+    const { userId, plan } = intent.metadata;
+    const pointsToAdd = plans[plan]?.points;
+
+    if (userId && pointsToAdd) {
+      try {
+        const user = await User.findById(userId);
+        if (user) {
+          const currentPoints = parseInt(user.points) || 0;
+          await User.findByIdAndUpdate(userId, {
+            $set: { plan, points: currentPoints + pointsToAdd },
+          });
+          console.log(`✅ PaymentIntent: User ${userId} +${pointsToAdd} points`);
+        }
+      } catch (err) {
+        console.error("❌ DB update error (PaymentIntent):", err);
+      }
+    }
+  }
 
   res.json({ received: true });
 };
+
+// NEW: Create PaymentIntent for mobile (native Stripe sheet)
+router.post("/create-payment-intent", auth, async (req, res) => {
+  try {
+    const { plan } = req.body;
+    const userId = req.user.id;
+
+    const selected = plans[plan];
+    if (!selected) return res.status(400).json({ message: "Invalid plan" });
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: selected.amount,
+      currency: "pkr",
+      metadata: { userId: userId.toString(), plan },
+      automatic_payment_methods: { enabled: true },
+    });
+
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (err) {
+    console.error("PaymentIntent error:", err);
+    res.status(500).json({ message: "Failed to create payment intent" });
+  }
+});
 
 module.exports = { router, webhook };

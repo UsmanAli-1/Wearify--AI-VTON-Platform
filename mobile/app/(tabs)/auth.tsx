@@ -1,6 +1,7 @@
 import axios from "axios";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL1 } from '@/constants/config';
 import React, { useState } from "react";
 import {
@@ -44,6 +45,11 @@ export default function AuthScreen() {
         );
 
         console.log("Login Success:", response.data);
+
+        // Save token and user data to AsyncStorage
+        await AsyncStorage.setItem('authToken', response.data.token);
+        await AsyncStorage.setItem('userId', response.data.user?.id ?? response.data.user?._id ?? '');
+
         Alert.alert("Success", "Welcome back!");
         router.replace("/dashboard");
       } else {
