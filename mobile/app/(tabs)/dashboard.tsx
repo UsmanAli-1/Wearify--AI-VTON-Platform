@@ -1,5 +1,5 @@
 import { API_URL } from '@/constants/config';
-import {  useStripe } from '@stripe/stripe-react-native';
+import { useStripe } from '@stripe/stripe-react-native';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -43,8 +43,8 @@ interface Plan {
 // ─── Plan definitions (must match backend `plans` object) ────────────────────
 
 const PLANS: Plan[] = [
-  { key: 'basic',   name: 'Basic',   price: 'Rs. 1,200', points: 400,  diamonds: 400  },
-  { key: 'pro',     name: 'Pro',     price: 'Rs. 3,000', points: 1000, diamonds: 1000, popular: true },
+  { key: 'basic', name: 'Basic', price: 'Rs. 1,200', points: 400, diamonds: 400 },
+  { key: 'pro', name: 'Pro', price: 'Rs. 3,000', points: 1000, diamonds: 1000, popular: true },
   { key: 'premium', name: 'Premium', price: 'Rs. 6,000', points: 2000, diamonds: 2000 },
 ];
 
@@ -61,23 +61,23 @@ async function getAuthToken(): Promise<string> {
 
 export default function DashboardScreen() {
   const router = useRouter();
-const { presentPaymentSheet, initPaymentSheet } = useStripe();
+  const { presentPaymentSheet, initPaymentSheet } = useStripe();
 
   // --- Data & Economy State ---
-  const [garments,         setGarments]         = useState<Garment[]>([]);
+  const [garments, setGarments] = useState<Garment[]>([]);
   const [isLoadingGarments, setIsLoadingGarments] = useState(true);
-  const [diamonds,         setDiamonds]         = useState(120);
-  const [showPlans,        setShowPlans]        = useState(false);
+  const [diamonds, setDiamonds] = useState(120);
+  const [showPlans, setShowPlans] = useState(false);
 
   // --- UI & Action State ---
   const [selectedGarmentId, setSelectedGarmentId] = useState<string | null>(null);
-  const [personImage,       setPersonImage]       = useState<string | null>(null);
-  const [isGenerating,      setIsGenerating]      = useState(false);
-  const [generatedImage,    setGeneratedImage]    = useState<string | null>(null);
-  const [showCamera,        setShowCamera]        = useState(false);
+  const [personImage, setPersonImage] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [showCamera, setShowCamera] = useState(false);
 
   // --- Payment State ---
-  const [payingPlan,        setPayingPlan]        = useState<PlanKey | null>(null);
+  const [payingPlan, setPayingPlan] = useState<PlanKey | null>(null);
 
   // ── Fetch garments ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -127,7 +127,7 @@ const { presentPaymentSheet, initPaymentSheet } = useStripe();
       'How would you like to provide your photo?',
       [
         { text: 'Smart Camera (Recommended)', onPress: handleCameraOpen },
-        { text: 'Choose from Gallery',        onPress: handleGalleryOpen },
+        { text: 'Choose from Gallery', onPress: handleGalleryOpen },
         { text: 'Cancel', style: 'cancel' },
       ],
     );
@@ -135,26 +135,74 @@ const { presentPaymentSheet, initPaymentSheet } = useStripe();
 
   // ── Try-on ──────────────────────────────────────────────────────────────────
 
-  const handleGenerateTryOn = () => {
+  const handleGenerateTryOn = async () => {
     if (diamonds < 40) {
       setShowPlans(true);
       return;
     }
-    setIsGenerating(true);
-    setDiamonds(prev => prev - 40);
-    setTimeout(() => {
-      setGeneratedImage(
-        'https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&w=600&q=80',
-      );
-      setIsGenerating(false);
-    }, 3000);
-  };
 
+    setIsGenerating(true);
+
+    try {
+      const token = await getAuthToken();
+
+      // Get the selected garment details
+      const selectedGarment = garments.find(g => g._id === selectedGarmentId);
+      if (!selectedGarment) return;
+
+      // Build multipart form
+      const formData = new FormData();
+      formData.append('image', {
+        uri: personImage,
+        name: 'person.jpg',
+        type: 'image/jpeg',
+      } as any);
+      formData.append('garmentId', selectedGarment._id);
+
+      const { data } = await axios.post(
+        `${API_URL}/users/generate`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+          timeout: 120000, // 2 min timeout for AI processing
+        }
+      );
+
+      setDiamonds(data.points);
+      setGeneratedImage(data.resultImage);  // ← use result directly
+
+      if (data.pointsExhausted) {
+        setShowPlans(true);
+      }
+
+    } catch (err: any) {
+      const msg = err?.response?.data?.message ?? '';
+      const reason = err?.response?.data?.reason ?? '';
+
+      if (msg.includes('full') || msg.includes('Invalid image')) {
+        Alert.alert(
+          'Full Body Required 📸',
+          `Please upload a clear head-to-toe photo.\n\n${reason}`,
+          [{ text: 'Try Again', style: 'default' }]
+        );
+      } else if (msg.includes('points') || msg.includes('Points')) {
+        setShowPlans(true);
+      } else {
+        Alert.alert('Error', msg || 'Something went wrong. Please try again.');
+      }
+
+    } finally {
+      setIsGenerating(false);
+    }
+  };
   const handleReset = () => {
     setGeneratedImage(null);
     setSelectedGarmentId(null);
+    setPersonImage(null);
   };
-
   // ── Payment flow ────────────────────────────────────────────────────────────
 
   /**
@@ -181,26 +229,26 @@ const { presentPaymentSheet, initPaymentSheet } = useStripe();
         merchantDisplayName: 'Wearify',
         appearance: {
           colors: {
-            primary:          '#8b5cf6',
-            background:       '#0A0F1C',
+            primary: '#8b5cf6',
+            background: '#0A0F1C',
             componentBackground: '#141929',
-            componentBorder:  '#1f2937',
+            componentBorder: '#1f2937',
             componentDivider: '#1f2937',
-            primaryText:      '#FFFFFF',
-            secondaryText:    '#A0AEC0',
-            componentText:    '#FFFFFF',
-            placeholderText:  '#64748b',
-            icon:             '#8b5cf6',
-            error:            '#ef4444',
+            primaryText: '#FFFFFF',
+            secondaryText: '#A0AEC0',
+            componentText: '#FFFFFF',
+            placeholderText: '#64748b',
+            icon: '#8b5cf6',
+            error: '#ef4444',
           },
           shapes: {
             borderRadius: 12,
-            borderWidth:  0.5,
+            borderWidth: 0.5,
           },
           primaryButton: {
             colors: {
               background: '#8b5cf6',
-              text:        '#FFFFFF',
+              text: '#FFFFFF',
             },
             shapes: { borderRadius: 12 },
           },
@@ -474,7 +522,7 @@ const { presentPaymentSheet, initPaymentSheet } = useStripe();
               contentContainerStyle={styles.planScroll}
             >
               {PLANS.map(plan => {
-                const isPro     = plan.popular === true;
+                const isPro = plan.popular === true;
                 const isLoading = payingPlan === plan.key;
 
                 return (
@@ -525,30 +573,30 @@ const { presentPaymentSheet, initPaymentSheet } = useStripe();
 
 const styles = StyleSheet.create({
   backgroundGradient: { flex: 1 },
-  container:          { flex: 1, backgroundColor: 'transparent' },
-  mainWrapper:        { flex: 1, paddingHorizontal: 20, paddingBottom: 20 },
+  container: { flex: 1, backgroundColor: 'transparent' },
+  mainWrapper: { flex: 1, paddingHorizontal: 20, paddingBottom: 20 },
 
   header: {
-    flexDirection:  'row',
+    flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems:     'center',
-    marginBottom:   16,
-    marginTop:      10,
+    alignItems: 'center',
+    marginBottom: 16,
+    marginTop: 10,
   },
-  headerLogo:  { width: 100, height: 40 },
+  headerLogo: { width: 100, height: 40 },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
 
   diamondBadge: {
     backgroundColor: 'rgba(139, 92, 246, 0.2)',
     paddingHorizontal: 12,
-    paddingVertical:   6,
-    borderRadius:      20,
-    borderWidth:       1,
-    borderColor:       'rgba(139, 92, 246, 0.5)',
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.5)',
   },
   diamondText: { color: '#FFFFFF', fontWeight: 'bold', fontSize: 14 },
 
-  signOutBtn:  { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 },
+  signOutBtn: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 },
   signOutText: { color: '#FFFFFF', fontWeight: '600', fontSize: 14 },
 
   quickNav: {
@@ -575,157 +623,157 @@ const styles = StyleSheet.create({
 
   carouselContainer: { height: 100, marginBottom: 16, justifyContent: 'center' },
   garmentCard: {
-    width:           75,
-    height:          100,
+    width: 75,
+    height: 100,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius:    12,
-    marginRight:     12,
-    overflow:        'hidden',
-    borderWidth:     2,
-    borderColor:     'transparent',
+    borderRadius: 12,
+    marginRight: 12,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'transparent',
   },
   garmentCardSelected: { borderColor: '#8b5cf6' },
-  garmentImage:        { width: '100%', height: '100%', resizeMode: 'cover' },
+  garmentImage: { width: '100%', height: '100%', resizeMode: 'cover' },
   checkmarkBadge: {
-    position:        'absolute',
-    top:             4,
-    right:           4,
+    position: 'absolute',
+    top: 4,
+    right: 4,
     backgroundColor: '#8b5cf6',
-    width:           18,
-    height:          18,
-    borderRadius:    9,
-    justifyContent:  'center',
-    alignItems:      'center',
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   checkmarkText: { color: '#FFFFFF', fontSize: 10, fontWeight: 'bold' },
 
   canvasWrapper: { flex: 1, justifyContent: 'center', marginBottom: 16 },
   mainContainer: {
-    width:           '100%',
-    height:          '100%',
+    width: '100%',
+    height: '100%',
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderRadius:    20,
-    borderWidth:     2,
-    borderColor:     'rgba(255, 255, 255, 0.1)',
-    borderStyle:     'dashed',
-    overflow:        'hidden',
-    alignItems:      'center',
-    justifyContent:  'center',
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderStyle: 'dashed',
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   mainContainerSuccess: {
-    borderStyle:   'solid',
-    borderColor:   '#8b5cf6',
-    shadowColor:   '#8b5cf6',
-    shadowOffset:  { width: 0, height: 4 },
+    borderStyle: 'solid',
+    borderColor: '#8b5cf6',
+    shadowColor: '#8b5cf6',
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius:  8,
-    elevation:     5,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  placeholder:    { alignItems: 'center', padding: 20 },
-  iconText:       { fontSize: 40, marginBottom: 12 },
-  uploadText:     { color: '#E2E8F0', fontSize: 16, fontWeight: '600', marginBottom: 4 },
-  subUploadText:  { color: '#64748b', fontSize: 12 },
-  previewImage:   { width: '100%', height: '100%', resizeMode: 'cover' },
+  placeholder: { alignItems: 'center', padding: 20 },
+  iconText: { fontSize: 40, marginBottom: 12 },
+  uploadText: { color: '#E2E8F0', fontSize: 16, fontWeight: '600', marginBottom: 4 },
+  subUploadText: { color: '#64748b', fontSize: 12 },
+  previewImage: { width: '100%', height: '100%', resizeMode: 'cover' },
   editOverlay: {
-    position:        'absolute',
-    bottom:          0,
-    width:           '100%',
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
     backgroundColor: 'rgba(0,0,0,0.6)',
     paddingVertical: 12,
-    alignItems:      'center',
+    alignItems: 'center',
   },
   editOverlayText: { color: '#FFFFFF', fontSize: 14, fontWeight: '500' },
 
-  footer:          { width: '100%', marginTop: 'auto' },
+  footer: { width: '100%', marginTop: 'auto' },
   buttonContainer: { width: '100%', borderRadius: 16, overflow: 'hidden' },
-  buttonDisabled:  { opacity: 0.7 },
-  gradient:        { paddingVertical: 16, justifyContent: 'center', alignItems: 'center' },
-  buttonText:      { color: '#FFFFFF', fontSize: 18, fontWeight: 'bold' },
+  buttonDisabled: { opacity: 0.7 },
+  gradient: { paddingVertical: 16, justifyContent: 'center', alignItems: 'center' },
+  buttonText: { color: '#FFFFFF', fontSize: 18, fontWeight: 'bold' },
   buttonTextDisabled: { color: '#9ca3af' },
 
   closeCameraBtn: {
-    position:          'absolute',
-    top:               50,
-    left:              20,
-    backgroundColor:   'rgba(0,0,0,0.5)',
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
     paddingHorizontal: 16,
-    paddingVertical:   8,
-    borderRadius:      20,
+    paddingVertical: 8,
+    borderRadius: 20,
   },
   closeCameraText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
 
   modalOverlay: {
-    flex:            1,
+    flex: 1,
     backgroundColor: 'rgba(0,0,0,0.8)',
-    justifyContent:  'flex-end',
+    justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor:    '#0A0F1C',
-    borderTopLeftRadius:  24,
+    backgroundColor: '#0A0F1C',
+    borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    padding:            24,
-    paddingBottom:      40,
-    minHeight:          420,
-    borderTopWidth:     1,
-    borderColor:        'rgba(255,255,255,0.1)',
+    padding: 24,
+    paddingBottom: 40,
+    minHeight: 420,
+    borderTopWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
-  closeModalBtn:  { alignSelf: 'flex-end', padding: 8 },
+  closeModalBtn: { alignSelf: 'flex-end', padding: 8 },
   closeModalText: { color: '#64748b', fontSize: 20, fontWeight: 'bold' },
-  modalTitle:     { color: '#FFF', fontSize: 28, fontWeight: 'bold', marginBottom: 8 },
-  modalSubtitle:  { color: '#A0AEC0', fontSize: 16, marginBottom: 24 },
+  modalTitle: { color: '#FFF', fontSize: 28, fontWeight: 'bold', marginBottom: 8 },
+  modalSubtitle: { color: '#A0AEC0', fontSize: 16, marginBottom: 24 },
 
   planScroll: { paddingRight: 24, alignItems: 'center' },
   planCard: {
     backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius:    16,
-    padding:         20,
-    width:           200,
-    marginRight:     16,
-    borderWidth:     1,
-    borderColor:     'rgba(255,255,255,0.05)',
+    borderRadius: 16,
+    padding: 20,
+    width: 200,
+    marginRight: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
   },
   planCardPro: {
-    borderColor:     '#8b5cf6',
+    borderColor: '#8b5cf6',
     backgroundColor: 'rgba(139, 92, 246, 0.1)',
   },
   popularBadge: {
-    position:          'absolute',
-    top:               -12,
-    right:             16,
-    backgroundColor:   'rgba(255,255,255,0.1)',
+    position: 'absolute',
+    top: -12,
+    right: 16,
+    backgroundColor: 'rgba(255,255,255,0.1)',
     paddingHorizontal: 12,
-    paddingVertical:   4,
-    borderRadius:      12,
-    borderWidth:       1,
-    borderColor:       '#8b5cf6',
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#8b5cf6',
   },
   popularText: { color: '#d8b4fe', fontSize: 10, fontWeight: 'bold' },
 
-  planName:   { color: '#FFF', fontSize: 20, fontWeight: 'bold',  marginBottom: 8  },
-  planPrice:  { color: '#FFF', fontSize: 24, fontWeight: '900',   marginBottom: 12 },
-  planPoints: { color: '#A0AEC0', fontSize: 14,                   marginBottom: 24 },
+  planName: { color: '#FFF', fontSize: 20, fontWeight: 'bold', marginBottom: 8 },
+  planPrice: { color: '#FFF', fontSize: 24, fontWeight: '900', marginBottom: 12 },
+  planPoints: { color: '#A0AEC0', fontSize: 14, marginBottom: 24 },
 
   planBtn: {
     backgroundColor: 'rgba(255,255,255,0.1)',
     paddingVertical: 12,
-    borderRadius:    8,
-    alignItems:      'center',
-    minHeight:       44,
-    justifyContent:  'center',
+    borderRadius: 8,
+    alignItems: 'center',
+    minHeight: 44,
+    justifyContent: 'center',
   },
   planBtnPro: {
     backgroundColor: '#8b5cf6',
     paddingVertical: 12,
-    borderRadius:    8,
-    alignItems:      'center',
-    minHeight:       44,
-    justifyContent:  'center',
+    borderRadius: 8,
+    alignItems: 'center',
+    minHeight: 44,
+    justifyContent: 'center',
   },
   planBtnText: { color: '#FFF', fontWeight: 'bold', fontSize: 14 },
 
   stripeBadge: {
-    color:     '#4B5563',
-    fontSize:  12,
+    color: '#4B5563',
+    fontSize: 12,
     textAlign: 'center',
     marginTop: 16,
   },

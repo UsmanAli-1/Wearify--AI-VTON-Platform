@@ -100,6 +100,7 @@ router.get("/me", auth, async (req, res) => {
 });
 
 router.post("/generate", auth, upload.single("image"), async (req, res) => {
+  console.log("🔗 TRYON_URL from env:", process.env.TRYON_MODEL_URL);  // ← add this
   console.log("AI URL:", process.env.AI_VALIDATION_URL);
 
   try {
@@ -136,6 +137,28 @@ router.post("/generate", auth, upload.single("image"), async (req, res) => {
 
     imageBuffer = await sharp(imageBuffer)
       .resize({ width: 1024 })
+      .jpeg({ quality: 80 })
+      .toBuffer();
+
+    // STEP 2.5: REMOVE BACKGROUND → WHITE
+    const rbgForm = new FormData();
+    rbgForm.append('image_file', imageBuffer, { filename: 'image.jpg', contentType: 'image/jpeg' });
+    rbgForm.append('size', 'auto');
+
+    const rbgResponse = await axios.post(
+      'https://api.remove.bg/v1.0/removebg',
+      rbgForm,
+      {
+        headers: {
+          ...rbgForm.getHeaders(),
+          'X-Api-Key': process.env.REMOVEBG_API_KEY,
+        },
+        responseType: 'arraybuffer',
+      }
+    );
+
+    imageBuffer = await sharp(Buffer.from(rbgResponse.data))
+      .flatten({ background: { r: 255, g: 255, b: 255 } })
       .jpeg({ quality: 80 })
       .toBuffer();
 
@@ -182,12 +205,73 @@ router.post("/generate", auth, upload.single("image"), async (req, res) => {
         .end(imageBuffer);
     });
 
+    // STEP 4.5: SEND TO FRIEND'S TRY-ON MODEL
+    const TRYON_URL = process.env.TRYON_MODEL_URL;
+    console.log("🔗 TRYON_URL:", TRYON_URL);
+
+    let garmentImageUrl = req.body.garmentImagePath || '';
+    if (!garmentImageUrl && garmentId) {
+      const Garment = require('../models/Garment');
+      const garment = await Garment.findById(garmentId);
+      garmentImageUrl = garment?.imagePath || '';
+    }
+    console.log("👕 Garment URL:", garmentImageUrl);
+
+    const tryonForm = new FormData();
+    const garmentResponse = await axios.get(garmentImageUrl, { responseType: 'arraybuffer' });
+    const garmentBuffer = Buffer.from(garmentResponse.data);
+    console.log("✅ Garment downloaded, size:", garmentBuffer.length);
+
+    tryonForm.append('person', imageBuffer, { filename: 'person.jpg', contentType: 'image/jpeg' });
+    tryonForm.append('cloth', garmentBuffer, { filename: 'cloth.jpg', contentType: 'image/jpeg' });
+
+    console.log("📤 Sending to try-on model...");
+    let tryonResponse;
+    try {
+      tryonResponse = await axios.post(
+        `${TRYON_URL}`,
+        tryonForm,
+        {
+          headers: {
+            ...tryonForm.getHeaders(),
+            'ngrok-skip-browser-warning': 'true',
+          },
+          responseType: 'arraybuffer',
+          timeout: 120000,
+        }
+      );
+      console.log("✅ Try-on response status:", tryonResponse.status);
+      console.log("✅ Try-on response size:", tryonResponse.data.byteLength);
+    } catch (tryonErr) {
+      console.error("❌ Try-on model error status:", tryonErr?.response?.status);
+      console.error("❌ Try-on model error:", tryonErr?.response?.data?.toString());
+      console.error("❌ Try-on full error:", tryonErr?.message);
+      throw tryonErr;
+    }
+
+    console.log("☁️ Uploading result to Cloudinary...");
+
+    // Upload try-on result to Cloudinary
+    const tryonBuffer = Buffer.from(tryonResponse.data);
+    const tryonUpload = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        { folder: 'wearify/results' },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      ).end(tryonBuffer);
+    });
+
+    const resultImageUrl = tryonUpload.secure_url;
+
+
     // STEP 5: SAVE TO DB & DEDUCT POINTS
     await Image.create({
       user: user._id,
-      imagePath: uploadResult.secure_url,
+      imagePath: resultImageUrl,          // ← result image, not person upload
       garment: isAiGarment ? null : garmentId,
-      garmentImagePath: req.body.garmentImagePath || "",
+      garmentImagePath: req.body.garmentImagePath || '',
       pointsUsed: COST,
     });
 
@@ -198,6 +282,7 @@ router.post("/generate", auth, upload.single("image"), async (req, res) => {
       message: "Success",
       points: user.points,
       pointsExhausted: user.points < COST,
+      resultImage: resultImageUrl,  // ← add this
     });
   } catch (err) {
     console.error("🔥 GENERATE ERROR:", err);
