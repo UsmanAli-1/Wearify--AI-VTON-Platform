@@ -1,1 +1,8 @@
-to upload on git 
+---
+title: Ai Suggestion
+emoji: 👗
+colorFrom: purple
+colorTo: blue
+sdk: docker
+pinned: false
+---
