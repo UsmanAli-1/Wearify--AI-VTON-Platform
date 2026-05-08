@@ -46,6 +46,7 @@ next-env.d.ts
 web/node_modules/
 backend/node_modules/
 hf-validation/
+hf-suggestion/
 
 # Logs
 *.log
