@@ -29,6 +29,7 @@ export default function SignIn() {
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       const response = await fetch(`${BASE_URL}/api/users/login`, {
@@ -41,14 +42,16 @@ export default function SignIn() {
 
       if (response.ok) {
         localStorage.setItem("token", data.token);
-        toast.success("Login successful "); 
+        toast.success("Login successful ");
         window.dispatchEvent(new Event("auth-changed"));
         router.push("/");
       } else {
-        toast.error(data.message); 
+        toast.error(data.message);
       }
     } catch (err) {
       toast.error("Something went wrong ❌");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -124,18 +127,38 @@ export default function SignIn() {
                     required
                   />
 
-                  {/* Forgot Password */}
-                  {/* <p className="text-center text-sm text-gray-700 mb-4 hover:underline cursor-pointer">
-                                        Forget Password?
-                                    </p> */}
-
                   {/* Login Button */}
                   <Button
-                  disabled={loading}
-                    className="w-full py-2 shadow-md mb-2 rounded-lg text-white font-semibold bg-gradient-to-r from-purple-400/50 to-blue-600/90"
+                    disabled={loading}
+                    className="w-full py-2 shadow-md mb-2 rounded-lg text-white font-semibold bg-gradient-to-r from-purple-400/50 to-blue-600/90 disabled:cursor-not-allowed disabled:opacity-70"
                     type="submit"
                   >
-                    {loading ? "Signing in..." : "Sign In"}
+                    {loading ? (
+                      <>
+                        <svg
+                          className="animate-spin w-4 h-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8z"
+                          />
+                        </svg>
+                        Signing in...
+                      </>
+                    ) : (
+                      "Sign In"
+                    )}
                   </Button>
                 </form>
 
@@ -148,7 +171,7 @@ export default function SignIn() {
 
                 {/* Register Link */}
                 <p className="text-center text-sm mt-6 text-gray-300">
-                  Don’t have an account?
+                  Don't have an account?
                   <a
                     href="/signup"
                     className="text-blue-600 ml-1 font-medium hover:underline"

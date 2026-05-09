@@ -151,7 +151,7 @@ export default function AiSuggestionSection() {
       {loading ? (
         <>
           <svg
-            className="animate-spin w-4 h-4 mr-2"
+            className="animate-spin w-4 h-4 "
             fill="none"
             viewBox="0 0 24 24"
           >
@@ -173,7 +173,7 @@ export default function AiSuggestionSection() {
         </>
       ) : (
         <>
-          <FontAwesomeIcon icon={faWandMagicSparkles} className="mr-2" />
+          <FontAwesomeIcon icon={faWandMagicSparkles}  />
           Suggest Me
         </>
       )}

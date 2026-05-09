@@ -17,6 +17,7 @@ export default function SignUp() {
     password: "",
   });
 
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleChanges = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,30 +29,37 @@ export default function SignUp() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
 
-    // Send data to backend
-    const response = await fetch(`${BASE_URL}/api/users`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
-
-    if (response.ok) {
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        password: "",
+    try {
+      const response = await fetch(`${BASE_URL}/api/users`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       });
-      toast.success("user created");
-      router.push("/signin");
-    } else {
-      const data = await response.json();
-      toast.error(data.message || "Something went wrong");
+
+      if (response.ok) {
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          password: "",
+        });
+        toast.success("user created");
+        router.push("/signin");
+      } else {
+        const data = await response.json();
+        toast.error(data.message || "Something went wrong");
+      }
+    } catch {
+      toast.error("Something went wrong ❌");
+    } finally {
+      setLoading(false);
     }
   };
+
   return (
     <>
       <section className="min-h-[calc(100vh-110px)] flex items-center justify-center ">
@@ -160,10 +168,36 @@ export default function SignUp() {
 
                   {/* Create Account Button */}
                   <Button
-                    className="w-full mb-4 rounded-lg text-white font-semibold bg-gradient-to-r from-purple-400/50 to-blue-600/90 shadow-md"
+                    disabled={loading}
+                    className="w-full mb-4 rounded-lg text-white font-semibold bg-gradient-to-r from-purple-400/50 to-blue-600/90 shadow-md disabled:cursor-not-allowed disabled:opacity-70"
                     type="submit"
                   >
-                    Create Account
+                    {loading ? (
+                      <>
+                        <svg
+                          className="animate-spin w-4 h-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8z"
+                          />
+                        </svg>
+                        Creating Account...
+                      </>
+                    ) : (
+                      "Create Account"
+                    )}
                   </Button>
 
                   {/* Login Link */}
