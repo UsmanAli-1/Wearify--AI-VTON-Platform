@@ -581,9 +581,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
-    marginTop: 10,
+    marginTop: 50,
   },
-  headerLogo: { width: 100, height: 40 },
+  headerLogo: { width: 100, height: 40, marginLeft: -25 },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
 
   diamondBadge: {
