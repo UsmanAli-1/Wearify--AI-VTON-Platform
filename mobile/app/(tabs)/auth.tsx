@@ -6,9 +6,11 @@ import { API_URL1 } from '@/constants/config';
 import React, { useState } from "react";
 import {
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -97,106 +99,104 @@ export default function AuthScreen() {
       end={{ x: 1, y: 1 }}
       style={styles.backgroundGradient}
     >
-      <Starfield />
       <SafeAreaView style={styles.container}>
+        <Image
+          source={require("../../assets/images/logo1.png")}
+          style={{ width: 64, height: 64, resizeMode: 'contain', marginTop: 32, marginLeft: 20 }}
+        />
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.keyboardView}
         >
-          <View style={styles.headerContainer}>
-            <Text style={styles.title}>
-              {isLogin ? "Welcome Back" : "Create Account"}
-            </Text>
-            <Text style={styles.subtitle}>
-              {isLogin
-                ? "Log in to continue to your virtual fitting room."
-                : "Sign up to start trying on clothes with AI."}
-            </Text>
-          </View>
-
-          <View style={styles.card}>
-            {!isLogin && (
-              <>
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Full Name</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="John Doe"
-                    placeholderTextColor="#4A5568"
-                    value={name}
-                    onChangeText={setName}
-                  />
-                </View>
-
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Phone Number</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="0300 1234567"
-                    placeholderTextColor="#4A5568"
-                    keyboardType="phone-pad"
-                    value={phone}
-                    onChangeText={setPhone}
-                  />
-                </View>
-              </>
-            )}
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Email</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="you@example.com"
-                placeholderTextColor="#4A5568"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={email}
-                onChangeText={setEmail}
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Password</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="••••••••"
-                placeholderTextColor="#4A5568"
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-              />
-            </View>
-
-            <TouchableOpacity
-              style={styles.buttonContainer}
-              onPress={handleAuth}
-            >
-              <LinearGradient
-                colors={["#8b5cf6", "#3b82f6"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.gradient}
-              >
-                <Text style={styles.buttonText}>
-                  {isLogin ? "Log In" : "Sign Up"}
-                </Text>
-              </LinearGradient>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.toggleContainer}
-              onPress={() => setIsLogin(!isLogin)}
-            >
-              <Text style={styles.toggleText}>
-                {isLogin
-                  ? "Don't have an account? "
-                  : "Already have an account? "}
-                <Text style={styles.toggleHighlight}>
-                  {isLogin ? "Sign Up" : "Log In"}
-                </Text>
+          <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+            <View style={styles.headerContainer}>
+              <Text style={styles.title}>
+                {isLogin ? "Sign In" : "Sign Up"}
               </Text>
-            </TouchableOpacity>
-          </View>
+            </View>
+
+            <View style={styles.card}>
+              {!isLogin && (
+                <>
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Full Name</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="John Doe"
+                      placeholderTextColor="#4A5568"
+                      value={name}
+                      onChangeText={setName}
+                    />
+                  </View>
+
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Phone Number</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="0300 1234567"
+                      placeholderTextColor="#4A5568"
+                      keyboardType="phone-pad"
+                      value={phone}
+                      onChangeText={setPhone}
+                    />
+                  </View>
+                </>
+              )}
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Email</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="you@example.com"
+                  placeholderTextColor="#4A5568"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={email}
+                  onChangeText={setEmail}
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Password</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="••••••••"
+                  placeholderTextColor="#4A5568"
+                  secureTextEntry
+                  value={password}
+                  onChangeText={setPassword}
+                />
+              </View>
+
+              <TouchableOpacity
+                style={styles.buttonContainer}
+                onPress={handleAuth}
+              >
+                <LinearGradient
+                  colors={["#8b5cf6", "#3b82f6"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.gradient}
+                >
+                  <Text style={styles.buttonText}>
+                    {isLogin ? "Sign In" : "Sign Up"}
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.toggleContainer}
+                onPress={() => setIsLogin(!isLogin)}
+              >
+                <Text style={styles.toggleText}>
+                  {isLogin ? "Don't have an account? " : "Already have an account? "}
+                  <Text style={styles.toggleHighlight}>
+                    {isLogin ? "Sign Up" : "Sign In"}
+                  </Text>
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
     </LinearGradient>
@@ -211,12 +211,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "transparent", // 2. Made transparent to reveal the gradient
   },
-  keyboardView: { flex: 1, justifyContent: "center", padding: 24 },
-  headerContainer: { marginBottom: 32 },
+  keyboardView: { flex: 1, padding: 20, paddingTop: 0 },
+  headerContainer: { marginBottom: 0, marginTop: 30 },
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#FFFFFF",
+    color: "#8b5cf6",
     marginBottom: 8,
   },
   subtitle: { fontSize: 16, color: "#A0AEC0", lineHeight: 24 },
