@@ -8,12 +8,14 @@ import toast from "react-hot-toast";
 
 type TryOnRecord = {
   _id: string;
-  imagePath: string;
+  imagePath: string;           // person uploaded image (kept in type, not displayed as main)
+  resultImagePath: string;     // ← result image from try-on model (shown as main card image)
   garment: {
     _id: string;
     name: string;
     imagePath: string;
-  };
+  } | null;
+  garmentImagePath: string;    // fallback garment url for AI garments
   createdAt: string;
 };
 
@@ -100,6 +102,13 @@ export default function TryOnGalleryModal({ isOpen, onClose }: Props) {
     });
   };
 
+  // resolve garment thumbnail — prefer populated garment object, fallback to garmentImagePath
+  const getGarmentThumbnail = (record: TryOnRecord) => {
+    if (record.garment?.imagePath) return record.garment.imagePath;
+    if (record.garmentImagePath) return record.garmentImagePath;
+    return null;
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -122,7 +131,7 @@ export default function TryOnGalleryModal({ isOpen, onClose }: Props) {
         }
       `}</style>
 
-      {/* Backdrop — slightly grayish, not pure black */}
+      {/* Backdrop */}
       <div
         className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-8"
         style={{
@@ -132,7 +141,7 @@ export default function TryOnGalleryModal({ isOpen, onClose }: Props) {
         }}
         onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       >
-        {/* Modal Panel — dark gray, not pure black */}
+        {/* Modal Panel */}
         <div
           className="relative w-full max-w-6xl max-h-[90vh] rounded-3xl flex flex-col overflow-hidden"
           style={{
@@ -187,80 +196,85 @@ export default function TryOnGalleryModal({ isOpen, onClose }: Props) {
                 </p>
               </div>
             ) : (
-              // 2/3 ratio = taller cards, better for full-body fashion images
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {records.map((record) => (
-                  <div
-                    key={record._id}
-                    className="group relative rounded-2xl overflow-hidden"
-                    style={{
-                      aspectRatio: "2/3",
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                    }}
-                  >
-                    {/* Main image */}
-                    <img
-                      src={record.imagePath}
-                      alt="Try-on"
-                      className="w-full h-full object-cover"
-                    />
+                {records.map((record) => {
+                  // ── use resultImagePath as the main displayed image ──
+                  const mainImage = record.resultImagePath || record.imagePath;
+                  const garmentThumb = getGarmentThumbnail(record);
 
-                    {/* Top-left: action buttons */}
-                    <div className="absolute top-2 left-2 flex gap-1.5  md:group-hover:opacity-100 transition-opacity duration-200">
-                      <button
-                        onClick={() => handleDownload(record.imagePath, record._id)}
-                        className="w-7 h-7 rounded-full flex items-center justify-center bg-black/35 hover:bg-green-500 transition duration-200 cursor-pointer"
-                        title="Download"
-                      >
-                        <FontAwesomeIcon icon={faDownload} className="text-white text-[10px]" />
-                      </button>
-                      <button
-                        onClick={() => setConfirmId(record._id)}
-                        disabled={deletingId === record._id}
-                        className="w-7 h-7 rounded-full flex items-center justify-center bg-black/35 hover:bg-red-500 transition duration-200 cursor-pointer disabled:opacity-50"
-                        title="Delete"
-                      >
-                        {deletingId === record._id ? (
-                          <svg className="animate-spin w-3 h-3 text-white" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                          </svg>
-                        ) : (
-                          <FontAwesomeIcon icon={faTrash} className="text-white text-[10px]" />
-                        )}
-                      </button>
-                    </div>
-
-                    {/* Top-right: garment thumbnail */}
-                    {record.garment?.imagePath && (
-                      <div className="absolute top-2 right-2">
-                        <img
-                          src={record.garment.imagePath}
-                          alt={record.garment.name}
-                          className="w-10 h-14 rounded-lg object-cover"
-                          style={{
-                            border: "1.5px solid rgba(255,255,255,0.25)",
-                            boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
-                          }}
-                        />
-                      </div>
-                    )}
-
-                    {/* Bottom: date */}
+                  return (
                     <div
-                      className="absolute bottom-0 left-0 right-0 px-3 py-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200"
-                      style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent)" }}
+                      key={record._id}
+                      className="group relative rounded-2xl overflow-hidden"
+                      style={{
+                        aspectRatio: "2/3",
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                      }}
                     >
-                      <p className="text-white/60 text-[10px]">{formatDate(record.createdAt)}</p>
+                      {/* Main image — result of try-on */}
+                      <img
+                        src={mainImage}
+                        alt="Try-on result"
+                        className="w-full h-full object-cover"
+                      />
+
+                      {/* Top-left: action buttons */}
+                      <div className="absolute top-2 left-2 flex gap-1.5 md:group-hover:opacity-100 transition-opacity duration-200">
+                        <button
+                          onClick={() => handleDownload(mainImage, record._id)}
+                          className="w-7 h-7 rounded-full flex items-center justify-center bg-black/35 hover:bg-green-500 transition duration-200 cursor-pointer"
+                          title="Download"
+                        >
+                          <FontAwesomeIcon icon={faDownload} className="text-white text-[10px]" />
+                        </button>
+                        <button
+                          onClick={() => setConfirmId(record._id)}
+                          disabled={deletingId === record._id}
+                          className="w-7 h-7 rounded-full flex items-center justify-center bg-black/35 hover:bg-red-500 transition duration-200 cursor-pointer disabled:opacity-50"
+                          title="Delete"
+                        >
+                          {deletingId === record._id ? (
+                            <svg className="animate-spin w-3 h-3 text-white" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                            </svg>
+                          ) : (
+                            <FontAwesomeIcon icon={faTrash} className="text-white text-[10px]" />
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Top-right: garment thumbnail (catalogue or AI garment) */}
+                      {garmentThumb && (
+                        <div className="absolute top-2 right-2">
+                          <img
+                            src={garmentThumb}
+                            alt="Garment"
+                            className="w-10 h-14 rounded-lg object-cover"
+                            style={{
+                              border: "1.5px solid rgba(255,255,255,0.25)",
+                              boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+                            }}
+                          />
+                        </div>
+                      )}
+
+                      {/* Bottom: date */}
+                      <div
+                        className="absolute bottom-0 left-0 right-0 px-3 py-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200"
+                        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent)" }}
+                      >
+                        <p className="text-white/60 text-[10px]">{formatDate(record.createdAt)}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
 
-          {/* Confirm Delete overlay — inside modal panel */}
+          {/* Confirm Delete overlay */}
           {confirmId && (
             <div
               className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl"

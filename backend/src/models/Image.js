@@ -1,44 +1,3 @@
-// const mongoose = require("mongoose");
-
-// const imageSchema = new mongoose.Schema({
-//   user: {
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: "User",
-//     required: true,
-//   },
-
-//   // user's uploaded image
-//   imagePath: {
-//     type: String,
-//     required: true,
-//   },
-
-//   // selected garment
-//   garment: {
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: "Garment",
-//     required: true,
-//   },
-
-//   pointsUsed: {
-//     type: Number,
-//     default: 40,
-//   },
-
-//   status: {
-//     type: String,
-//     default: "uploaded", // later: processing, done
-//   },
-
-//   createdAt: {
-//     type: Date,
-//     default: Date.now,
-//   },
-// });
-
-// module.exports = mongoose.model("Image", imageSchema);
-
-
 const mongoose = require("mongoose");
 
 const imageSchema = new mongoose.Schema({
@@ -54,11 +13,15 @@ const imageSchema = new mongoose.Schema({
   garment: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Garment",
-    required: false,        // ← change to false
+    required: false,
   },
   garmentImagePath: {
     type: String,
-    default: "",            // ← add this
+    default: "",
+  },
+  resultImagePath: {
+    type: String,
+    default: "",
   },
   pointsUsed: {
     type: Number,

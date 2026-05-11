@@ -1,5 +1,6 @@
 const express = require("express");
 const User = require("../models/User");
+const Garment = require("../models/Garment"); // moved to top
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -11,19 +12,16 @@ const FormData = require("form-data");
 const sharp = require("sharp");
 const cloudinary = require("../config/cloudinary");
 
-//  Defined once at top, not inside route
-const waitForAiService = async (retries = 5, delay = 15000) => {
-  for (let i = 0; i < retries; i++) {
-    try {
-      const response = await axios.get(`${process.env.AI_VALIDATION_URL}/`, {
-        timeout: 15000,
-      });
-      if (response.status === 200) return true;
-    } catch (e) {
-      if (i < retries - 1) await new Promise((r) => setTimeout(r, delay));
-    }
-  }
-  return false;
+// Helper to upload a buffer to Cloudinary
+const uploadToCloudinary = (buffer, folder) => {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader
+      .upload_stream({ folder }, (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      })
+      .end(buffer);
+  });
 };
 
 router.post("/", async (req, res) => {
@@ -100,11 +98,12 @@ router.get("/me", auth, async (req, res) => {
 });
 
 router.post("/generate", auth, upload.single("image"), async (req, res) => {
-  console.log("🔗 TRYON_URL from env:", process.env.TRYON_MODEL_URL);  // ← add this
+  console.log("🔗 TRYON_URL from env:", process.env.TRYON_MODEL_URL);
   console.log("AI URL:", process.env.AI_VALIDATION_URL);
 
   try {
     const COST = 40;
+    const TRYON_URL = process.env.TRYON_MODEL_URL;
 
     const { garmentId } = req.body;
     const isAiGarment = req.body.garmentImagePath ? true : false;
@@ -117,13 +116,13 @@ router.post("/generate", auth, upload.single("image"), async (req, res) => {
       return res.status(400).json({ message: "No garment selected" });
     }
 
-    //  STEP 1: CHECK POINTS
+    // STEP 1: CHECK POINTS
     const user = await User.findById(req.user.id);
     if (user.points < COST) {
       return res.status(400).json({ message: "Not enough points" });
     }
 
-    //  STEP 2: CONVERT & RESIZE IMAGE
+    // STEP 2: CONVERT HEIC/HEIF/AVIF/WEBP → JPEG only (no resize, no bg removal)
     let imageBuffer = req.file.buffer;
 
     if (
@@ -135,57 +134,26 @@ router.post("/generate", auth, upload.single("image"), async (req, res) => {
       imageBuffer = await sharp(req.file.buffer).jpeg().toBuffer();
     }
 
-    imageBuffer = await sharp(imageBuffer)
-      .resize({ width: 1024 })
-      .jpeg({ quality: 80 })
-      .toBuffer();
+    // STEP 3: AI VALIDATION — directly call check-full-body, no separate wake-up ping
+    console.log("🔍 Validating image...");
+    let aiData;
+    try {
+      const formData = new FormData();
+      formData.append("file", imageBuffer, { filename: "image.jpg" });
 
-    // STEP 2.5: REMOVE BACKGROUND → WHITE
-    const rbgForm = new FormData();
-    rbgForm.append('image_file', imageBuffer, { filename: 'image.jpg', contentType: 'image/jpeg' });
-    rbgForm.append('size', 'auto');
-
-    const rbgResponse = await axios.post(
-      'https://api.remove.bg/v1.0/removebg',
-      rbgForm,
-      {
-        headers: {
-          ...rbgForm.getHeaders(),
-          'X-Api-Key': process.env.REMOVEBG_API_KEY,
-        },
-        responseType: 'arraybuffer',
-      }
-    );
-
-    imageBuffer = await sharp(Buffer.from(rbgResponse.data))
-      .flatten({ background: { r: 255, g: 255, b: 255 } })
-      .jpeg({ quality: 80 })
-      .toBuffer();
-
-    //  STEP 3: WAKE UP AI + VALIDATE
-    const isReady = await waitForAiService();
-    console.log("AI Service Ready:", isReady);
-    if (!isReady) {
-      return res
-        .status(503)
-        .json({ message: "AI service unavailable, please try again" });
+      const aiResponse = await axios.post(
+        `${process.env.AI_VALIDATION_URL}/check-full-body`,
+        formData,
+        { headers: formData.getHeaders(), timeout: 90000 }
+      );
+      aiData = aiResponse.data;
+    } catch (aiErr) {
+      console.error("❌ AI Validation error:", aiErr?.message);
+      return res.status(503).json({ message: "AI service unavailable, please try again" });
     }
 
-    const formData = new FormData();
-    formData.append("file", imageBuffer, { filename: "image.jpg" });
-
-    const aiResponse = await axios.post(
-      `${process.env.AI_VALIDATION_URL}/check-full-body`,
-      formData,
-      { headers: formData.getHeaders(), timeout: 60000 },
-    );
-
-    const aiData = aiResponse.data;
-
     if (typeof aiData !== "object") {
-      return res
-        .status(503)
-        .json({ message: "AI service is waking up, please try again" });
+      return res.status(503).json({ message: "AI service is waking up, please try again" });
     }
 
     if (!aiData.isFullBody) {
@@ -195,94 +163,82 @@ router.post("/generate", auth, upload.single("image"), async (req, res) => {
       });
     }
 
-    //  STEP 4: UPLOAD TO CLOUDINARY
-    const uploadResult = await new Promise((resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream({ folder: "wearify" }, (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        })
-        .end(imageBuffer);
-    });
-
-    // STEP 4.5: SEND TO FRIEND'S TRY-ON MODEL
-    const TRYON_URL = process.env.TRYON_MODEL_URL;
-    console.log("🔗 TRYON_URL:", TRYON_URL);
-
-    let garmentImageUrl = req.body.garmentImagePath || '';
+    // STEP 4: FETCH GARMENT URL (resolved early, ready for parallel use)
+    let garmentImageUrl = req.body.garmentImagePath || "";
     if (!garmentImageUrl && garmentId) {
-      const Garment = require('../models/Garment');
       const garment = await Garment.findById(garmentId);
-      garmentImageUrl = garment?.imagePath || '';
+      garmentImageUrl = garment?.imagePath || "";
     }
     console.log("👕 Garment URL:", garmentImageUrl);
 
-    const tryonForm = new FormData();
-    const garmentResponse = await axios.get(garmentImageUrl, { responseType: 'arraybuffer' });
+    if (!garmentImageUrl) {
+      return res.status(400).json({ message: "Garment image not found" });
+    }
+
+    // STEP 5: DOWNLOAD GARMENT IMAGE
+    const garmentResponse = await axios.get(garmentImageUrl, { responseType: "arraybuffer" });
     const garmentBuffer = Buffer.from(garmentResponse.data);
     console.log("✅ Garment downloaded, size:", garmentBuffer.length);
 
-    tryonForm.append('person', imageBuffer, { filename: 'person.jpg', contentType: 'image/jpeg' });
-    tryonForm.append('cloth', garmentBuffer, { filename: 'cloth.jpg', contentType: 'image/jpeg' });
+    // STEP 6: PARALLEL — send to try-on model AND upload person image to Cloudinary
+    console.log("🚀 Starting parallel: try-on model + Cloudinary upload...");
 
-    console.log("📤 Sending to try-on model...");
-    let tryonResponse;
-    try {
-      tryonResponse = await axios.post(
-        `${TRYON_URL}`,
-        tryonForm,
-        {
-          headers: {
-            ...tryonForm.getHeaders(),
-            'ngrok-skip-browser-warning': 'true',
-          },
-          responseType: 'arraybuffer',
-          timeout: 120000,
-        }
-      );
-      console.log("✅ Try-on response status:", tryonResponse.status);
-      console.log("✅ Try-on response size:", tryonResponse.data.byteLength);
-    } catch (tryonErr) {
-      console.error("❌ Try-on model error status:", tryonErr?.response?.status);
-      console.error("❌ Try-on model error:", tryonErr?.response?.data?.toString());
-      console.error("❌ Try-on full error:", tryonErr?.message);
-      throw tryonErr;
-    }
+    const tryonForm = new FormData();
+    tryonForm.append("person", imageBuffer, { filename: "person.jpg", contentType: "image/jpeg" });
+    tryonForm.append("cloth", garmentBuffer, { filename: "cloth.jpg", contentType: "image/jpeg" });
 
+    const [tryonResponse, personUpload] = await Promise.all([
+      // Try-on model
+      axios.post(TRYON_URL, tryonForm, {
+        headers: {
+          ...tryonForm.getHeaders(),
+          "ngrok-skip-browser-warning": "true",
+        },
+        responseType: "arraybuffer",
+        timeout: 120000,
+      }).then((res) => {
+        console.log("✅ Try-on response status:", res.status);
+        console.log("✅ Try-on response size:", res.data.byteLength);
+        return res;
+      }).catch((tryonErr) => {
+        console.error("❌ Try-on model error status:", tryonErr?.response?.status);
+        console.error("❌ Try-on model error:", tryonErr?.response?.data?.toString());
+        console.error("❌ Try-on full error:", tryonErr?.message);
+        throw tryonErr;
+      }),
+
+      // Cloudinary upload of person image
+      uploadToCloudinary(imageBuffer, "wearify").then((result) => {
+        console.log("✅ Person image uploaded to Cloudinary:", result.secure_url);
+        return result;
+      }),
+    ]);
+
+    // STEP 7: UPLOAD RESULT IMAGE TO CLOUDINARY
     console.log("☁️ Uploading result to Cloudinary...");
-
-    // Upload try-on result to Cloudinary
     const tryonBuffer = Buffer.from(tryonResponse.data);
-    const tryonUpload = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        { folder: 'wearify/results' },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      ).end(tryonBuffer);
-    });
-
+    const tryonUpload = await uploadToCloudinary(tryonBuffer, "wearify/results");
     const resultImageUrl = tryonUpload.secure_url;
+    console.log("✅ Result image uploaded:", resultImageUrl);
 
-
-    // STEP 5: SAVE TO DB & DEDUCT POINTS
-    await Image.create({
-      user: user._id,
-      imagePath: resultImageUrl,          // ← result image, not person upload
-      garment: isAiGarment ? null : garmentId,
-      garmentImagePath: req.body.garmentImagePath || '',
-      pointsUsed: COST,
-    });
-
+    // STEP 8: DEDUCT POINTS + SAVE TO DB (single write, only after successful result)
     user.points -= COST;
     await user.save();
+
+    await Image.create({
+      user: user._id,
+      imagePath: personUpload.secure_url,         // person image cloudinary link
+      garment: isAiGarment ? null : garmentId,    // garment id (if selected from catalogue)
+      garmentImagePath: req.body.garmentImagePath || "", // garment url (if ai garment)
+      resultImagePath: resultImageUrl,            // result image cloudinary link
+      pointsUsed: COST,
+    });
 
     return res.json({
       message: "Success",
       points: user.points,
       pointsExhausted: user.points < COST,
-      resultImage: resultImageUrl,  // ← add this
+      resultImage: resultImageUrl,
     });
   } catch (err) {
     console.error("🔥 GENERATE ERROR:", err);

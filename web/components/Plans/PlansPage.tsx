@@ -4,6 +4,7 @@ import { Card } from "@/ui/card";
 import { Button } from "@/ui/button";
 import { Sparkles, Zap, Crown } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import BASE_URL, { authHeaders } from "@/config/api";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -14,24 +15,47 @@ export default function PlansPage() {
   const [loading, setLoading] = useState<Plan | "">("");
   const [userPlan, setUserPlan] = useState<string>("free");
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const res = await fetch(`${BASE_URL}/api/users/me`, {
-          headers: authHeaders(),
-          // credentials: "include",
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setUserPlan(data.plan || "free");
-        }
-      } catch (err) {
-        console.error(err);
+  const fetchUser = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/api/users/me`, {
+        headers: authHeaders(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUserPlan(data.plan || "free");
       }
+    } catch (err) {
+      console.error(err);
     }
+  };
+
+  // initial fetch
+  useEffect(() => {
     fetchUser();
   }, []);
+
+  // on stripe redirect return — detect ?success=true or ?canceled=true
+  useEffect(() => {
+    const success = searchParams.get("success");
+    const canceled = searchParams.get("canceled");
+
+    if (success === "true") {
+      toast.success("Payment successful! Your plan has been upgraded.");
+      // re-fetch user so plan + points update here
+      fetchUser();
+      // fire auth-changed so Header re-fetches too (points + plan badge)
+      window.dispatchEvent(new Event("auth-changed"));
+      // clean up url params without reload
+      router.replace("/plans");
+    }
+
+    if (canceled === "true") {
+      toast.error("Payment canceled.");
+      router.replace("/plans");
+    }
+  }, [searchParams]);
 
   async function handleCheckout(plan: Plan): Promise<void> {
     setLoading(plan);
@@ -41,7 +65,7 @@ export default function PlansPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // ← add this
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ plan }),
       });
@@ -59,7 +83,7 @@ export default function PlansPage() {
       setLoading("");
     }
   }
- 
+
   return (
     <section className="pb-5 pt-22 md:pt-8 w-full min-h-[calc(100vh-100px)] px-6 md:px-12 xl:px-20 flex flex-col items-center justify-center">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full items-stretch">
@@ -74,10 +98,10 @@ export default function PlansPage() {
             <h2 className="text-4xl font-bold text-white my-5">Rs. 1,200</h2>
             <p className="text-gray-400 text-lg mt-0.5">" 400 Points "</p>
             <ul className="text-sm text-gray-300 space-y-2 mt-4">
-              <li>✔ Generate images</li>
+              <li>✔ Limited Generate images</li>
+              <li>✔ Limited AI outfit suggestions</li>
               <li>✔ 400 usage points</li>
-              <li className="text-gray-500">✖ No AI suggestions</li>
-              <li className="text-gray-500">✖ Normal speed only</li>
+              <li>✔ Normal speed only</li>
             </ul>
           </div>
           <Button
@@ -103,15 +127,13 @@ export default function PlansPage() {
               <Zap />
             </div>
             <h3 className="text-2xl font-semibold text-white">Pro</h3>
-            <p className="text-gray-300 text-sm mt-0.5">
-              Best for regular users
-            </p>
+            <p className="text-gray-300 text-sm mt-0.5">Best for regular users</p>
             <h2 className="text-4xl font-bold text-white my-5">Rs. 3,000</h2>
             <p className="text-gray-300 text-lg mt-0.5">" 1000 Points "</p>
             <ul className="text-sm text-gray-200 space-y-2 mt-4">
               <li>✔ Generate images</li>
+              <li>✔ AI outfit suggestions</li>
               <li>✔ 1000 usage points</li>
-              <li>✔ 10 AI outfit suggestions</li>
               <li>✔ Faster processing</li>
             </ul>
           </div>
@@ -139,9 +161,9 @@ export default function PlansPage() {
             <h2 className="text-4xl font-bold text-white my-5">Rs. 6,000</h2>
             <p className="text-gray-400 text-lg mt-0.5">" 2000 Points "</p>
             <ul className="text-sm text-gray-300 space-y-2 mt-4">
-              <li>✔ Generate images</li>
+              <li>✔ Unlimited Generate images</li>
+              <li>✔ Unlimited AI outfit suggestions</li>
               <li>✔ 2000 usage points</li>
-              <li>✔ Unlimited AI suggestions</li>
               <li>✔ Fast image generation</li>
             </ul>
           </div>

@@ -20,10 +20,8 @@ import TryOnGalleryModal from "../Modals/Tryongallerymodal";
 type Garment = { _id: string; name: string; imagePath: string };
 type GeneratingPhase = "idle" | "scanning" | "generating" | "done";
 
-/* ─── how many skeleton cards to show while loading ─── */
 const SKELETON_COUNT = 16;
 
-/* ─── staggered shimmer keyframes injected once ─── */
 const SHIMMER_STYLE = `
 @keyframes wearify-shimmer {
   0%   { background-position: 200% 0; }
@@ -43,12 +41,12 @@ export default function UploadTryOnSection() {
   const [selectedGarment, setSelectedGarment] = useState<Garment | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [generating, setGenerating] = useState(false);
-  const [generatingPhase, setGeneratingPhase] =
-    useState<GeneratingPhase>("idle");
+  const [generatingPhase, setGeneratingPhase] = useState<GeneratingPhase>("idle");
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeShownThisSession, setUpgradeShownThisSession] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
+  const [downloading, setDownloading] = useState(false); // ← new
 
   /* ── inject shimmer keyframes once ── */
   useEffect(() => {
@@ -118,6 +116,24 @@ export default function UploadTryOnSection() {
     setUploadedImage(URL.createObjectURL(file));
   };
 
+  // ── fetch → blob → trigger download (same approach as gallery modal, works for cross-origin Cloudinary URLs) ──
+  const handleDownload = async (url: string) => {
+    setDownloading(true);
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "wearify-tryon.jpg";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } catch {
+      window.open(url, "_blank");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const handleImageCheck = async () => {
     if (!uploadedImage) return toast.error("Please upload your photo");
     if (!selectedGarment) return toast.error("Please select a garment");
@@ -165,12 +181,16 @@ export default function UploadTryOnSection() {
       return;
     }
 
+    if (data.resultImage) {
+      setGeneratedImage(data.resultImage);
+    }
+
     setSelectedGarment(null);
     setGenerating(false);
     setGeneratingPhase("done");
-    toast.success("Image & garment submitted successfully");
+    toast.success("Try-on generated successfully!");
     window.dispatchEvent(new Event("auth-changed"));
-    if (data.generatedImageUrl) setGeneratedImage(data.generatedImageUrl);
+
     if (data.pointsExhausted && !upgradeShownThisSession) {
       setUpgradeShownThisSession(true);
       setShowUpgrade(true);
@@ -178,7 +198,7 @@ export default function UploadTryOnSection() {
   };
 
   /* ════════════════════════════════════════════
-     Shared sub-components (closures over state)
+     Shared sub-components
   ════════════════════════════════════════════ */
 
   const RemoveBtn = ({ onClick }: { onClick: () => void }) => (
@@ -191,36 +211,17 @@ export default function UploadTryOnSection() {
   );
 
   const Spinner = () => (
-    <svg
-      className="animate-spin w-4 h-4 flex-shrink-0"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8v8z"
-      />
+    <svg className="animate-spin w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
     </svg>
   );
 
   const buttonContent =
     generatingPhase === "scanning" ? (
-      <>
-        <Spinner /> Scanning Image...
-      </>
+      <><Spinner /> Scanning Image...</>
     ) : generatingPhase === "generating" ? (
-      <>
-        <Spinner /> Generating Image...
-      </>
+      <><Spinner /> Generating Image...</>
     ) : (
       <>✨ Try On</>
     );
@@ -249,50 +250,31 @@ export default function UploadTryOnSection() {
       </button>
     ) : null;
 
-  /* ── skeleton card (single slot while loading) ── */
-  const SkeletonCard = ({
-    index,
-    mobile,
-  }: {
-    index: number;
-    mobile?: boolean;
-  }) => (
+  const SkeletonCard = ({ index, mobile }: { index: number; mobile?: boolean }) => (
     <div
       className={`relative flex flex-col items-center justify-center gap-1 rounded-xl overflow-hidden ${
         mobile ? "flex-shrink-0 w-[85px] h-[140px]" : "w-full aspect-[2/3]"
       }`}
       style={{
-        background:
-          "linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.05) 75%)",
+        background: "linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.05) 75%)",
         backgroundSize: "200% 100%",
         animation: `wearify-shimmer 1.5s ${index * 0.13}s infinite linear`,
       }}
     >
       <Sparkles
         className="w-4 h-4 text-purple-400/60"
-        style={{
-          animation: `wearify-pulse 1.3s ${index * 0.13}s ease-in-out infinite`,
-        }}
+        style={{ animation: `wearify-pulse 1.3s ${index * 0.13}s ease-in-out infinite` }}
       />
       <p
         className="text-white/20 text-[9px]"
-        style={{
-          animation: `wearify-pulse 1.3s ${index * 0.13}s ease-in-out infinite`,
-        }}
+        style={{ animation: `wearify-pulse 1.3s ${index * 0.13}s ease-in-out infinite` }}
       >
         Finding {index + 1}...
       </p>
     </div>
   );
 
-  /* ── empty placeholder card (loaded but no garments yet) ── */
-  const EmptyCard = ({
-    index,
-    mobile,
-  }: {
-    index: number;
-    mobile?: boolean;
-  }) => (
+  const EmptyCard = ({ index, mobile }: { index: number; mobile?: boolean }) => (
     <div
       className={`relative flex flex-col items-center justify-center gap-1 rounded-xl overflow-hidden opacity-30 ${
         mobile ? "flex-shrink-0 w-[85px] h-[140px]" : "w-full aspect-[2/3]"
@@ -306,13 +288,10 @@ export default function UploadTryOnSection() {
     </div>
   );
 
-  /* ── garment grid — desktop (2-col) ── */
   const GarmentGrid = () => (
     <>
       {loading
-        ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-            <SkeletonCard key={i} index={i} />
-          ))
+        ? Array.from({ length: SKELETON_COUNT }).map((_, i) => <SkeletonCard key={i} index={i} />)
         : garments.map((g) => (
             <img
               key={g._id}
@@ -320,23 +299,16 @@ export default function UploadTryOnSection() {
               alt={g.name}
               onClick={() => !generating && setSelectedGarment(g)}
               className={`w-full aspect-[2/3] rounded-xl object-cover cursor-pointer transition hover:scale-105 duration-200
-                ${
-                  selectedGarment?._id === g._id
-                    ? "ring-2 ring-white"
-                    : "opacity-75 hover:opacity-100"
-                }`}
+                ${selectedGarment?._id === g._id ? "ring-2 ring-white" : "opacity-75 hover:opacity-100"}`}
             />
           ))}
     </>
   );
 
-  /* ── garment strip — mobile (horizontal scroll) ── */
   const GarmentStrip = () => (
     <>
       {loading
-        ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-            <SkeletonCard key={i} index={i} mobile />
-          ))
+        ? Array.from({ length: SKELETON_COUNT }).map((_, i) => <SkeletonCard key={i} index={i} mobile />)
         : garments.map((g) => (
             <img
               key={g._id}
@@ -344,11 +316,7 @@ export default function UploadTryOnSection() {
               alt={g.name}
               onClick={() => !generating && setSelectedGarment(g)}
               className={`flex-shrink-0 w-[85px] h-[140px] rounded-xl object-cover cursor-pointer transition hover:scale-105 duration-200
-                ${
-                  selectedGarment?._id === g._id
-                    ? "ring-2 ring-white"
-                    : "opacity-75"
-                }`}
+                ${selectedGarment?._id === g._id ? "ring-2 ring-white" : "opacity-75"}`}
             />
           ))}
     </>
@@ -365,16 +333,22 @@ export default function UploadTryOnSection() {
             className="absolute inset-0 w-full h-full object-cover rounded-2xl"
           />
           <div className="absolute top-2 right-2 z-10 flex gap-2">
-            <a
-              href={generatedImage}
-              download="wearify-tryon.jpg"
-              className="w-7 h-7 rounded-full bg-black/60 hover:bg-green-500 flex items-center justify-center transition cursor-pointer"
+            {/* ── download: fetch→blob same as gallery modal, works for cross-origin Cloudinary URLs ── */}
+            <button
+              onClick={() => handleDownload(generatedImage)}
+              disabled={downloading}
+              className="w-7 h-7 rounded-full bg-black/60 hover:bg-green-500 flex items-center justify-center transition cursor-pointer disabled:opacity-50"
+              title="Download"
             >
-              <FontAwesomeIcon
-                icon={faDownload}
-                className="w-3 h-3 text-white"
-              />
-            </a>
+              {downloading ? (
+                <svg className="animate-spin w-3 h-3 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                </svg>
+              ) : (
+                <FontAwesomeIcon icon={faDownload} className="w-3 h-3 text-white" />
+              )}
+            </button>
             <button
               onClick={() => setGeneratedImage(null)}
               className="w-7 h-7 rounded-full bg-black/60 hover:bg-red-500 flex items-center justify-center transition cursor-pointer"
@@ -387,68 +361,40 @@ export default function UploadTryOnSection() {
         <div className="flex flex-col items-center gap-3">
           <Sparkles className="w-6 h-6 text-purple-400/60 animate-pulse" />
           <p className="text-white/30 text-xs text-center">
-            {generatingPhase === "scanning"
-              ? "Scanning Image..."
-              : "Generating Image..."}
+            {generatingPhase === "scanning" ? "Scanning Image..." : "Generating Image..."}
           </p>
         </div>
       ) : (
-        <p className="text-gray-500 text-xs text-center px-4">
-          Generated image preview
-        </p>
+        <p className="text-gray-500 text-xs text-center px-4">Generated image preview</p>
       )}
     </div>
   );
 
-  /* ── Upload Person card inner ── */
   const UploadCardInner = () => (
     <>
       {uploadedImage ? (
         <div className="relative w-full h-full">
-          <img
-            src={uploadedImage}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover rounded-xl"
-          />
+          <img src={uploadedImage} alt="" className="absolute inset-0 w-full h-full object-cover rounded-xl" />
           {!generating && (
-            <RemoveBtn
-              onClick={() => {
-                setUploadedImage(null);
-                setSelectedFile(null);
-              }}
-            />
+            <RemoveBtn onClick={() => { setUploadedImage(null); setSelectedFile(null); }} />
           )}
         </div>
       ) : (
         <div className="flex flex-col items-center gap-1 text-center px-3">
           <h3 className="font-semibold text-white text-sm">Upload Person</h3>
           <p className="text-gray-500 text-xs mb-2">png, jpg, jpeg</p>
-          <label
-            className={`font-semibold text-sm ${
-              isLoggedIn
-                ? "text-[#A06CE3] cursor-pointer"
-                : "text-gray-400 cursor-not-allowed"
-            }`}
-          >
-            <Input
-              type="file"
-              className="hidden"
-              disabled={!isLoggedIn}
-              onChange={handleUpload}
-            />
+          <label className={`font-semibold text-sm ${isLoggedIn ? "text-[#A06CE3] cursor-pointer" : "text-gray-400 cursor-not-allowed"}`}>
+            <Input type="file" className="hidden" disabled={!isLoggedIn} onChange={handleUpload} />
             Select Image
           </label>
           {!isLoggedIn && (
-            <a href="/signin" className="text-xs text-[#A06CE3] mt-1">
-              Sign in to upload
-            </a>
+            <a href="/signin" className="text-xs text-[#A06CE3] mt-1">Sign in to upload</a>
           )}
         </div>
       )}
     </>
   );
 
-  /* ── Selected Garment card inner ── */
   const GarmentCardInner = ({ hint }: { hint: string }) => (
     <>
       {selectedGarment ? (
@@ -458,9 +404,7 @@ export default function UploadTryOnSection() {
             alt={selectedGarment.name}
             className="absolute inset-0 w-full h-full object-cover rounded-xl"
           />
-          {!generating && (
-            <RemoveBtn onClick={() => setSelectedGarment(null)} />
-          )}
+          {!generating && <RemoveBtn onClick={() => setSelectedGarment(null)} />}
         </div>
       ) : (
         <div className="text-center px-3">
@@ -486,14 +430,12 @@ export default function UploadTryOnSection() {
           </h1>
         </div>
 
-        {/* Garments — horizontal scroll with skeleton */}
         <Card className="rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 shadow-xl overflow-hidden py-2 px-2">
           <div className="flex gap-2 overflow-x-auto no-scrollbar items-center">
             <GarmentStrip />
           </div>
         </Card>
 
-        {/* Upload + Selected side by side */}
         <div className="grid grid-cols-2 gap-3 h-[52vw] min-h-[280px] max-h-[340px]">
           <Card className="relative flex items-center justify-center bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden h-full">
             <div className="absolute inset-2 border-2 border-dashed border-white/10 rounded-xl overflow-hidden flex flex-col items-center justify-center">
@@ -507,11 +449,9 @@ export default function UploadTryOnSection() {
           </Card>
         </div>
 
-        {/* Try On button + gallery */}
         <TryOnBtn />
         <GalleryLink />
 
-        {/* Generated preview */}
         <Card className="relative bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden shadow-xl h-[800vw] min-h-[420px] max-h-[480px]">
           <GeneratedInner />
         </Card>
@@ -528,7 +468,6 @@ export default function UploadTryOnSection() {
         </div>
 
         <div className="flex-1 min-h-0 grid grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 overflow-hidden">
-          {/* ── COL 1: Garments panel with skeleton ── */}
           <Card className="h-full rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 shadow-xl overflow-hidden">
             <CardContent className="p-2 md:p-3 h-full overflow-y-auto no-scrollbar">
               <div className="grid grid-cols-2 gap-2">
@@ -537,7 +476,6 @@ export default function UploadTryOnSection() {
             </CardContent>
           </Card>
 
-          {/* ── COL 2 (sm–md): Upload + Selected stacked ── */}
           <div className="lg:hidden h-full flex flex-col gap-3 min-h-0">
             <Card className="flex-1 relative flex items-center justify-center bg-white/5 backdrop-blur-md border border-white/10 shadow-xl rounded-2xl overflow-hidden min-h-0">
               <div className="absolute inset-3 border-2 border-dashed border-white/10 rounded-xl overflow-hidden flex flex-col items-center justify-center">
@@ -551,21 +489,18 @@ export default function UploadTryOnSection() {
             </Card>
           </div>
 
-          {/* ── COL 2 (lg+): Upload Person alone ── */}
           <Card className="hidden lg:flex h-full relative items-center justify-center bg-white/5 backdrop-blur-md border border-white/10 shadow-xl rounded-2xl overflow-hidden">
             <div className="absolute inset-4 border-2 border-dashed border-white/10 rounded-xl overflow-hidden flex flex-col items-center justify-center">
               <UploadCardInner />
             </div>
           </Card>
 
-          {/* ── COL 3 (lg+): Selected Garment alone ── */}
           <Card className="hidden lg:flex h-full relative items-center justify-center bg-white/5 backdrop-blur-md border border-white/10 shadow-xl rounded-2xl overflow-hidden">
             <div className="absolute inset-4 border-2 border-dashed border-white/10 rounded-xl overflow-hidden flex flex-col items-center justify-center">
               <GarmentCardInner hint="Choose from left panel" />
             </div>
           </Card>
 
-          {/* ── COL 3 (sm–md) / COL 4 (lg+): Generated preview + button ── */}
           <div className="h-full flex flex-col gap-2 min-h-0">
             <Card className="flex-1 relative rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 shadow-xl overflow-hidden min-h-0">
               <GeneratedInner />
