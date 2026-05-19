@@ -12,50 +12,73 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Skin tone → color families (Pakistani-calibrated) ──
 SKIN_TO_COLORS = {
+
+    # FAIR (گورا رنگ)
+    # Jewel tones, rich darks, deep jewel shades work best
+    # New: lilac adds soft contrast, olive-green is trending in Pakistani fashion
     "fair": [
-        "dark-blue",
-        "dark-green",
-        "dark-red",
-        "purple",
-        "dark-purple",
-        "black",
-        "blue",
-        "dark-brown",
+        "dark-blue",      # navy — classic contrast
+        "dark-green",     # bottle green — very popular
+        "dark-red",       # maroon — wedding staple
+        "purple",         # medium purple — flattering
+        "dark-purple",    # deep purple — rich look
+        "black",          # classic
+        "blue",           # medium blue
+        "dark-brown",     # chocolate brown
+        "lilac",          # soft purple — flattering on fair skin
+        "olive-green",    # earthy trending tone — works on fair
     ],
+
+    # MEDIUM (گندمی رنگ — most common Pakistani tone)
+    # Warm earthy tones, terracotta, mustard
+    # New: cream too pale for medium, olive-green perfect match
     "medium": [
-        "orange",
-        "dark-orange",
-        "brown",
-        "dark-brown",
-        "green",
-        "dark-green",
-        "blue",
-        "dark-blue",
+        "orange",         # burnt orange — extremely flattering
+        "dark-orange",    # terracotta — huge in Pakistani fashion
+        "brown",          # camel/tan brown
+        "dark-brown",     # chocolate
+        "green",          # olive/forest
+        "dark-green",     # bottle green
+        "blue",           # medium blue
+        "dark-blue",      # navy
+        "olive-green",    # perfect earthy match for wheatish skin
+        "cream",          # off-white cream — warm neutral, works on medium
     ],
+
+    # TAN (سانولا رنگ)
+    # Bright colors for contrast, avoid dark/brown family
+    # New: off-white great contrast, cream slightly warm works well
     "tan": [
-        "white",
-        "light-blue",
-        "blue",
-        "light-green",
-        "orange",
-        "red",
-        "light-yellow",
-        "light-orange",
+        "white",          # brightest contrast
+        "light-blue",     # sky blue — fresh
+        "blue",           # medium blue
+        "light-green",    # mint — vibrant
+        "orange",         # warm complementary
+        "red",            # bright red — stunning
+        "light-yellow",   # mustard — traditional pairing
+        "light-orange",   # peach — soft contrast
+        "off-white",      # warm white — elegant contrast
+        "cream",          # slightly warmer than white — works on tan
     ],
+
+    # DEEP (سیاہ فام)
+    # Maximum contrast bold brights
+    # New: off-white + cream = maximum contrast, lilac pops beautifully
     "deep": [
-        "white",
-        "light-yellow",
-        "yellow",
-        "light-orange",
-        "orange",
-        "light-green",
-        "light-red",
-        "light-blue",
+        "white",          # maximum contrast
+        "light-yellow",   # golden yellow — stunning
+        "yellow",         # bright yellow
+        "light-orange",   # peach/apricot
+        "orange",         # bold beautiful
+        "light-green",    # mint — fresh
+        "light-red",      # rose/coral
+        "light-blue",     # sky blue
+        "off-white",      # warm white — elegant on deep skin
+        "cream",          # soft warm contrast
+        "lilac",          # soft purple pops on deep skin beautifully
     ],
 }
-
 # ── OpenCV Haar Cascade face detector (built-in, no download needed) ──
 face_cascade = cv2.CascadeClassifier(
     cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
@@ -150,14 +173,46 @@ def get_skin_tone(image_bytes: bytes) -> str:
         return "deep"
 
 
+# @app.post("/suggest-outfits")
+# async def suggest_outfits(
+#     file: UploadFile = File(...),
+#     gender: str = Form(...)
+# ):
+#     image_bytes = await file.read()
+#     skin_tone = get_skin_tone(image_bytes)
+#     suggested_colors = SKIN_TO_COLORS[skin_tone]
+
+#     return {
+#         "skin_tone": skin_tone,
+#         "suggested_colors": suggested_colors,
+#         "gender": gender
+#     }
+
+
+# @app.get("/health")
+# async def health():
+#     return {"status": "ok"}
+
+
 @app.post("/suggest-outfits")
 async def suggest_outfits(
     file: UploadFile = File(...),
     gender: str = Form(...)
 ):
     image_bytes = await file.read()
+
+    # Detect skin tone
     skin_tone = get_skin_tone(image_bytes)
+
+    # Get recommended garment colors
     suggested_colors = SKIN_TO_COLORS[skin_tone]
+
+    # -------- LOGS --------
+    print("\n========== AI OUTFIT SUGGESTION ==========")
+    print(f"Detected Skin Tone: {skin_tone}")
+    print(f"Recommended Garment Colors: {suggested_colors}")
+    print(f"Gender: {gender}")
+    print("==========================================\n")
 
     return {
         "skin_tone": skin_tone,
@@ -165,7 +220,6 @@ async def suggest_outfits(
         "gender": gender
     }
 
-
-@app.get("/health")
-async def health():
-    return {"status": "ok"}
+@app.get("/")
+async def home():
+    return {"message": "AI Suggestion API Running"}

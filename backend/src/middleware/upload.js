@@ -12,7 +12,7 @@ const allowedTypes = [
 ];
 
 // ✅ filter
-const fileFilter = (req, file, cb) => {
+const fileFilter = (req, file, cb) => { 
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
